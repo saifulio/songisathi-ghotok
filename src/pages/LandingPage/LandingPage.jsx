@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button.jsx';
 import './LandingPage.css';
 
@@ -46,10 +47,10 @@ const COPY = {
     heroEn: 'The questions no family can ask are answered before you meet.',
     heroBody:
       'Dowry. Where the couple will live. Whether she keeps working. A health matter that ought to be said early. You answer these once, privately — they are sealed, and only ever compared. If two families disagree on something fundamental, the proposal simply never reaches you.',
-    heroCta: 'কীভাবে সুরক্ষিত জানুন',
-    heroCta2: 'Find a verified ghotok',
+    heroCta: 'ফ্রি শুরু করুন · Start free',
+    heroCta2: 'How it works',
     heroFoot: 'Your ghotok cannot read your answers. Neither can we.',
-    ctaLabel: 'How it works',
+    ctaLabel: 'Start free',
     stepsTitleBn: 'আপনার পরিবারের জন্য',
     stepsTitleEn: 'Three things you keep control of, start to finish',
     steps: [
@@ -83,8 +84,11 @@ export default function LandingPage() {
   const [audience, setAudience] = useState('ghotok');
   const [toast, setToast] = useState(null);
   const timer = useRef(null);
+  const navigate = useNavigate();
   const c = COPY[audience];
   const forGhotok = audience === 'ghotok';
+  // A ghotok signs up as a matchmaker; a family signs up as a guardian.
+  const signupRole = forGhotok ? 'matchmaker' : 'guardian';
 
   const say = useCallback((msg) => {
     clearTimeout(timer.current);
@@ -93,6 +97,9 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => () => clearTimeout(timer.current), []);
+
+  // "Start free" — go to sign up with the right account type preselected.
+  const goSignup = () => navigate(`/signup?as=${signupRole}`);
 
   const cta = () =>
     say(
@@ -135,8 +142,16 @@ export default function LandingPage() {
               </button>
             ))}
           </div>
-          <span className="lp-login">Log in</span>
-          <Button variant="primary" size="sm" onClick={cta}>
+          <span
+            className="lp-login"
+            role="button"
+            tabIndex={0}
+            onClick={() => navigate('/signin')}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/signin')}
+          >
+            Log in
+          </span>
+          <Button variant="primary" size="sm" onClick={goSignup}>
             {c.ctaLabel}
           </Button>
         </div>
@@ -153,7 +168,7 @@ export default function LandingPage() {
           <div className="lp-hero-en">{c.heroEn}</div>
           <p className="lp-hero-body">{c.heroBody}</p>
           <div className="lp-hero-actions">
-            <Button variant="primary" size="lg" onClick={cta}>
+            <Button variant="primary" size="lg" onClick={goSignup}>
               {c.heroCta}
             </Button>
             <Button variant="outline" size="lg" onClick={secondary}>

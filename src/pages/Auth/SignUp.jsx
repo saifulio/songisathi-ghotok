@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Input, Select } from '../../components/ui/index.jsx';
 import { useAuth, homeForRole } from '../../context/AuthContext.jsx';
 import './Auth.css';
@@ -10,6 +10,7 @@ const ACCOUNT_TYPES = [
   { value: 'bride', label: 'Bride (self)', bn: 'কনে', note: 'You manage your own biodata.' },
   { value: 'groom', label: 'Groom (self)', bn: 'বর', note: 'You manage your own biodata.' },
 ];
+const TYPE_VALUES = ACCOUNT_TYPES.map((t) => t.value);
 
 const opts = (a) => a.map((v) => ({ value: v, label: v }));
 const DISTRICTS = ['Dhaka', 'Sylhet', 'Chattogram', 'Rajshahi', 'Khulna', 'Mymensingh', 'Barishal', 'Rangpur'];
@@ -18,7 +19,13 @@ const HEIGHTS = ["4′10″", "4′11″", "5′0″", "5′1″", "5′2″", "
 export default function SignUp() {
   const { signup } = useAuth();
   const navigate = useNavigate();
-  const [accountType, setAccountType] = useState('matchmaker');
+  const [params] = useSearchParams();
+  // Preselect the account type from ?as= (e.g. the "For families" flow lands
+  // here with guardian chosen). Falls back to matchmaker for anything unknown.
+  const requestedType = params.get('as');
+  const [accountType, setAccountType] = useState(
+    TYPE_VALUES.includes(requestedType) ? requestedType : 'matchmaker'
+  );
   const [f, setF] = useState({
     fullName: '', phone: '', password: '', confirm: '',
     // matchmaker

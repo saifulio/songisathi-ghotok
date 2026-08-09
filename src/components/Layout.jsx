@@ -6,10 +6,22 @@ import './Layout.css';
 
 const ROLE_LABEL = { GHOTOK: 'Matchmaker', GUARDIAN: 'Guardian', CANDIDATE: 'Member', ADMIN: 'Admin' };
 
+// A nav item is visible when it's public, or the signed-in user's role is
+// allowed on it (mirrors ProtectedRoute so we never show a dead link).
+function canSee(item, user) {
+  if (item.public) return true;
+  if (!user) return false;
+  return !item.roles || item.roles.includes(user.role);
+}
+
 export default function Layout({ children }) {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const groups = NAV_GROUPS
+    .map((group) => ({ ...group, items: group.items.filter((item) => canSee(item, user)) }))
+    .filter((group) => group.items.length > 0);
 
   const doLogout = () => {
     logout();
@@ -37,7 +49,7 @@ export default function Layout({ children }) {
           </button>
 
           <nav className={`ss-nav ${open ? 'is-open' : ''}`}>
-            {NAV_GROUPS.map((group) => (
+            {groups.map((group) => (
               <div className="ss-nav-group" key={group.label}>
                 <span className="ss-nav-group-label">{group.label}</span>
                 <div className="ss-nav-links">
