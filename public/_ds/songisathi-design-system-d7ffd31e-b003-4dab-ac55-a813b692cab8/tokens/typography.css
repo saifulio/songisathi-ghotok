@@ -1,0 +1,26 @@
+:root{
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 21px;
+  --text-xl: 26px;
+  --text-2xl: 32px;
+  --text-3xl: 40px;
+  --text-4xl: 52px;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.04em;
+  --tracking-label: 0.08em;
+}

@@ -1,0 +1,89 @@
+:root{
+  /* --- base palette --- */
+  --green-900:#1B3220;
+  --green-800:#20421F;
+  --green-700:#2F5233;
+  --green-600:#3D6B44;
+  --green-500:#4F8757;
+  --green-400:#79A97F;
+  --green-300:#A9C9AD;
+  --green-200:#D3E4D5;
+  --green-100:#EAF2EA;
+
+  --terracotta-800:#7A3620;
+  --terracotta-700:#9A4425;
+  --terracotta-600:#BD572F;
+  --terracotta-500:#D06B41;
+  --terracotta-400:#DE8B62;
+  --terracotta-300:#EBB198;
+  --terracotta-200:#F4D2C0;
+  --terracotta-100:#FBEBE1;
+
+  --gold-700:#8C6318;
+  --gold-600:#B08628;
+  --gold-500:#C9A03F;
+  --gold-400:#DBB863;
+  --gold-300:#E9CE96;
+  --gold-200:#F3E4C3;
+  --gold-100:#FAF1DF;
+
+  --ivory-050:#FDFBF6;
+  --ivory-100:#FBF6EC;
+  --ivory-200:#F5EBDA;
+  --ivory-300:#EBDCC3;
+
+  --brown-900:#241A12;
+  --brown-800:#382A1F;
+  --brown-700:#4E3B2C;
+  --brown-600:#6B5544;
+  --brown-500:#8C7461;
+  --brown-400:#AA9683;
+  --brown-300:#C7B7A6;
+  --brown-200:#DDD1C3;
+
+  --red-700:#8A2E23;
+  --red-600:#AE3A2A;
+  --red-500:#C64B38;
+  --red-100:#F8E1DC;
+
+  /* --- semantic aliases --- */
+  --brand-primary: var(--green-700);
+  --brand-primary-hover: var(--green-800);
+  --brand-primary-press: var(--green-900);
+  --brand-secondary: var(--terracotta-600);
+  --brand-secondary-hover: var(--terracotta-700);
+  --brand-accent-gold: var(--gold-600);
+
+  --surface-page: var(--ivory-100);
+  --surface-card: var(--ivory-050);
+  --surface-card-alt: var(--ivory-200);
+  --surface-sunken: var(--ivory-300);
+  --surface-overlay: rgba(36,26,18,0.5);
+  --surface-inverse: var(--green-900);
+
+  --border-subtle: var(--brown-200);
+  --border-default: var(--brown-300);
+  --border-strong: var(--brown-500);
+  --border-focus: var(--green-600);
+
+  --text-primary: var(--brown-900);
+  --text-secondary: var(--brown-600);
+  --text-tertiary: var(--brown-400);
+  --text-on-brand: var(--ivory-050);
+  --text-link: var(--green-700);
+  --text-link-hover: var(--green-800);
+
+  --status-success: var(--green-600);
+  --status-success-bg: var(--green-100);
+  --status-warning: var(--gold-700);
+  --status-warning-bg: var(--gold-100);
+  --status-error: var(--red-600);
+  --status-error-bg: var(--red-100);
+  --status-pending: var(--terracotta-600);
+  --status-pending-bg: var(--terracotta-100);
+  --status-info: var(--green-600);
+  --status-info-bg: var(--green-100);
+
+  --verified-badge: var(--gold-600);
+  --photo-lock-scrim: rgba(36,26,18,0.72);
+}

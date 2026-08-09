@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/colors.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/typography.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/styles.css">
+<script src="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&amp;family=Hind+Siliguri:wght@400;500;600;700&amp;display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-sunken);font-family:var(--font-sans-body);color:var(--text-primary);-webkit-font-smoothing:antialiased}
+a{color:var(--brand-primary);text-decoration:none}
+a:hover{color:var(--brand-primary-hover)}
+@keyframes vfade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(36,26,18,.18);border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+
+<section id="t2" style="padding:40px 44px 44px;border-bottom:1px solid var(--border-subtle)">
+  <div style="display:flex;align-items:baseline;gap:10px;margin:0 0 6px">
+    <a href="#t2" style="font-family:var(--font-sans-body);font-size:10px;font-weight:600;padding:4px 7px;background:var(--text-primary);color:var(--surface-card);border-radius:4px">2</a>
+    <span style="font-size:13px;font-weight:600;color:var(--text-primary)">Add profile — step 3, the private vault</span>
+  </div>
+  <p style="max-width:790px;margin:0 0 26px;font-size:12.5px;line-height:1.6;color:var(--text-secondary);text-wrap:pretty">The step the whole product hangs on: the questions families need answered but can never ask. The ghotok sets up the profile, then hands this step to the family — answers seal on submit and are never shown to the ghotok, the other family, or the matched candidate. Only the compatibility result crosses the wall. All four wizard steps are navigable; the seal, the hand-off, and the re-answer request are live.</p>
+
+  <div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start">
+
+    <!-- 2a desktop -->
+    <div id="2a" style="flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px">
+      <div style="display:flex;align-items:baseline;gap:8px;font-size:11px;color:var(--text-secondary)">
+        <a href="#2a" style="font-size:10.5px;font-weight:600;padding:3px 7px;background:rgba(36,26,18,.08);color:var(--text-primary);border-radius:5px">2a</a>
+        Desktop ghotok · four-step wizard, step 3 open
+      </div>
+
+      <div style="position:relative;width:1240px;background:var(--surface-page);border:1px solid var(--border-subtle);border-radius:14px;box-shadow:var(--shadow-2);overflow:hidden">
+
+        <!-- top bar -->
+        <div style="background:var(--green-900);padding:0 20px;display:flex;align-items:center;gap:16px;height:54px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:24px;height:24px;border-radius:7px;background:var(--surface-card);display:grid;place-items:center;font-family:var(--font-serif-display);font-size:12px;font-weight:600;color:var(--green-900)">স</div>
+            <span style="font-family:var(--font-serif-display);font-size:13.5px;font-weight:600;color:var(--surface-card)">SongiSathi</span>
+          </div>
+          <span style="font-size:11.5px;color:rgba(253,251,246,.55)">/ প্রোফাইল / নতুন প্রোফাইল</span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+            <span style="font-size:11px;color:rgba(253,251,246,.6)">Draft saved {{ savedAt }}</span>
+            <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="neutral" hint-size="60px,22px">Draft</x-import>
+            <div style="width:28px;height:28px;border-radius:50%;overflow:hidden">
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Avatar" initials="RA" size="{{ sz28 }}" hint-size="28px,28px"></x-import>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:264px 1fr;align-items:stretch">
+
+          <!-- step rail -->
+          <div style="border-right:1px solid var(--border-subtle);background:var(--surface-card);padding:20px 18px 22px;display:flex;flex-direction:column;gap:16px">
+            <div>
+              <div style="font-family:'Tiro Bangla',serif;font-size:17px;line-height:1.3;color:var(--text-primary)">নতুন প্রোফাইল</div>
+              <div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px">New profile · PRN will be issued on publish</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <sc-for list="{{ steps }}" as="st" hint-placeholder-count="4">
+                <div onClick="{{ st.go }}" style="display:flex;gap:11px;padding:11px 12px;border-radius:12px;cursor:pointer;background:{{ st.bg }};border:1px solid {{ st.bd }}" style-hover="border-color:var(--border-default)">
+                  <span style="width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:700;background:{{ st.numBg }};color:{{ st.numFg }}">{{ st.mark }}</span>
+                  <span style="flex:1;min-width:0">
+                    <span style="display:block;font-family:'Hind Siliguri',sans-serif;font-size:12.5px;font-weight:600;color:{{ st.fg }}">{{ st.bn }}</span>
+                    <span style="display:block;font-size:11px;color:var(--text-secondary);margin-top:1px">{{ st.en }}</span>
+                    <span style="display:block;font-size:10px;color:{{ st.metaFg }};margin-top:4px">{{ st.meta }}</span>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="margin-top:auto;border:1px solid var(--border-subtle);border-radius:12px;padding:12px;background:var(--surface-page)">
+              <div style="font-size:11px;font-weight:600;color:var(--text-primary)">Profile completeness</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:6px">
+                <span style="font-family:var(--font-serif-display);font-size:20px;font-weight:600;color:var(--brand-primary);font-variant-numeric:tabular-nums">{{ completePct }}%</span>
+                <span style="font-size:11px;color:var(--text-secondary)">of required fields</span>
+              </div>
+              <div style="margin-top:8px;height:5px;border-radius:99px;background:var(--border-subtle);overflow:hidden"><div style="width:{{ completeW }};height:100%;background:var(--brand-primary);transition:width .18s ease-out"></div></div>
+              <div style="font-size:10px;line-height:1.5;color:var(--text-secondary);margin-top:8px">Profiles under 70% are not shown in AI matching.</div>
+            </div>
+          </div>
+
+          <!-- step body -->
+          <div style="min-width:0;padding:22px 26px 26px;display:flex;flex-direction:column;gap:18px">
+
+            <!-- STEP 1 -->
+            <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ false }}">
+              <div style="animation:vfade .16s ease-out;display:flex;flex-direction:column;gap:18px">
+                <div>
+                  <div style="font-family:'Tiro Bangla',serif;font-size:20px;color:var(--text-primary)">মৌলিক তথ্য</div>
+                  <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">Basic details · visible on the biodata once you publish</div>
+                </div>
+                <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Input" label="Full name" caption="পুরো নাম" placeholder="e.g. Nusrat Jahan" value="{{ f.name }}" onChange="{{ onName }}" hint-size="100%,68px"></x-import>
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Input" label="Date of birth" caption="জন্ম তারিখ" type="date" value="{{ f.dob }}" onChange="{{ onDob }}" hint-size="100%,68px"></x-import>
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Select" label="Height" value="{{ f.height }}" onChange="{{ onHeight }}" options="{{ heightOpts }}" hint-size="100%,68px"></x-import>
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Select" label="Marital status" value="{{ f.marital }}" onChange="{{ onMarital }}" options="{{ maritalOpts }}" hint-size="100%,68px"></x-import>
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Select" label="District" value="{{ f.district }}" onChange="{{ onDistrict }}" options="{{ districtOpts }}" hint-size="100%,68px"></x-import>
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Input" label="Area" caption="এলাকা" placeholder="e.g. Dhanmondi" value="{{ f.area }}" onChange="{{ onArea }}" hint-size="100%,68px"></x-import>
+                </div>
+                <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:20px;display:flex;gap:20px;align-items:flex-start">
+                  <div style="width:132px;height:160px;flex:none;border-radius:12px;border:1px dashed var(--border-default);background:repeating-linear-gradient(135deg,#EBDCC3 0 6px,#F5EBDA 6px 12px);position:relative;overflow:hidden">
+                    <div style="position:absolute;inset:0;background:rgba(36,26,18,.72);backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EBDCC3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"></rect><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"></path></svg>
+                      <span style="font-size:10px;line-height:1.4;color:#EBDCC3;text-align:center;padding:0 10px">Photo locked by default<br>Release per request</span>
+                    </div>
+                  </div>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:12px">
+                    <div>
+                      <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Photograph</div>
+                      <div style="font-size:11.5px;line-height:1.55;color:var(--text-secondary);margin-top:3px;max-width:520px">Photos stay blurred to everyone until this profile's manager releases them for a specific request. Families see the biodata first — the photo is never the opening move.</div>
+                    </div>
+                    <div style="display:flex;gap:10px">
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="outline" size="sm" onClick="{{ upload }}" hint-size="130px,34px">Upload photo</x-import>
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="sm" onClick="{{ skipPhoto }}" hint-size="120px,34px">Add later</x-import>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- STEP 2 -->
+            <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+              <div style="animation:vfade .16s ease-out;display:flex;flex-direction:column;gap:18px">
+                <div>
+                  <div style="font-family:'Tiro Bangla',serif;font-size:20px;color:var(--text-primary)">শিক্ষা ও পরিবার</div>
+                  <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">Education, profession, and family details</div>
+                </div>
+                <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Input" label="Highest degree" caption="সর্বোচ্চ ডিগ্রি" placeholder="e.g. MBA" value="{{ f.degree }}" onChange="{{ onDegree }}" hint-size="100%,68px"></x-import>
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Input" label="Institution" placeholder="e.g. IBA, University of Dhaka" value="{{ f.inst }}" onChange="{{ onInst }}" hint-size="100%,68px"></x-import>
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Input" label="Profession" caption="পেশা" placeholder="e.g. Banker" value="{{ f.job }}" onChange="{{ onJob }}" hint-size="100%,68px"></x-import>
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Select" label="Family type" value="{{ f.family }}" onChange="{{ onFamily }}" options="{{ familyOpts }}" hint-size="100%,68px"></x-import>
+                </div>
+                <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:20px">
+                  <div style="font-size:13px;font-weight:600;color:var(--text-primary)">What the family is looking for</div>
+                  <div style="font-size:11.5px;color:var(--text-secondary);margin-top:3px">Shown on the biodata. Anything sensitive belongs in step 3 instead.</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:14px">
+                    <sc-for list="{{ prefs }}" as="pf" hint-placeholder-count="6">
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Checkbox" label="{{ pf.label }}" checked="{{ pf.checked }}" onChange="{{ pf.toggle }}" hint-size="200px,26px"></x-import>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- STEP 3 — VAULT -->
+            <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ true }}">
+              <div style="animation:vfade .16s ease-out;display:flex;flex-direction:column;gap:16px">
+
+                <div style="display:flex;align-items:flex-start;gap:16px">
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:center;gap:9px">
+                      <div style="font-family:'Tiro Bangla',serif;font-size:20px;color:var(--text-primary)">গোপন প্রশ্নাবলী</div>
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="gold" hint-size="96px,22px">Sealed layer</x-import>
+                    </div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:3px">Private screening · the questions families need answered but can never ask</div>
+                  </div>
+                  <div style="flex:none;text-align:right">
+                    <div style="font-size:11px;color:var(--text-secondary)">{{ answered }} of {{ total }} answered</div>
+                    <div style="margin-top:6px;width:150px;height:5px;border-radius:99px;background:var(--border-subtle);overflow:hidden"><div style="width:{{ vaultW }};height:100%;background:var(--gold-600);transition:width .18s ease-out"></div></div>
+                  </div>
+                </div>
+
+                <!-- the wall -->
+                <div style="background:var(--green-900);border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DBB863" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"></rect><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"></path></svg>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13px;font-weight:600;color:var(--surface-card)">These answers are sealed the moment they are submitted</div>
+                    <div style="font-size:11.5px;line-height:1.6;color:rgba(253,251,246,.72);margin-top:4px;max-width:640px">They are encrypted and read only by the matching system. You will never see them. The other family will never see them. The matched candidate will never see them. What crosses the wall is a single line on the suggestion card: compatible, or not suggested.</div>
+                  </div>
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="sm" onClick="{{ readPolicy }}" style="{{ btnOnDark }}" hint-size="118px,32px">How it works</x-import>
+                </div>
+
+                <!-- who answers -->
+                <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:16px 18px">
+                  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                    <div style="flex:1;min-width:260px">
+                      <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Who answers this section?</div>
+                      <div style="font-size:11.5px;line-height:1.55;color:var(--text-secondary);margin-top:3px">Most ghotoks hand this step to the family — the answers are theirs to give, and handing it over is what keeps you out of the confidential layer entirely.</div>
+                    </div>
+                    <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Tabs" items="{{ ownerTabs }}" active="{{ owner }}" onChange="{{ onOwner }}" hint-size="380px,42px"></x-import>
+                  </div>
+                  <sc-if value="{{ handoff }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:14px;border-top:1px dashed var(--border-subtle);padding-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;animation:vfade .16s ease-out">
+                      <div style="flex:1;min-width:280px">
+                        <div style="font-size:12px;font-weight:600;color:var(--text-primary)">{{ handoffTitle }}</div>
+                        <div style="font-size:11px;line-height:1.55;color:var(--text-secondary);margin-top:2px">{{ handoffBody }}</div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <div style="padding:9px 12px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--surface-page);font-size:11.5px;font-weight:600;letter-spacing:.06em;color:var(--text-primary);font-variant-numeric:tabular-nums">{{ handoffLink }}</div>
+                        <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="sm" onClick="{{ sendHandoff }}" hint-size="164px,34px">Send on WhatsApp</x-import>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+
+                <!-- questions -->
+                <sc-if value="{{ notSealed }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;flex-direction:column;gap:12px">
+                    <sc-for list="{{ questions }}" as="qq" hint-placeholder-count="5">
+                      <div style="background:var(--surface-card);border:1px solid {{ qq.bd }};border-radius:14px;padding:16px 18px">
+                        <div style="display:flex;align-items:flex-start;gap:12px">
+                          <span style="width:22px;height:22px;flex:none;margin-top:1px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:700;background:{{ qq.numBg }};color:{{ qq.numFg }}">{{ qq.n }}</span>
+                          <div style="flex:1;min-width:0">
+                            <div style="font-family:'Hind Siliguri',sans-serif;font-size:14px;font-weight:600;line-height:1.45;color:var(--text-primary)">{{ qq.bn }}</div>
+                            <div style="font-size:12px;line-height:1.5;color:var(--text-secondary);margin-top:2px">{{ qq.en }}</div>
+                            <sc-if value="{{ qq.hasHelp }}" hint-placeholder-val="{{ true }}">
+                              <div style="font-size:11px;line-height:1.5;color:var(--text-secondary);margin-top:5px">{{ qq.help }}</div>
+                            </sc-if>
+                          </div>
+                          <span style="flex:none;display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--text-secondary)">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"></rect><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"></path></svg>
+                            never shown
+                          </span>
+                        </div>
+
+                        <sc-if value="{{ qq.isChoice }}" hint-placeholder-val="{{ true }}">
+                          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:13px;padding-left:34px">
+                            <sc-for list="{{ qq.options }}" as="op" hint-placeholder-count="3">
+                              <div onClick="{{ op.pick }}" style="padding:10px 13px;border-radius:11px;border:1px solid {{ op.bd }};background:{{ op.bg }};cursor:pointer" style-hover="border-color:var(--border-default)">
+                                <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Radio" label="{{ op.label }}" checked="{{ op.checked }}" name="{{ op.name }}" onChange="{{ op.pick }}" hint-size="150px,24px"></x-import>
+                              </div>
+                            </sc-for>
+                          </div>
+                        </sc-if>
+
+                        <sc-if value="{{ qq.isText }}" hint-placeholder-val="{{ false }}">
+                          <div style="margin-top:13px;padding-left:34px">
+                            <textarea value="{{ qq.text }}" onChange="{{ qq.onText }}" placeholder="{{ qq.placeholder }}" style="width:100%;min-height:84px;resize:vertical;padding:12px 14px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--surface-page);font-family:var(--font-sans-body);font-size:13px;line-height:1.6;color:var(--text-primary);outline:none"></textarea>
+                            <div style="font-size:11px;color:var(--text-secondary);margin-top:6px">Written answers are encrypted with the same key as the rest of this section. They are never rendered anywhere in the product.</div>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+
+                  <!-- consent + seal -->
+                  <div style="background:var(--gold-100);border:1px solid var(--gold-300);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                    <div style="flex:1;min-width:320px;display:flex;flex-direction:column;gap:9px">
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Checkbox" label="The family has given these answers themselves and understands they cannot be edited after sealing." checked="{{ consent }}" onChange="{{ onConsent }}" hint-size="100%,26px"></x-import>
+                      <div style="font-size:11px;line-height:1.55;color:var(--text-secondary);padding-left:28px">A sealed section can only be reopened by asking the family to answer again — you request it, they re-answer, the old answers are destroyed.</div>
+                    </div>
+                    <div style="display:flex;gap:10px">
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="md" onClick="{{ saveDraft }}" hint-size="120px,40px">Save draft</x-import>
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="md" disabled="{{ sealDisabled }}" onClick="{{ askSeal }}" hint-size="190px,40px">Seal and encrypt answers</x-import>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <!-- sealed state -->
+                <sc-if value="{{ sealed }}" hint-placeholder-val="{{ false }}">
+                  <div style="animation:vfade .18s ease-out;background:var(--green-900);border-radius:16px;padding:30px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px">
+                    <div style="width:56px;height:56px;border-radius:50%;background:rgba(219,184,99,.16);display:grid;place-items:center">
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#DBB863" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"></rect><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"></path></svg>
+                    </div>
+                    <div style="font-family:'Tiro Bangla',serif;font-size:20px;color:var(--surface-card)">উত্তরগুলো সিল করা হয়েছে</div>
+                    <div style="font-size:12.5px;line-height:1.65;color:rgba(253,251,246,.72);max-width:520px">Sealed on {{ sealDate }} by the Guardian of this profile. {{ total }} answers encrypted. From here, matching reads them; nobody does.</div>
+                    <div style="display:flex;gap:26px;margin-top:6px">
+                      <div>
+                        <div style="font-family:var(--font-serif-display);font-size:22px;font-weight:600;color:#DBB863;font-variant-numeric:tabular-nums">{{ total }}</div>
+                        <div style="font-size:10.5px;color:rgba(253,251,246,.55);margin-top:2px">answers sealed</div>
+                      </div>
+                      <div>
+                        <div style="font-family:var(--font-serif-display);font-size:22px;font-weight:600;color:#DBB863">0</div>
+                        <div style="font-size:10.5px;color:rgba(253,251,246,.55);margin-top:2px">people who can read them</div>
+                      </div>
+                      <div>
+                        <div style="font-family:var(--font-serif-display);font-size:22px;font-weight:600;color:#DBB863">AES-256</div>
+                        <div style="font-size:10.5px;color:rgba(253,251,246,.55);margin-top:2px">at rest and in transit</div>
+                      </div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:10px">
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="sm" onClick="{{ requestReanswer }}" style="{{ btnOnDark }}" hint-size="190px,34px">Ask the family to re-answer</x-import>
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="sm" onClick="{{ goStep4 }}" hint-size="150px,34px">Continue to review</x-import>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <!-- STEP 4 -->
+            <sc-if value="{{ isStep4 }}" hint-placeholder-val="{{ false }}">
+              <div style="animation:vfade .16s ease-out;display:flex;flex-direction:column;gap:16px">
+                <div>
+                  <div style="font-family:'Tiro Bangla',serif;font-size:20px;color:var(--text-primary)">পর্যালোচনা ও প্রকাশ</div>
+                  <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">Review and publish · this is exactly what other families will see</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start">
+                  <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;overflow:hidden">
+                    <div style="padding:16px 18px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:12px">
+                      <div style="width:52px;height:52px;flex:none;border-radius:12px;background:repeating-linear-gradient(135deg,#EBDCC3 0 5px,#F5EBDA 5px 10px);position:relative;overflow:hidden">
+                        <div style="position:absolute;inset:0;background:rgba(36,26,18,.72);display:grid;place-items:center">
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#EBDCC3" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"></rect><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"></path></svg>
+                        </div>
+                      </div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:15px;font-weight:600;color:var(--text-primary)">{{ f.name }}</div>
+                        <div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px;font-variant-numeric:tabular-nums">PRN issued on publish · {{ f.area }}, {{ f.district }}</div>
+                      </div>
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.StatusPill" status="draft" hint-size="70px,24px"></x-import>
+                    </div>
+                    <sc-for list="{{ reviewRows }}" as="r" hint-placeholder-count="6">
+                      <div style="display:grid;grid-template-columns:200px 1fr;gap:12px;padding:11px 18px;border-bottom:1px solid var(--surface-card-alt)">
+                        <span style="font-size:11.5px;color:var(--text-secondary)">{{ r.k }}</span>
+                        <span style="font-size:12.5px;color:var(--text-primary)">{{ r.v }}</span>
+                      </div>
+                    </sc-for>
+                    <div style="padding:14px 18px;display:flex;align-items:center;gap:11px;background:var(--surface-page)">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold-600)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"></rect><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"></path></svg>
+                      <span style="font-size:11.5px;line-height:1.55;color:var(--text-secondary)">Private screening section: <strong style="color:var(--text-primary)">{{ vaultSummary }}</strong>. Its contents appear nowhere on this page, by design.</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:12px">
+                    <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:16px">
+                      <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Before you publish</div>
+                      <div style="display:flex;flex-direction:column;gap:11px;margin-top:12px">
+                        <sc-for list="{{ checks }}" as="c" hint-placeholder-count="3">
+                          <div style="display:flex;gap:9px;align-items:flex-start">
+                            <span style="width:16px;height:16px;flex:none;margin-top:1px;border-radius:50%;display:grid;place-items:center;background:{{ c.bg }};color:{{ c.fg }};font-size:9px;font-weight:700">{{ c.mark }}</span>
+                            <span style="font-size:11.5px;line-height:1.5;color:var(--text-secondary)">{{ c.label }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:11px">
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Switch" label="Include in trusted network pool" checked="{{ poolOn }}" onChange="{{ onPool }}" hint-size="100%,26px"></x-import>
+                      <div style="font-size:11px;line-height:1.55;color:var(--text-secondary)">Other verified ghotoks can be suggested this profile. Contact always routes back through you.</div>
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="md" onClick="{{ publish }}" style="{{ btnFull }}" hint-size="100%,40px">Publish profile</x-import>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- wizard footer -->
+            <div style="margin-top:auto;border-top:1px solid var(--border-subtle);padding-top:16px;display:flex;align-items:center;gap:12px">
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="md" onClick="{{ back }}" hint-size="90px,40px">Back</x-import>
+              <span style="font-size:11.5px;color:var(--text-secondary)">{{ footerNote }}</span>
+              <div style="margin-left:auto;display:flex;gap:10px">
+                <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="outline" size="md" onClick="{{ saveDraft }}" hint-size="130px,40px">Save and exit</x-import>
+                <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="md" onClick="{{ next }}" hint-size="130px,40px">{{ nextLabel }}</x-import>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Dialog" open="{{ dialogOpen }}" title="{{ dialogTitle }}" onClose="{{ closeDialog }}" actions="{{ dialogActions }}" hint-size="380px,220px">
+          <span style="font-size:13px;line-height:1.65;color:var(--text-secondary)">{{ dialogBody }}</span>
+        </x-import>
+      </div>
+    </div>
+
+    <!-- 2b mobile -->
+    <div id="2b" style="flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px">
+      <div style="display:flex;align-items:baseline;gap:8px;font-size:11px;color:var(--text-secondary)">
+        <a href="#2b" style="font-size:10.5px;font-weight:600;padding:3px 7px;background:rgba(36,26,18,.08);color:var(--text-primary);border-radius:5px">2b</a>
+        Mobile · the family's view of the handed-off vault step
+      </div>
+      <div style="width:390px;background:var(--surface-page);border:1px solid var(--border-subtle);border-radius:20px;box-shadow:var(--shadow-2);overflow:hidden">
+        <div style="background:var(--green-900);padding:8px 16px 16px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:rgba(253,251,246,.65)">
+            <span>9:41</span><span>4G · 78%</span>
+          </div>
+          <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DBB863" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"></rect><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"></path></svg>
+            <div style="flex:1;min-width:0">
+              <div style="font-family:'Tiro Bangla',serif;font-size:16px;color:var(--surface-card)">গোপন প্রশ্নাবলী</div>
+              <div style="font-size:10.5px;color:rgba(253,251,246,.6)">Private screening for Nusrat Jahan</div>
+            </div>
+          </div>
+          <div style="margin-top:12px;font-size:11px;line-height:1.6;color:rgba(253,251,246,.72)">রাহিমা আপা আপনাকে এই অংশটি পূরণ করতে বলেছেন। আপনার উত্তর ঘটক বা অন্য পরিবার কেউই দেখতে পাবে না।</div>
+          <div style="margin-top:12px;display:flex;align-items:center;gap:9px">
+            <div style="flex:1;height:6px;border-radius:99px;background:rgba(253,251,246,.18);overflow:hidden"><div style="width:{{ vaultW }};height:100%;background:#DBB863;transition:width .18s ease-out"></div></div>
+            <span style="font-size:10.5px;font-weight:600;color:#DBB863;font-variant-numeric:tabular-nums">{{ answered }}/{{ total }}</span>
+          </div>
+        </div>
+
+        <div style="padding:14px 14px 0;display:flex;flex-direction:column;gap:12px">
+          <sc-if value="{{ notSealed }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ mobileQuestions }}" as="qq" hint-placeholder-count="3">
+                <div style="background:var(--surface-card);border:1px solid {{ qq.bd }};border-radius:14px;padding:14px">
+                  <div style="display:flex;align-items:flex-start;gap:10px">
+                    <span style="width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:700;background:{{ qq.numBg }};color:{{ qq.numFg }}">{{ qq.n }}</span>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-family:'Hind Siliguri',sans-serif;font-size:14px;font-weight:600;line-height:1.5;color:var(--text-primary)">{{ qq.bn }}</div>
+                      <div style="font-size:11.5px;line-height:1.5;color:var(--text-secondary);margin-top:2px">{{ qq.en }}</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+                    <sc-for list="{{ qq.options }}" as="op" hint-placeholder-count="3">
+                      <div onClick="{{ op.pick }}" style="min-height:48px;display:flex;align-items:center;padding:0 14px;border-radius:12px;border:1px solid {{ op.bd }};background:{{ op.bg }};cursor:pointer">
+                        <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Radio" label="{{ op.label }}" checked="{{ op.checked }}" name="{{ op.mname }}" onChange="{{ op.pick }}" hint-size="100%,24px"></x-import>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+
+              <div style="background:var(--gold-100);border:1px solid var(--gold-300);border-radius:14px;padding:14px">
+                <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Checkbox" label="These are our own answers and we understand they cannot be edited." checked="{{ consent }}" onChange="{{ onConsent }}" hint-size="100%,26px"></x-import>
+                <div style="margin-top:12px">
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="lg" disabled="{{ sealDisabled }}" onClick="{{ askSeal }}" style="{{ btnTall }}" hint-size="100%,48px">উত্তর সিল করুন · Seal answers</x-import>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ sealed }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:vfade .18s ease-out;background:var(--green-900);border-radius:16px;padding:26px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:11px">
+              <div style="width:52px;height:52px;border-radius:50%;background:rgba(219,184,99,.16);display:grid;place-items:center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DBB863" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"></rect><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"></path></svg>
+              </div>
+              <div style="font-family:'Tiro Bangla',serif;font-size:18px;color:var(--surface-card)">সিল করা হয়েছে</div>
+              <div style="font-size:11.5px;line-height:1.65;color:rgba(253,251,246,.72)">Your answers are encrypted. Rahima Akter can see that this section is complete — nothing more. You can close this page now.</div>
+            </div>
+          </sc-if>
+
+          <div style="border:1px solid var(--border-subtle);border-radius:14px;padding:13px 14px;background:var(--surface-card);display:flex;gap:11px;align-items:flex-start;margin-bottom:16px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-4.5M12 8h.01"></path></svg>
+            <div style="font-size:11px;line-height:1.6;color:var(--text-secondary)">Not sure about an answer? Leave it and come back — the link stays valid for 7 days. An unanswered question simply carries less weight in matching.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin:26px 0 0;font-size:12px;line-height:1.6;color:var(--text-secondary)">
+    Try next: “show the guardian's inbox after the seal” · “biodata PDF templates” · “what the ghotok sees when a re-answer is pending”
+  </p>
+</section>
+
+<sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:90;animation:vfade .2s ease-out">
+    <div style="display:flex;align-items:center;gap:11px;padding:13px 18px;border-radius:12px;background:var(--text-primary);box-shadow:var(--shadow-3);max-width:540px">
+      <span style="width:24px;height:24px;flex:none;border-radius:50%;background:rgba(253,251,246,.14);display:grid;place-items:center;color:#DBB863;font-size:12px;font-weight:700">✓</span>
+      <span style="font-size:12.5px;line-height:1.45;color:var(--surface-card)">{{ toastMsg }}</span>
+    </div>
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const QS = [
+  {id:'q1', bn:'বিয়ের পর কোথায় থাকার পরিকল্পনা?', en:'Where does the family expect the couple to live after marriage?',
+   help:'The single most common cause of a broken engagement, and the hardest thing for two families to raise with each other.',
+   options:['With the groom’s family','Separate household','Either, to be decided together']},
+  {id:'q2', bn:'যৌতুক সম্পর্কে পরিবারের অবস্থান কী?', en:'What is the family’s position on dowry?',
+   help:'Dowry is illegal in Bangladesh. SongiSathi does not match a family that expects it with one that refuses it.',
+   options:['We neither give nor accept dowry','Gifts only, freely given','Prefer not to answer']},
+  {id:'q3', bn:'বিয়ের পর চাকরি চালিয়ে যাওয়া নিয়ে প্রত্যাশা?', en:'Expectation about continuing employment after marriage',
+   help:'Asked of both sides. Mismatched expectations here surface late and painfully.',
+   options:['Should continue working','Should stop working','The couple decides']},
+  {id:'q4', bn:'ধর্মীয় অনুশীলনের মাত্রা?', en:'Level of religious practice in the household',
+   help:'', options:['Strictly practising','Moderately practising','Culturally observant']},
+  {id:'q5', bn:'আগের বিবাহ বা সন্তান আছে এমন পাত্র/পাত্রী বিবেচনা করবেন?', en:'Would the family consider a candidate with a prior marriage or children?',
+   help:'', options:['Yes, without reservation','Yes, if there are no children','No']},
+  {id:'q6', bn:'অন্য পরিবারের আগে থেকে জানা উচিত এমন কোনো স্বাস্থ্য বিষয়?', en:'Any health matter the other family should know before proceeding?',
+   help:'Written answers are compared by the system only, never displayed. Leave blank if there is nothing to disclose.',
+   type:'text', placeholder:'e.g. a managed chronic condition, a hereditary consideration — in the family’s own words'}
+];
+
+const opts = a => a.map(v => ({value:v, label:v}));
+
+const OWNERS = [
+  {value:'guardian', label:'The guardian'},
+  {value:'candidate', label:'The candidate'},
+  {value:'ghotok', label:'I will fill it in'}
+];
+
+class Component extends DCLogic {
+  state = {
+    step: 3,
+    owner: 'guardian',
+    answers: {},
+    text: '',
+    consent: false,
+    sealed: false,
+    poolOn: true,
+    dialog: null,
+    toast: null,
+    f: {
+      name:'Nusrat Jahan', dob:'2000-03-14', height:'5′4″', marital:'Never married',
+      district:'Dhaka', area:'Dhanmondi', degree:'MBA', inst:'IBA, University of Dhaka',
+      job:'Banker', family:'Nuclear'
+    },
+    prefs: {'Postgraduate degree':true,'Settled abroad':false,'Same district':true,'Government service':false,'Within 4 years of age':true,'Family known to ours':false}
+  };
+
+  componentWillUnmount(){ clearTimeout(this._t); }
+
+  say(msg){
+    clearTimeout(this._t);
+    this.setState({toast: msg});
+    this._t = setTimeout(() => this.setState({toast:null}), 4200);
+  }
+
+  setF(k){ return e => this.setState(s => ({f:{...s.f, [k]: e.target.value}})); }
+
+  dsButtons(specs){
+    const ns = (window.SongiSathiDesignSystem_d7ffd3 || {});
+    const B = ns.Button;
+    if (!B) return null;
+    return specs.map((a, i) => React.createElement(B, {key:i, variant:a.variant, size:'md', onClick:a.onClick}, a.label));
+  }
+
+  answeredCount(){
+    const n = QS.filter(q => q.type !== 'text' && this.state.answers[q.id]).length;
+    return n + (this.state.text.trim() ? 1 : 0);
+  }
+
+  buildQ(q, i, prefix){
+    const a = this.state.answers[q.id];
+    const done = q.type === 'text' ? !!this.state.text.trim() : !!a;
+    return {
+      n: done ? '✓' : String(i + 1),
+      bn:q.bn, en:q.en, help:q.help || '', hasHelp: !!q.help,
+      bd: done ? 'var(--green-300)' : 'var(--border-subtle)',
+      numBg: done ? 'var(--brand-primary)' : 'var(--surface-card-alt)',
+      numFg: done ? 'var(--surface-card)' : 'var(--text-secondary)',
+      isChoice: q.type !== 'text',
+      isText: q.type === 'text',
+      text: this.state.text,
+      placeholder: q.placeholder || '',
+      onText: e => this.setState({text: e.target.value}),
+      options: (q.options || []).map(o => ({
+        label:o, checked: a === o,
+        name: prefix + q.id, mname: prefix + q.id,
+        bd: a === o ? 'var(--brand-primary)' : 'var(--border-subtle)',
+        bg: a === o ? 'var(--green-100)' : 'var(--surface-page)',
+        pick: () => this.setState(s => ({answers:{...s.answers, [q.id]: o}}))
+      }))
+    };
+  }
+
+  renderVals(){
+    const s = this.state;
+    const total = QS.length;
+    const answered = this.answeredCount();
+    const vaultPct = Math.round(answered / total * 100);
+    const stepDone = {1:true, 2:true, 3:s.sealed, 4:false};
+    const completePct = 46 + Math.round(answered / total * 34) + (s.sealed ? 8 : 0);
+
+    const steps = [
+      {n:1, bn:'মৌলিক তথ্য', en:'Basic details', meta:'6 of 6 fields'},
+      {n:2, bn:'শিক্ষা ও পরিবার', en:'Education and family', meta:'4 of 4 fields'},
+      {n:3, bn:'গোপন প্রশ্নাবলী', en:'Private screening', meta: s.sealed ? 'Sealed' : answered + ' of ' + total + ' answered'},
+      {n:4, bn:'পর্যালোচনা', en:'Review and publish', meta: s.sealed ? 'Ready' : 'Locked until step 3 is sealed'}
+    ].map(st => {
+      const active = s.step === st.n;
+      const done = stepDone[st.n];
+      return {
+        ...st,
+        mark: done && !active ? '✓' : String(st.n),
+        bg: active ? 'var(--green-100)' : 'transparent',
+        bd: active ? 'var(--green-300)' : 'transparent',
+        numBg: active ? 'var(--brand-primary)' : done ? 'var(--green-100)' : 'var(--surface-card-alt)',
+        numFg: active ? 'var(--surface-card)' : done ? 'var(--brand-primary)' : 'var(--text-secondary)',
+        fg: active ? 'var(--text-primary)' : 'var(--text-secondary)',
+        metaFg: st.n === 3 && !s.sealed ? 'var(--gold-700)' : 'var(--text-secondary)',
+        go: () => this.setState({step: st.n})
+      };
+    });
+
+    const handoffCopy = {
+      guardian: {title:'Hand this step to the guardian', body:'They open the link on their own phone. You never see the answers, and they know it.', link:'sngi.st/v/9K2M'},
+      candidate: {title:'Hand this step to the candidate', body:'The candidate answers privately. The guardian is notified that the section is complete, not what it says.', link:'sngi.st/v/4T7P'},
+      ghotok: null
+    }[s.owner];
+
+    const dlg = {
+      seal: {
+        title: 'Seal these answers?',
+        body: 'Once sealed, these ' + total + ' answers are encrypted and cannot be viewed or edited — by you, by the family, or by anyone at SongiSathi. Reopening the section means asking the family to answer again from the start.',
+        actions: [
+          {label:'Not yet', variant:'ghost', onClick: () => this.setState({dialog:null})},
+          {label:'Seal answers', variant:'primary', onClick: () => {
+            this.setState({sealed:true, dialog:null});
+            this.say('Sealed. ' + total + ' answers encrypted — matching can read them, nobody else can.');
+          }}
+        ]
+      },
+      reanswer: {
+        title: 'Ask the family to re-answer?',
+        body: 'The sealed answers are destroyed and a fresh link is sent to the guardian. Until they finish, this profile drops out of AI matching.',
+        actions: [
+          {label:'Cancel', variant:'ghost', onClick: () => this.setState({dialog:null})},
+          {label:'Send new link', variant:'primary', onClick: () => {
+            this.setState({sealed:false, answers:{}, text:'', consent:false, dialog:null});
+            this.say('Previous answers destroyed. A fresh link was sent to the guardian on WhatsApp.');
+          }}
+        ]
+      },
+      policy: {
+        title: 'How the sealed layer works',
+        body: 'Answers are encrypted on the family’s device before they reach us. Matching runs on the encrypted comparison, returning one bit per pair: compatible, or not suggested. No staff account, no export, and no support ticket can reveal an answer.',
+        actions: [{label:'Understood', variant:'primary', onClick: () => this.setState({dialog:null})}]
+      }
+    }[s.dialog] || null;
+
+    return {
+      sz28: 28,
+      savedAt: '2 minutes ago',
+      steps, completePct, completeW: Math.min(completePct, 100) + '%',
+      isStep1: s.step === 1, isStep2: s.step === 2, isStep3: s.step === 3, isStep4: s.step === 4,
+
+      f: s.f,
+      onName: this.setF('name'), onDob: this.setF('dob'), onHeight: this.setF('height'),
+      onMarital: this.setF('marital'), onDistrict: this.setF('district'), onArea: this.setF('area'),
+      onDegree: this.setF('degree'), onInst: this.setF('inst'), onJob: this.setF('job'), onFamily: this.setF('family'),
+      heightOpts: opts(['5′0″','5′1″','5′2″','5′3″','5′4″','5′5″','5′6″']),
+      maritalOpts: opts(['Never married','Divorced','Widowed']),
+      districtOpts: opts(['Dhaka','Sylhet','Chattogram','Rajshahi','Khulna','Mymensingh']),
+      familyOpts: opts(['Nuclear','Joint']),
+      prefs: Object.keys(s.prefs).map(k => ({
+        label:k, checked:s.prefs[k],
+        toggle: () => this.setState(st => ({prefs:{...st.prefs, [k]: !st.prefs[k]}}))
+      })),
+      upload: () => this.say('Photo added and locked. Release it per request from the profile page.'),
+      skipPhoto: () => this.say('Photo skipped. Profiles without a photo still match — the biodata carries the weight.'),
+
+      total, answered, vaultW: vaultPct + '%',
+      questions: QS.map((q, i) => this.buildQ(q, i, 'd-')),
+      mobileQuestions: QS.filter(q => q.type !== 'text').slice(0, 3).map((q, i) => this.buildQ(q, i, 'm-')),
+      notSealed: !s.sealed, sealed: s.sealed,
+      sealDate: '8 August 2026',
+      consent: s.consent,
+      onConsent: () => this.setState(st => ({consent: !st.consent})),
+      sealDisabled: !(s.consent && answered >= total - 1),
+      askSeal: () => this.setState({dialog:'seal'}),
+      requestReanswer: () => this.setState({dialog:'reanswer'}),
+      readPolicy: () => this.setState({dialog:'policy'}),
+      goStep4: () => this.setState({step:4}),
+
+      ownerTabs: OWNERS,
+      owner: s.owner,
+      onOwner: v => this.setState({owner: v}),
+      handoff: s.owner !== 'ghotok',
+      handoffTitle: handoffCopy ? handoffCopy.title : '',
+      handoffBody: handoffCopy ? handoffCopy.body : '',
+      handoffLink: handoffCopy ? handoffCopy.link : '',
+      sendHandoff: () => this.say('Link sent. The family answers on their own phone; you will only see that the section is complete.'),
+
+      btnOnDark: {color:'#DBB863', borderColor:'rgba(219,184,99,.4)'},
+      btnFull: {width:'100%', justifyContent:'center'},
+      btnTall: {width:'100%', justifyContent:'center', height:48},
+
+      reviewRows: [
+        {k:'Date of birth · age', v:'14 March 2000 · 26 years'},
+        {k:'Height · marital status', v:s.f.height + ' · ' + s.f.marital},
+        {k:'Education', v:s.f.degree + ', ' + s.f.inst},
+        {k:'Profession', v:s.f.job},
+        {k:'Family type', v:s.f.family + ' family, ' + s.f.area},
+        {k:'Managed by', v:'Rahima Akter (ghotok) · GHT-0042, Sylhet'}
+      ],
+      vaultSummary: s.sealed ? 'sealed, ' + total + ' answers' : 'not yet sealed',
+      checks: [
+        {label:'Basic details and education complete', mark:'✓', bg:'var(--green-100)', fg:'var(--brand-primary)'},
+        {label: s.sealed ? 'Private screening sealed' : 'Private screening not sealed — profile will publish without matching', mark: s.sealed ? '✓' : '!', bg: s.sealed ? 'var(--green-100)' : 'var(--gold-200)', fg: s.sealed ? 'var(--brand-primary)' : 'var(--gold-700)'},
+        {label:'Photo locked until released per request', mark:'✓', bg:'var(--green-100)', fg:'var(--brand-primary)'},
+        {label:'Guardian consent recorded for contact routing', mark:'✓', bg:'var(--green-100)', fg:'var(--brand-primary)'}
+      ],
+      poolOn: s.poolOn,
+      onPool: () => this.setState(st => ({poolOn: !st.poolOn})),
+      publish: () => this.say('Profile published. PRN-10512 issued — it enters matching from Monday’s run.'),
+
+      back: () => this.setState(st => ({step: Math.max(1, st.step - 1)})),
+      next: () => this.setState(st => ({step: Math.min(4, st.step + 1)})),
+      nextLabel: s.step === 4 ? 'Publish profile' : 'Save and continue',
+      footerNote: s.step === 3
+        ? (s.sealed ? 'Sealed — step 4 is unlocked.' : 'Step 4 unlocks once this section is sealed.')
+        : 'Everything here is editable until you publish.',
+      saveDraft: () => this.say('Draft saved. You can return to this profile from the dashboard.'),
+
+      dialogOpen: !!dlg,
+      dialogTitle: dlg ? dlg.title : '',
+      dialogBody: dlg ? dlg.body : '',
+      dialogActions: dlg ? this.dsButtons(dlg.actions) : null,
+      closeDialog: () => this.setState({dialog:null}),
+
+      toastOn: !!s.toast,
+      toastMsg: s.toast || ''
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/colors.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/typography.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/styles.css">
+<script src="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&amp;family=Hind+Siliguri:wght@400;500;600;700&amp;display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-sunken);font-family:var(--font-sans-body);color:var(--text-primary);-webkit-font-smoothing:antialiased}
+a{color:var(--brand-primary);text-decoration:none}
+a:hover{color:var(--brand-primary-hover)}
+@keyframes ofade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(36,26,18,.18);border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+
+<section id="t7" style="padding:40px 44px 44px;border-bottom:1px solid var(--border-subtle)">
+  <div style="display:flex;align-items:baseline;gap:10px;margin:0 0 6px">
+    <a href="#t7" style="font-size:10px;font-weight:600;padding:4px 7px;background:var(--text-primary);color:var(--surface-card);border-radius:4px">7</a>
+    <span style="font-size:13px;font-weight:600;color:var(--text-primary)">Ghotok onboarding and pricing</span>
+  </div>
+  <p style="max-width:820px;margin:0 0 26px;font-size:12.5px;line-height:1.6;color:var(--text-secondary);text-wrap:pretty">A ghotok's book of business already exists — in a paper register, a phone's contact list, and years of memory. Onboarding's only real job is to move the first ten profiles across without asking her to type them, and to establish that she is who she says she is. Pricing follows the same logic: pay for the size of your practice, not per introduction.</p>
+
+  <div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start">
+
+    <!-- 7a onboarding mobile -->
+    <div id="7a" style="flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px">
+      <div style="display:flex;align-items:baseline;gap:8px;font-size:11px;color:var(--text-secondary)">
+        <a href="#7a" style="font-size:10.5px;font-weight:600;padding:3px 7px;background:rgba(36,26,18,.08);color:var(--text-primary);border-radius:5px">7a</a>
+        Onboarding · mobile — four steps, all navigable
+      </div>
+      <div style="width:390px;background:var(--surface-page);border:1px solid var(--border-subtle);border-radius:20px;box-shadow:var(--shadow-2);overflow:hidden;min-height:800px;display:flex;flex-direction:column">
+
+        <div style="background:var(--green-900);padding:8px 16px 16px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:rgba(253,251,246,.65)">
+            <span>9:41</span><span>4G · 78%</span>
+          </div>
+          <div style="margin-top:12px;display:flex;align-items:center;gap:9px">
+            <div style="width:26px;height:26px;flex:none;border-radius:8px;background:var(--surface-card);display:grid;place-items:center;font-family:var(--font-serif-display);font-size:13px;font-weight:600;color:var(--green-900)">স</div>
+            <span style="font-family:var(--font-serif-display);font-size:14px;font-weight:600;color:var(--surface-card)">SongiSathi</span>
+            <span style="margin-left:auto;font-size:10.5px;color:rgba(253,251,246,.6);font-variant-numeric:tabular-nums">ধাপ {{ stepNo }} / ৪</span>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:5px">
+            <sc-for list="{{ bars }}" as="b" hint-placeholder-count="4">
+              <span style="flex:1;height:4px;border-radius:99px;background:{{ b.bg }};transition:background .18s ease-out"></span>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="flex:1;padding:18px 16px;display:flex;flex-direction:column;gap:14px">
+
+          <!-- step 1: phone -->
+          <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ true }}">
+            <div style="animation:ofade .16s ease-out;display:flex;flex-direction:column;gap:14px">
+              <div>
+                <div style="font-family:'Tiro Bangla',serif;font-size:22px;line-height:1.35;color:var(--text-primary)">আপনার নম্বর দিয়ে শুরু করুন</div>
+                <div style="font-size:12.5px;line-height:1.6;color:var(--text-secondary);margin-top:5px">Start with the number families already call you on. No email, no password.</div>
+              </div>
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Input" label="Mobile number" caption="মোবাইল নম্বর" placeholder="01712 345 678" value="{{ phone }}" onChange="{{ onPhone }}" hint-size="100%,68px"></x-import>
+              <sc-if value="{{ otpSent }}" hint-placeholder-val="{{ false }}">
+                <div style="animation:ofade .16s ease-out">
+                  <div style="font-size:12px;font-weight:600;color:var(--text-primary)">Enter the 4-digit code</div>
+                  <div style="display:flex;gap:9px;margin-top:9px">
+                    <sc-for list="{{ otpBoxes }}" as="ob" hint-placeholder-count="4">
+                      <div style="flex:1;height:56px;border-radius:12px;border:1px solid {{ ob.bd }};background:var(--surface-card);display:grid;place-items:center;font-size:20px;font-weight:600;color:var(--text-primary)">{{ ob.v }}</div>
+                    </sc-for>
+                  </div>
+                  <div style="font-size:11px;color:var(--text-secondary);margin-top:9px">Sent to {{ phone }} · resend in 24s</div>
+                </div>
+              </sc-if>
+              <div style="background:var(--gold-100);border:1px solid var(--gold-300);border-radius:14px;padding:14px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                  <span style="font-size:12.5px;font-weight:600;color:var(--gold-700)">Founding member · {{ slotsLeft }} slots left</span>
+                  <span style="font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums">{{ slotsUsed }} / 10</span>
+                </div>
+                <div style="margin-top:9px;height:6px;border-radius:99px;background:var(--surface-card);overflow:hidden"><div style="width:{{ slotW }};height:100%;background:var(--gold-600)"></div></div>
+                <div style="font-size:11px;line-height:1.6;color:var(--text-secondary);margin-top:9px">The first ten activated ghotoks get two years free. The next ninety get one year. After that, the tiers in <a href="#7b">7b</a> apply.</div>
+              </div>
+              <div onClick="{{ primary }}" style="margin-top:auto;min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:var(--brand-primary);color:var(--text-on-brand);font-size:14px;font-weight:600;font-family:'Hind Siliguri',sans-serif;cursor:pointer" style-hover="background:var(--brand-primary-hover)">{{ primaryLabel }}</div>
+            </div>
+          </sc-if>
+
+          <!-- step 2: identity -->
+          <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:ofade .16s ease-out;display:flex;flex-direction:column;gap:14px">
+              <div>
+                <div style="font-family:'Tiro Bangla',serif;font-size:22px;line-height:1.35;color:var(--text-primary)">আপনি কে, তা প্রমাণ করুন</div>
+                <div style="font-size:12.5px;line-height:1.6;color:var(--text-secondary);margin-top:5px">Families are handing you their daughters' details. Verification is what makes that reasonable — and it is what the gold seal on your profile means.</div>
+              </div>
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Input" label="Your name" caption="নাম" placeholder="e.g. Rahima Akter" value="{{ ghName }}" onChange="{{ onGhName }}" hint-size="100%,68px"></x-import>
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Input" label="Bureau or practice name" caption="ব্যুরোর নাম" placeholder="Optional" value="{{ bureau }}" onChange="{{ onBureau }}" hint-size="100%,68px"></x-import>
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Select" label="District you work in" value="{{ district }}" onChange="{{ onDistrict }}" options="{{ districtOpts }}" hint-size="100%,68px"></x-import>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <sc-for list="{{ docs }}" as="d" hint-placeholder-count="2">
+                  <div onClick="{{ d.upload }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:13px;border:1px {{ d.style }} {{ d.bd }};background:{{ d.bg }};cursor:pointer">
+                    <span style="width:34px;height:34px;flex:none;border-radius:10px;background:{{ d.iconBg }};display:grid;place-items:center;color:{{ d.iconFg }};font-size:13px;font-weight:700">{{ d.mark }}</span>
+                    <span style="flex:1;min-width:0">
+                      <span style="display:block;font-size:12.5px;font-weight:600;color:var(--text-primary)">{{ d.label }}</span>
+                      <span style="display:block;font-size:11px;line-height:1.5;color:var(--text-secondary);margin-top:2px">{{ d.note }}</span>
+                    </span>
+                  </div>
+                </sc-for>
+              </div>
+              <div onClick="{{ primary }}" style="margin-top:auto;min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:var(--brand-primary);color:var(--text-on-brand);font-size:14px;font-weight:600;font-family:'Hind Siliguri',sans-serif;cursor:pointer" style-hover="background:var(--brand-primary-hover)">{{ primaryLabel }}</div>
+            </div>
+          </sc-if>
+
+          <!-- step 3: import -->
+          <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:ofade .16s ease-out;display:flex;flex-direction:column;gap:14px">
+              <div>
+                <div style="font-family:'Tiro Bangla',serif;font-size:22px;line-height:1.35;color:var(--text-primary)">আপনার খাতা নিয়ে আসুন</div>
+                <div style="font-size:12.5px;line-height:1.6;color:var(--text-secondary);margin-top:5px">Bring your register across. Photograph the pages or forward the biodata you already have on WhatsApp — we read them and you correct what is wrong.</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ imports }}" as="im" hint-placeholder-count="3">
+                  <div onClick="{{ im.run }}" style="padding:15px;border-radius:14px;border:1px solid {{ im.bd }};background:{{ im.bg }};cursor:pointer" style-hover="border-color:var(--border-default)">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <span style="width:36px;height:36px;flex:none;border-radius:11px;background:{{ im.iconBg }};display:grid;place-items:center">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="{{ im.iconPath }}"></path>
+                        </svg>
+                      </span>
+                      <span style="flex:1;min-width:0">
+                        <span style="display:block;font-size:13px;font-weight:600;color:var(--text-primary)">{{ im.label }}</span>
+                        <span style="display:block;font-size:11px;color:var(--text-secondary);margin-top:1px">{{ im.bn }}</span>
+                      </span>
+                      <span style="font-size:11.5px;font-weight:600;color:{{ im.actionFg }}">{{ im.action }}</span>
+                    </div>
+                    <sc-if value="{{ im.done }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin-top:11px;padding-top:11px;border-top:1px dashed var(--border-subtle);display:flex;flex-direction:column;gap:7px">
+                        <sc-for list="{{ im.rows }}" as="ir" hint-placeholder-count="3">
+                          <div style="display:flex;align-items:center;gap:9px">
+                            <span style="width:26px;height:26px;flex:none;border-radius:8px;background:var(--surface-card-alt);display:grid;place-items:center;font-size:9.5px;font-weight:600;color:var(--text-secondary)">{{ ir.init }}</span>
+                            <span style="flex:1;min-width:0;font-size:11.5px;color:var(--text-primary)">{{ ir.name }}</span>
+                            <span style="font-size:10.5px;color:var(--text-secondary)">{{ ir.state }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:14px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between">
+                  <span style="font-size:12.5px;font-weight:600;color:var(--text-primary)">{{ imported }} profiles ready</span>
+                  <span style="font-size:11px;color:var(--text-secondary)">you review each one before it goes live</span>
+                </div>
+                <div style="font-size:11px;line-height:1.6;color:var(--text-secondary);margin-top:6px">Nothing is published and nothing enters matching until each family has given their private answers.</div>
+              </div>
+              <div onClick="{{ primary }}" style="margin-top:auto;min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:var(--brand-primary);color:var(--text-on-brand);font-size:14px;font-weight:600;font-family:'Hind Siliguri',sans-serif;cursor:pointer" style-hover="background:var(--brand-primary-hover)">{{ primaryLabel }}</div>
+            </div>
+          </sc-if>
+
+          <!-- step 4: done -->
+          <sc-if value="{{ isStep4 }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:ofade .18s ease-out;display:flex;flex-direction:column;gap:14px;flex:1">
+              <div style="background:var(--green-900);border-radius:16px;padding:26px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:11px">
+                <div style="width:56px;height:56px;border-radius:50%;background:rgba(219,184,99,.16);display:grid;place-items:center">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2.6l2.3 1.7 2.8-.3 1.1 2.6 2.4 1.5-.6 2.8.9 2.7-2.2 1.8-.8 2.7-2.9.2L12 21.4l-2.9-1.8-2.9-.2-.8-2.7L3.2 15l.9-2.7-.6-2.8L5.9 8 7 5.4l2.8.3z" fill="var(--gold-400)"></path><path d="M9 12.2l2.1 2.1 4-4.2" stroke="var(--green-900)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </div>
+                <div style="font-family:'Tiro Bangla',serif;font-size:20px;color:var(--surface-card)">আপনি ফাউন্ডিং সদস্য</div>
+                <div style="font-size:12px;line-height:1.65;color:rgba(253,251,246,.75)">Slot 5 of 10. Two years free, then whichever tier fits your practice. Your verification is pending — it usually takes a day.</div>
+                <div style="display:flex;gap:24px;margin-top:6px">
+                  <div>
+                    <div style="font-family:var(--font-serif-display);font-size:21px;font-weight:600;color:var(--gold-400);font-variant-numeric:tabular-nums">{{ imported }}</div>
+                    <div style="font-size:10.5px;color:rgba(253,251,246,.6);margin-top:2px">profiles imported</div>
+                  </div>
+                  <div>
+                    <div style="font-family:var(--font-serif-display);font-size:21px;font-weight:600;color:var(--gold-400)">2 yrs</div>
+                    <div style="font-size:10.5px;color:rgba(253,251,246,.6);margin-top:2px">free, from today</div>
+                  </div>
+                </div>
+              </div>
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:15px">
+                <div style="font-size:13px;font-weight:600;color:var(--text-primary)">What to do first</div>
+                <div style="display:flex;flex-direction:column;gap:11px;margin-top:12px">
+                  <sc-for list="{{ nextSteps }}" as="ns" hint-placeholder-count="3">
+                    <div style="display:flex;gap:11px;align-items:flex-start">
+                      <span style="width:20px;height:20px;flex:none;border-radius:50%;background:var(--green-100);color:var(--brand-primary);display:grid;place-items:center;font-size:10px;font-weight:700">{{ ns.n }}</span>
+                      <span style="flex:1;min-width:0">
+                        <span style="display:block;font-size:12.5px;font-weight:600;color:var(--text-primary)">{{ ns.title }}</span>
+                        <span style="display:block;font-size:11px;line-height:1.55;color:var(--text-secondary);margin-top:2px">{{ ns.body }}</span>
+                      </span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div onClick="{{ primary }}" style="margin-top:auto;min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:var(--brand-primary);color:var(--text-on-brand);font-size:14px;font-weight:600;font-family:'Hind Siliguri',sans-serif;cursor:pointer" style-hover="background:var(--brand-primary-hover)">{{ primaryLabel }}</div>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;align-items:center;gap:10px">
+            <span onClick="{{ back }}" style="font-size:12px;color:var(--text-secondary);cursor:pointer" style-hover="color:var(--text-primary)">← Back</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--text-secondary)">{{ footNote }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7b pricing -->
+    <div id="7b" style="flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px">
+      <div style="display:flex;align-items:baseline;gap:8px;font-size:11px;color:var(--text-secondary)">
+        <a href="#7b" style="font-size:10.5px;font-weight:600;padding:3px 7px;background:rgba(36,26,18,.08);color:var(--text-primary);border-radius:5px">7b</a>
+        Pricing · desktop — priced by practice size, paid by bKash
+      </div>
+      <div style="width:1000px;background:var(--surface-page);border:1px solid var(--border-subtle);border-radius:14px;box-shadow:var(--shadow-2);overflow:hidden">
+        <div style="background:var(--green-900);padding:0 20px;display:flex;align-items:center;gap:16px;height:54px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:24px;height:24px;border-radius:7px;background:var(--surface-card);display:grid;place-items:center;font-family:var(--font-serif-display);font-size:12px;font-weight:600;color:var(--green-900)">স</div>
+            <span style="font-family:var(--font-serif-display);font-size:13.5px;font-weight:600;color:var(--surface-card)">SongiSathi</span>
+          </div>
+          <span style="font-size:11.5px;color:rgba(253,251,246,.55)">মূল্য · Pricing for ghotoks</span>
+        </div>
+
+        <div style="padding:28px 28px 32px;display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap">
+            <div style="flex:1;min-width:300px">
+              <div style="font-family:'Tiro Bangla',serif;font-size:26px;line-height:1.3;color:var(--text-primary)">আপনার ব্যবসার আকার অনুযায়ী</div>
+              <div style="font-size:13px;line-height:1.6;color:var(--text-secondary);margin-top:5px;max-width:520px">Priced by how many profiles you keep active — never per introduction, never a cut of your commission. What you earn from a marriage stays yours.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="font-size:12.5px;color:var(--text-secondary)">Monthly</span>
+              <div onClick="{{ toggleBilling }}" style="width:44px;height:24px;border-radius:99px;background:{{ billBg }};position:relative;cursor:pointer;transition:background .16s ease-out">
+                <span style="position:absolute;top:3px;left:{{ billX }};width:18px;height:18px;border-radius:50%;background:var(--surface-card);transition:left .16s ease-out"></span>
+              </div>
+              <span style="font-size:12.5px;color:var(--text-secondary)">Annual</span>
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="gold" hint-size="112px,22px">Save 20%</x-import>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:stretch">
+            <sc-for list="{{ tiers }}" as="t" hint-placeholder-count="3">
+              <div style="background:{{ t.bg }};border:1px solid {{ t.bd }};border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px;position:relative">
+                <sc-if value="{{ t.featured }}" hint-placeholder-val="{{ false }}">
+                  <span style="position:absolute;top:-11px;left:22px;padding:4px 11px;border-radius:99px;background:var(--gold-600);color:var(--brown-900);font-size:10px;font-weight:700;letter-spacing:.06em">MOST GHOTOKS</span>
+                </sc-if>
+                <div>
+                  <div style="font-family:var(--font-serif-display);font-size:19px;font-weight:600;color:{{ t.fg }}">{{ t.name }}</div>
+                  <div style="font-family:'Hind Siliguri',sans-serif;font-size:12px;color:{{ t.sub }};margin-top:2px">{{ t.bn }}</div>
+                </div>
+                <div>
+                  <div style="display:flex;align-items:baseline;gap:5px">
+                    <span style="font-family:var(--font-serif-display);font-size:32px;font-weight:600;color:{{ t.fg }};font-variant-numeric:tabular-nums">{{ t.price }}</span>
+                    <span style="font-size:12px;color:{{ t.sub }}">{{ t.per }}</span>
+                  </div>
+                  <div style="font-size:11.5px;color:{{ t.sub }};margin-top:4px">{{ t.priceNote }}</div>
+                </div>
+                <div style="padding:12px 14px;border-radius:12px;background:{{ t.limitBg }}">
+                  <div style="font-family:var(--font-serif-display);font-size:22px;font-weight:600;color:{{ t.fg }};font-variant-numeric:tabular-nums">{{ t.limit }}</div>
+                  <div style="font-size:11px;color:{{ t.sub }};margin-top:1px">active profiles</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <sc-for list="{{ t.features }}" as="ft" hint-placeholder-count="5">
+                    <div style="display:flex;gap:9px;align-items:flex-start">
+                      <span style="width:15px;height:15px;flex:none;margin-top:2px;border-radius:50%;background:{{ t.tickBg }};color:{{ t.tickFg }};display:grid;place-items:center;font-size:8.5px;font-weight:700">✓</span>
+                      <span style="font-size:11.5px;line-height:1.55;color:{{ t.featFg }}">{{ ft }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div onClick="{{ t.choose }}" style="margin-top:auto;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:{{ t.ctaBg }};border:1px solid {{ t.ctaBd }};color:{{ t.ctaFg }};font-size:12.5px;font-weight:600;cursor:pointer">{{ t.cta }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start">
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:18px">
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Included on every tier, including free</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px">
+                <sc-for list="{{ universal }}" as="u" hint-placeholder-count="6">
+                  <div style="display:flex;gap:9px;align-items:flex-start">
+                    <span style="width:15px;height:15px;flex:none;margin-top:2px;border-radius:50%;background:var(--green-100);color:var(--brand-primary);display:grid;place-items:center;font-size:8.5px;font-weight:700">✓</span>
+                    <span style="font-size:11.5px;line-height:1.55;color:var(--text-secondary)">{{ u }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:18px">
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary)">How you pay</div>
+              <div style="display:flex;gap:9px;margin-top:12px">
+                <sc-for list="{{ methods }}" as="m" hint-placeholder-count="3">
+                  <div style="flex:1;padding:11px 8px;border-radius:11px;border:1px solid var(--border-subtle);background:var(--surface-page);text-align:center">
+                    <div style="font-size:12px;font-weight:700;color:{{ m.fg }}">{{ m.name }}</div>
+                    <div style="font-size:10px;color:var(--text-secondary);margin-top:2px">{{ m.note }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font-size:11px;line-height:1.6;color:var(--text-secondary);margin-top:12px">Send to the merchant number, then enter the transaction ID. A person checks it within a few hours — no card is ever required.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin:26px 0 0;font-size:12px;line-height:1.6;color:var(--text-secondary)">
+    Try next: “the admin moderation queue” · “commission tracking after a marriage closes” · “the landing page”
+  </p>
+</section>
+
+<sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:90;animation:ofade .2s ease-out">
+    <div style="display:flex;align-items:center;gap:11px;padding:13px 18px;border-radius:12px;background:var(--text-primary);box-shadow:var(--shadow-3);max-width:560px">
+      <span style="width:24px;height:24px;flex:none;border-radius:50%;background:rgba(253,251,246,.14);display:grid;place-items:center;color:var(--gold-400);font-size:12px;font-weight:700">✓</span>
+      <span style="font-size:12.5px;line-height:1.45;color:var(--surface-card)">{{ toastMsg }}</span>
+    </div>
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const TIERS = [
+  {value:'solo', name:'Solo', bn:'একক ঘটক', monthly:'৳1,200', annual:'৳960', limit:'20',
+   features:['Weekly AI match suggestions','Bilingual biodata studio','Private screening on every profile','WhatsApp sharing with revocable links']},
+  {value:'bureau', name:'Bureau', bn:'ব্যুরো', monthly:'৳2,500', annual:'৳2,000', limit:'50', featured:true,
+   features:['Everything in Solo','Trusted network pool access','Commission tracking','Two staff logins','Priority verification']},
+  {value:'agency', name:'Agency', bn:'এজেন্সি', monthly:'৳5,000', annual:'৳4,000', limit:'150',
+   features:['Everything in Bureau','Six staff logins','Branded biodata templates','District-level insight reports','A named support contact']}
+];
+
+class Component extends DCLogic {
+  state = {
+    step:1, phone:'01712 345 678', otpSent:false, otp:'',
+    ghName:'', bureau:'', district:'Sylhet',
+    docs:{nid:false, photo:false},
+    imports:{register:false, whatsapp:false, manual:false},
+    annual:true, toast:null
+  };
+
+  componentWillUnmount(){ clearTimeout(this._t); }
+
+  say(msg){
+    clearTimeout(this._t);
+    this.setState({toast: msg});
+    this._t = setTimeout(() => this.setState({toast:null}), 4400);
+  }
+
+  renderVals(){
+    const s = this.state;
+    const importedCount = (s.imports.register ? 8 : 0) + (s.imports.whatsapp ? 5 : 0) + (s.imports.manual ? 1 : 0);
+
+    const primaryLabel = s.step === 1
+      ? (s.otpSent ? 'কোড যাচাই করুন · Verify code' : 'কোড পাঠান · Send code')
+      : s.step === 2 ? 'Continue to import'
+      : s.step === 3 ? (importedCount ? 'Finish setup · ' + importedCount + ' profiles' : 'Skip for now')
+      : 'ড্যাশবোর্ডে যান · Go to dashboard';
+
+    const primary = () => {
+      if (s.step === 1 && !s.otpSent) { this.setState({otpSent:true, otp:'4712'}); this.say('Code sent to ' + s.phone + '. It expires in two minutes.'); return; }
+      if (s.step === 4) { this.say('Opening your dashboard. Your 42-profile book is waiting.'); return; }
+      this.setState({step: Math.min(4, s.step + 1)});
+    };
+
+    return {
+      stepNo: ['১','২','৩','৪'][s.step - 1],
+      bars: [1,2,3,4].map(n => ({bg: n <= s.step ? 'var(--gold-400)' : 'rgba(253,251,246,.2)'})),
+      isStep1: s.step === 1, isStep2: s.step === 2, isStep3: s.step === 3, isStep4: s.step === 4,
+      back: () => this.setState({step: Math.max(1, s.step - 1)}),
+      primary, primaryLabel,
+      footNote: s.step === 1 ? 'We never post to your number' : s.step === 2 ? 'Verification takes about a day' : s.step === 3 ? 'You can import more later' : 'Founding slot 5 of 10',
+
+      phone: s.phone,
+      onPhone: e => this.setState({phone: e.target.value}),
+      otpSent: s.otpSent,
+      otpBoxes: (s.otp || '    ').split('').slice(0,4).map(v => ({
+        v: v.trim(), bd: v.trim() ? 'var(--brand-primary)' : 'var(--border-default)'
+      })),
+      slotsUsed: 5, slotsLeft: 5, slotW: '50%',
+
+      ghName: s.ghName, onGhName: e => this.setState({ghName: e.target.value}),
+      bureau: s.bureau, onBureau: e => this.setState({bureau: e.target.value}),
+      district: s.district, onDistrict: e => this.setState({district: e.target.value}),
+      districtOpts: ['Sylhet','Dhaka','Chattogram','Rajshahi','Khulna','Mymensingh'].map(v => ({value:v, label:v})),
+      docs: [
+        {k:'nid', label:'National ID', note:'Photograph the front and back. Checked by a person, never published.'},
+        {k:'photo', label:'A photo of you', note:'Shown to families alongside your name and district.'}
+      ].map(d => {
+        const on = s.docs[d.k];
+        return {
+          label:d.label, note: on ? 'Uploaded · awaiting review' : d.note,
+          mark: on ? '✓' : '+',
+          style: on ? 'solid' : 'dashed',
+          bd: on ? 'var(--green-300)' : 'var(--border-default)',
+          bg: on ? 'var(--green-100)' : 'var(--surface-card)',
+          iconBg: on ? 'var(--brand-primary)' : 'var(--surface-card-alt)',
+          iconFg: on ? 'var(--text-on-brand)' : 'var(--text-secondary)',
+          upload: () => {
+            this.setState(st => ({docs:{...st.docs, [d.k]: !st.docs[d.k]}}));
+            this.say(on ? d.label + ' removed.' : d.label + ' uploaded. A person reviews it within a day.');
+          }
+        };
+      }),
+
+      imports: [
+        {k:'register', label:'Photograph your register', bn:'খাতার ছবি তুলুন', count:8, iconPath:'M14.5 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9.5L14.5 4zM14 4v6h6M8 14h8M8 17h5',
+         rows:[{init:'NJ',name:'Nusrat Jahan',state:'read'},{init:'TA',name:'Tanvir Ahmed',state:'read'},{init:'SI',name:'Sadia Islam',state:'check name'}]},
+        {k:'whatsapp', label:'Forward biodata from WhatsApp', bn:'হোয়াটসঅ্যাপ থেকে', count:5, iconPath:'M20 12a8 8 0 0 1-11.7 7.1L4 20.5l1.4-4.3A8 8 0 1 1 20 12z',
+         rows:[{init:'RK',name:'Rezaul Karim',state:'read'},{init:'FA',name:'Farhana Akter',state:'read'}]},
+        {k:'manual', label:'Type one in yourself', bn:'নিজে লিখুন', count:1, iconPath:'M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z',
+         rows:[{init:'MH',name:'Mahmudul Hasan',state:'draft'}]}
+      ].map(im => {
+        const done = s.imports[im.k];
+        return {
+          label:im.label, bn:im.bn, iconPath:im.iconPath, done, rows:im.rows,
+          bd: done ? 'var(--green-300)' : 'var(--border-subtle)',
+          bg: done ? 'var(--green-100)' : 'var(--surface-card)',
+          iconBg: done ? 'var(--surface-card)' : 'var(--surface-card-alt)',
+          action: done ? im.count + ' read' : 'Start',
+          actionFg: done ? 'var(--brand-primary)' : 'var(--text-secondary)',
+          run: () => {
+            this.setState(st => ({imports:{...st.imports, [im.k]: !st.imports[im.k]}}));
+            if (!done) this.say(im.count + ' profiles read. Check the names and ages — handwriting is not always kind.');
+          }
+        };
+      }),
+      imported: importedCount,
+      nextSteps: [
+        {n:'1', title:'Send the private questions to two families', body:'A profile only enters matching once its family has sealed their answers.'},
+        {n:'2', title:'Turn on the trusted network pool', body:'Your profiles become visible to other verified ghotoks. Contact still routes through you.'},
+        {n:'3', title:'Invite a ghotok you trust', body:'You both get a free month, and the pool gets better for everyone in your district.'}
+      ],
+
+      annual: s.annual,
+      toggleBilling: () => this.setState({annual: !s.annual}),
+      billBg: s.annual ? 'var(--brand-primary)' : 'var(--border-default)',
+      billX: s.annual ? '23px' : '3px',
+      tiers: TIERS.map(t => {
+        const f = !!t.featured;
+        return {
+          name:t.name, bn:t.bn, limit:t.limit, features:t.features, featured:f,
+          price: s.annual ? t.annual : t.monthly,
+          per: '/month',
+          priceNote: s.annual ? 'billed yearly · 20% saved' : 'billed monthly · cancel any time',
+          bg: f ? 'var(--green-900)' : 'var(--surface-card)',
+          bd: f ? 'var(--green-900)' : 'var(--border-subtle)',
+          fg: f ? 'var(--surface-card)' : 'var(--text-primary)',
+          sub: f ? 'rgba(253,251,246,.65)' : 'var(--text-secondary)',
+          featFg: f ? 'rgba(253,251,246,.85)' : 'var(--text-secondary)',
+          limitBg: f ? 'rgba(253,251,246,.08)' : 'var(--surface-page)',
+          tickBg: f ? 'rgba(219,184,99,.22)' : 'var(--green-100)',
+          tickFg: f ? 'var(--gold-400)' : 'var(--brand-primary)',
+          ctaBg: f ? 'var(--gold-400)' : 'transparent',
+          ctaBd: f ? 'var(--gold-400)' : 'var(--border-default)',
+          ctaFg: f ? 'var(--brown-900)' : 'var(--text-primary)',
+          cta: f ? 'Choose Bureau' : 'Choose ' + t.name,
+          choose: () => this.say(t.name + ' selected — ' + (s.annual ? t.annual : t.monthly) + '/month. Pay by bKash and enter the transaction ID.')
+        };
+      }),
+      universal: [
+        'Private screening on every profile',
+        'Photos locked until you release them',
+        'Contact details behind a two-sided release',
+        'Bilingual biodata, Bangla and English',
+        'Your commission is yours — we take none of it',
+        'Export your book and leave whenever you like'
+      ],
+      methods: [
+        {name:'bKash', note:'merchant', fg:'var(--terracotta-600)'},
+        {name:'Nagad', note:'merchant', fg:'var(--terracotta-700)'},
+        {name:'Rocket', note:'merchant', fg:'var(--brand-primary)'}
+      ],
+
+      toastOn: !!s.toast,
+      toastMsg: s.toast || ''
+    };
+  }
+}
+
+</script>
+</body>
+</html>

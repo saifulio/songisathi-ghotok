@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#1B3220">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#1B3220"/>
+    <rect x="120" y="150" width="960" height="500" rx="40" fill="#FBF6EC"/>
+    <rect x="120" y="150" width="260" height="500" rx="40" fill="#2F5233"/>
+    <circle cx="250" cy="300" r="52" fill="#FDFBF6"/>
+    <rect x="176" y="410" width="148" height="18" rx="9" fill="#DBB863"/>
+    <rect x="176" y="452" width="108" height="18" rx="9" fill="#79A97F"/>
+    <rect x="440" y="230" width="560" height="26" rx="13" fill="#241A12"/>
+    <rect x="440" y="292" width="380" height="18" rx="9" fill="#AA9683"/>
+    <rect x="440" y="370" width="560" height="110" rx="24" fill="#FDFBF6" stroke="#DDD1C3" stroke-width="4"/>
+    <circle cx="500" cy="425" r="26" fill="#EBDCC3"/>
+    <circle cx="560" cy="425" r="26" fill="#EBDCC3"/>
+    <rect x="620" y="412" width="180" height="26" rx="13" fill="#2F5233"/>
+    <rect x="840" y="404" width="120" height="42" rx="21" fill="#B08628"/>
+    <rect x="440" y="520" width="560" height="80" rx="24" fill="#F5EBDA"/>
+  </svg>
+</template>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&amp;family=Karla:wght@400;500;600;700&amp;family=Tiro+Bangla&amp;family=Hind+Siliguri:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/styles.css">
+<script src="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/_ds_bundle.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#EFE7D8;font-family:'Karla',system-ui,sans-serif;color:#241A12;-webkit-font-smoothing:antialiased}
+a{color:#2F5233;text-decoration:none}
+a:hover{color:#20421F}
+::selection{background:#F3E4C3}
+@keyframes ghfade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ghfall{0%{transform:translate(0,-20px) rotate(0);opacity:1}100%{transform:translate(var(--dx),240px) rotate(540deg);opacity:0}}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(36,26,18,.18);border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+
+<!-- ══════════════ TURN 1 ══════════════ -->
+<section id="t1" style="padding:40px 44px 44px;border-bottom:1px solid rgba(36,26,18,.09)">
+
+  <div style="display:flex;align-items:baseline;gap:10px;margin:0 0 6px">
+    <a href="#t1" style="font:600 10px/1 ui-monospace,Menlo,monospace;padding:4px 7px;background:#241A12;color:#FDFBF6;border-radius:4px">1</a>
+    <span style="font:600 13px/1.2 'Karla',sans-serif;color:#241A12">Ghotok dashboard — layout &amp; density explorations</span>
+  </div>
+  <p style="max-width:760px;margin:0 0 26px;font:400 12.5px/1.6 'Karla',sans-serif;color:#6B5544;text-wrap:pretty">Built on the SongiSathi foundations (olive green, terracotta, gold reserved for verification, warm ivory paper). Bangla leads, English sits underneath. Live in all three: <strong style="color:#241A12">Accept / Dismiss / Why?</strong> on match suggestions, the one-tap attestation, the network-pool switch, the tier-limit nudge, and the marriage-closed celebration.</p>
+
+  <div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start">
+
+    <!-- ─────────── 1a — Workbench (comfortable) ─────────── -->
+    <div id="1a" style="flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px">
+      <div style="display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 'Karla',sans-serif;color:rgba(36,26,18,.55)">
+        <a href="#1a" style="font:600 10.5px/1 ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(36,26,18,.08);color:#241A12;border-radius:5px">1a</a>
+        Desktop · “Practice workbench” — comfortable density, AI suggestions as the hero
+      </div>
+      <div style="width:1320px;background:#FBF6EC;border:1px solid #DDD1C3;border-radius:14px;box-shadow:0 10px 30px rgba(36,26,18,.10);overflow:hidden;display:flex">
+
+        <!-- app nav -->
+        <div style="width:216px;flex:none;background:#1B3220;padding:18px 14px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:30px;height:30px;flex:none;border-radius:9px;background:#FDFBF6;display:grid;place-items:center;font:600 15px/1 'Lora',serif;color:#1B3220">স</div>
+            <div>
+              <div style="font:600 14px/1.1 'Lora',serif;color:#FDFBF6">SongiSathi</div>
+              <div style="font:400 10px/1.3 'Karla',sans-serif;color:rgba(253,251,246,.5);letter-spacing:.06em">GHOTOK WORKSPACE</div>
+            </div>
+          </div>
+
+          <!-- tier badge + profile meter (persistent) -->
+          <div style="background:rgba(253,251,246,.07);border:1px solid rgba(253,251,246,.14);border-radius:12px;padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+              <span style="display:inline-flex;align-items:center;gap:6px">
+                <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="gold" hint-size="78px,24px">BUREAU</x-import>
+              </span>
+              <span style="font:400 10px/1 'Karla',sans-serif;color:rgba(253,251,246,.55)">Verified</span>
+            </div>
+            <div style="margin-top:10px;display:flex;align-items:baseline;justify-content:space-between">
+              <span style="font:600 15px/1 'Karla',sans-serif;color:#FDFBF6;font-variant-numeric:tabular-nums">42<span style="font-weight:400;color:rgba(253,251,246,.5)">/50</span></span>
+              <span style="font:400 10px/1 'Karla',sans-serif;color:rgba(253,251,246,.5)">সক্রিয় প্রোফাইল</span>
+            </div>
+            <div style="margin-top:6px;height:5px;border-radius:99px;background:rgba(253,251,246,.16);overflow:hidden">
+              <div style="width:84%;height:100%;background:#DBB863"></div>
+            </div>
+            <div onClick="{{ upgrade }}" style="margin-top:9px;font:500 10.5px/1.4 'Karla',sans-serif;color:#DBB863;cursor:pointer" style-hover="color:#F3E4C3">84% used · Upgrade for 150 →</div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:1px">
+            <sc-for list="{{ nav }}" as="n" hint-placeholder-count="7">
+              <div style="display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;background:{{ n.bg }}" style-hover="background:rgba(253,251,246,.09)">
+                <span style="width:6px;height:6px;flex:none;border-radius:50%;background:{{ n.dot }}"></span>
+                <span style="flex:1;min-width:0">
+                  <span style="display:block;font:500 12px/1.3 'Hind Siliguri',sans-serif;color:{{ n.fg }}">{{ n.bn }}</span>
+                  <span style="display:block;font:400 10px/1.3 'Karla',sans-serif;color:rgba(253,251,246,.42)">{{ n.en }}</span>
+                </span>
+                <span style="font:600 10px/1 'Karla',sans-serif;color:rgba(253,251,246,.4);font-variant-numeric:tabular-nums">{{ n.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <!-- referral widget -->
+          <div style="margin-top:auto;border:1px dashed rgba(219,184,99,.5);border-radius:12px;padding:12px;background:rgba(219,184,99,.08)">
+            <div style="font:500 11.5px/1.4 'Hind Siliguri',sans-serif;color:#F3E4C3">সহকর্মী ঘটককে আমন্ত্রণ করুন</div>
+            <div style="font:400 10.5px/1.45 'Karla',sans-serif;color:rgba(253,251,246,.6);margin-top:3px">Invite a fellow ghotok — you both get one month free.</div>
+            <div onClick="{{ copyInvite }}" style="margin-top:9px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(253,251,246,.1);cursor:pointer" style-hover="background:rgba(253,251,246,.18)">
+              <span style="font:600 11px/1 ui-monospace,Menlo,monospace;color:#FDFBF6;letter-spacing:.08em">RAHIMA-SYL</span>
+              <span style="font:500 10px/1 'Karla',sans-serif;color:#DBB863">Copy</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- main column -->
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+
+          <!-- header -->
+          <div style="padding:16px 24px;border-bottom:1px solid #DDD1C3;background:#FDFBF6;display:flex;align-items:center;gap:20px">
+            <div style="flex:1;min-width:0">
+              <div style="font:400 17px/1.25 'Tiro Bangla',serif;color:#241A12">শুভ সকাল, রাহিমা আপা</div>
+              <div style="font:400 11.5px/1.4 'Karla',sans-serif;color:#6B5544;margin-top:2px">Good morning · Sylhet bureau · 22 years of matchmaking</div>
+            </div>
+            <div style="position:relative;width:250px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#AA9683" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:11px;top:10px"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+              <div style="padding:9px 12px 9px 32px;border:1px solid #DDD1C3;border-radius:10px;background:#FBF6EC;font:400 12px/1.3 'Karla',sans-serif;color:#AA9683">প্রোফাইল খুঁজুন · Search profiles</div>
+            </div>
+            <div onClick="{{ toggleLang }}" style="display:flex;border:1px solid #DDD1C3;border-radius:10px;overflow:hidden;cursor:pointer;font:600 11px/1 'Karla',sans-serif;flex:none">
+              <span style="padding:9px 11px;font-family:'Hind Siliguri',sans-serif;background:{{ bnBg }};color:{{ bnFg }}">বাংলা</span>
+              <span style="padding:9px 11px;background:{{ enBg }};color:{{ enFg }}">EN</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:9px;flex:none;padding-left:16px;border-left:1px solid #DDD1C3">
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Avatar" initials="RA" size="{{ sz32 }}" hint-size="32px,32px"></x-import>
+              <div>
+                <div style="font:600 11.5px/1.2 'Karla',sans-serif">Rahima Akter</div>
+                <div style="font:400 10px/1.2 'Karla',sans-serif;color:#8C7461">GHT-0042</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:20px 24px 26px;display:flex;flex-direction:column;gap:20px">
+
+            <!-- stats row -->
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+              <div style="background:#FDFBF6;border:1px solid #DDD1C3;border-radius:13px;padding:14px 15px">
+                <div style="font:400 10.5px/1.3 'Karla',sans-serif;color:#8C7461;letter-spacing:.06em;text-transform:uppercase">সক্রিয় প্রোফাইল</div>
+                <div style="font:400 9.5px/1.3 'Karla',sans-serif;color:#AA9683;margin-top:1px">Active profiles</div>
+                <div style="display:flex;align-items:baseline;gap:5px;margin-top:9px">
+                  <span style="font:600 26px/1 'Lora',serif;color:#241A12;font-variant-numeric:tabular-nums">42</span>
+                  <span style="font:400 12px/1 'Karla',sans-serif;color:#8C7461">/ 50</span>
+                </div>
+                <div style="margin-top:9px;height:5px;border-radius:99px;background:#EBDCC3;overflow:hidden"><div style="width:84%;height:100%;background:#B08628"></div></div>
+                <div style="margin-top:7px;font:500 10px/1.4 'Karla',sans-serif;color:#8C6318">8 slots left on Bureau</div>
+              </div>
+              <div style="background:#FDFBF6;border:1px solid #DDD1C3;border-radius:13px;padding:14px 15px">
+                <div style="font:400 10.5px/1.3 'Karla',sans-serif;color:#8C7461;letter-spacing:.06em;text-transform:uppercase">এ সপ্তাহের প্রস্তাব</div>
+                <div style="font:400 9.5px/1.3 'Karla',sans-serif;color:#AA9683;margin-top:1px">Matches suggested</div>
+                <div style="font:600 26px/1 'Lora',serif;color:#241A12;margin-top:9px;font-variant-numeric:tabular-nums">9</div>
+                <div style="margin-top:14px;font:500 10px/1.4 'Karla',sans-serif;color:#3D6B44">3 awaiting your review</div>
+              </div>
+              <div style="background:#FDFBF6;border:1px solid #DDD1C3;border-radius:13px;padding:14px 15px">
+                <div style="font:400 10.5px/1.3 'Karla',sans-serif;color:#8C7461;letter-spacing:.06em;text-transform:uppercase">চলমান পরিচয়</div>
+                <div style="font:400 9.5px/1.3 'Karla',sans-serif;color:#AA9683;margin-top:1px">Introductions in progress</div>
+                <div style="font:600 26px/1 'Lora',serif;color:#241A12;margin-top:9px;font-variant-numeric:tabular-nums">5</div>
+                <div style="margin-top:14px;font:500 10px/1.4 'Karla',sans-serif;color:#BD572F">2 need a follow-up call</div>
+              </div>
+              <div style="background:#2F5233;border:1px solid #20421F;border-radius:13px;padding:14px 15px">
+                <div style="font:400 10.5px/1.3 'Karla',sans-serif;color:rgba(253,251,246,.7);letter-spacing:.06em;text-transform:uppercase">সম্পন্ন বিবাহ</div>
+                <div style="font:400 9.5px/1.3 'Karla',sans-serif;color:rgba(253,251,246,.5);margin-top:1px">Marriages closed · lifetime</div>
+                <div style="display:flex;align-items:baseline;gap:6px;margin-top:9px">
+                  <span style="font:600 26px/1 'Lora',serif;color:#FDFBF6;font-variant-numeric:tabular-nums">{{ closed }}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24"><path d="M12 2l2.6 6.8L22 10l-5.4 4.4L18 22l-6-3.8L6 22l1.4-7.6L2 10l7.4-1.2z" fill="#DBB863"></path></svg>
+                </div>
+                <div onClick="{{ markMarried }}" style="margin-top:12px;padding:7px 9px;border-radius:8px;border:1px solid rgba(219,184,99,.45);font:600 10px/1.3 'Karla',sans-serif;color:#DBB863;text-align:center;cursor:pointer" style-hover="background:rgba(219,184,99,.16)">Record a marriage</div>
+              </div>
+              <div style="background:#FDFBF6;border:1px solid #DDD1C3;border-radius:13px;padding:14px 15px">
+                <div style="font:400 10.5px/1.3 'Karla',sans-serif;color:#8C7461;letter-spacing:.06em;text-transform:uppercase">এ মাসের কমিশন</div>
+                <div style="font:400 9.5px/1.3 'Karla',sans-serif;color:#AA9683;margin-top:1px">Commission earned</div>
+                <div style="font:600 26px/1 'Lora',serif;color:#241A12;margin-top:9px;font-variant-numeric:tabular-nums">৳48,000</div>
+                <div style="margin-top:14px;font:500 10px/1.4 'Karla',sans-serif;color:#3B6B44">3 of 4 payments received</div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 316px;gap:20px;align-items:start">
+
+              <!-- AI suggestions hero -->
+              <div style="background:#FDFBF6;border:1px solid #DDD1C3;border-radius:14px;overflow:hidden">
+                <div style="padding:15px 18px;border-bottom:1px solid #EBDCC3;display:flex;align-items:center;gap:12px">
+                  <div style="flex:1">
+                    <div style="font:400 15px/1.3 'Tiro Bangla',serif;color:#241A12">এই সপ্তাহের ম্যাচ প্রস্তাব</div>
+                    <div style="font:400 11px/1.4 'Karla',sans-serif;color:#6B5544;margin-top:1px">AI match suggestions · refreshed Monday, 4 August</div>
+                  </div>
+                  <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:99px;background:#EAF2EA;font:500 10.5px/1.3 'Karla',sans-serif;color:#2F5233">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2F5233" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                    Private screening applied
+                  </span>
+                  <span style="font:500 11px/1 'Karla',sans-serif;color:#2F5233;cursor:pointer" style-hover="color:#20421F">Weekly digest →</span>
+                </div>
+
+                <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+                  <sc-for list="{{ sugs }}" as="s" hint-placeholder-count="3">
+                    <div style="border:1px solid {{ s.border }};border-radius:13px;background:{{ s.bg }};overflow:hidden">
+                      <div style="padding:14px 16px;display:flex;align-items:center;gap:14px">
+                        <!-- pair -->
+                        <div style="display:flex;flex-direction:column;gap:6px;flex:1 1 260px;min-width:0">
+                          <div style="display:flex;align-items:center;gap:10px;min-width:0">
+                            <div style="width:36px;height:36px;flex:none;border-radius:10px;background:repeating-linear-gradient(135deg,#EBDCC3 0 4px,#F5EBDA 4px 8px);display:grid;place-items:center;font:600 11px/1 'Karla',sans-serif;color:#8C7461">{{ s.aInit }}</div>
+                            <div style="flex:1;min-width:0">
+                              <div style="font:600 12.5px/1.3 'Karla',sans-serif;color:#241A12;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.aName }}</div>
+                              <div style="font:400 10.5px/1.35 'Karla',sans-serif;color:#8C7461;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.aMeta }}</div>
+                            </div>
+                          </div>
+                          <div style="display:flex;align-items:center;gap:8px;padding-left:11px">
+                            <span style="display:inline-flex;width:22px;height:22px;flex:none;border-radius:50%;border:1px solid #DDD1C3;background:#FBF6EC;align-items:center;justify-content:center">
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#BD572F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"></path><path d="M17 20V4"></path><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path></svg>
+                            </span>
+                            <span style="flex:1;height:1px;background:#EBDCC3"></span>
+                          </div>
+                          <div style="display:flex;align-items:center;gap:10px;min-width:0">
+                            <div style="width:36px;height:36px;flex:none;border-radius:10px;background:repeating-linear-gradient(135deg,#EBDCC3 0 4px,#F5EBDA 4px 8px);display:grid;place-items:center;font:600 11px/1 'Karla',sans-serif;color:#8C7461">{{ s.bInit }}</div>
+                            <div style="flex:1;min-width:0">
+                              <div style="font:600 12.5px/1.3 'Karla',sans-serif;color:#241A12;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.bName }}</div>
+                              <div style="font:400 10.5px/1.35 'Karla',sans-serif;color:#8C7461;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.bMeta }}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- score -->
+                        <div style="flex:none;text-align:right;padding-right:14px;border-right:1px solid #EBDCC3">
+                          <div style="font:600 20px/1 'Lora',serif;color:#2F5233;font-variant-numeric:tabular-nums">{{ s.score }}%</div>
+                          <div style="font:400 9.5px/1.3 'Karla',sans-serif;color:#8C7461;letter-spacing:.05em">সঙ্গতি · compatibility</div>
+                        </div>
+
+                        <!-- actions / resolved state -->
+                        <div style="flex:none;display:flex;align-items:center;gap:8px;justify-content:flex-end">
+                          <sc-if value="{{ s.open }}" hint-placeholder-val="{{ true }}">
+                            <div style="display:flex;align-items:center;gap:8px">
+                              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="outline" size="sm" onClick="{{ s.onWhy }}" hint-size="62px,34px">Why?</x-import>
+                              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="sm" onClick="{{ s.onDismiss }}" hint-size="78px,34px">Dismiss</x-import>
+                              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="sm" onClick="{{ s.onAccept }}" hint-size="176px,34px">Introduce · পরিচয় করান</x-import>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ s.resolved }}" hint-placeholder-val="{{ false }}">
+                            <span style="display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:9px;background:{{ s.resBg }};font:600 11.5px/1.3 'Karla',sans-serif;color:{{ s.resFg }}">{{ s.resLabel }}</span>
+                          </sc-if>
+                        </div>
+                      </div>
+
+                      <!-- why drawer -->
+                      <sc-if value="{{ s.whyOpen }}" hint-placeholder-val="{{ false }}">
+                        <div style="border-top:1px dashed #DDD1C3;background:#FBF6EC;padding:14px 16px;animation:ghfade .18s ease-out">
+                          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+                            <div style="font:600 11.5px/1.3 'Karla',sans-serif;color:#241A12">Why this pair — visible factors only</div>
+                            <span onClick="{{ s.onWhy }}" style="font:500 11px/1 'Karla',sans-serif;color:#8C7461;cursor:pointer">Close</span>
+                          </div>
+                          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:11px">
+                            <sc-for list="{{ s.factors }}" as="f" hint-placeholder-count="4">
+                              <div style="background:#FDFBF6;border:1px solid #EBDCC3;border-radius:10px;padding:10px">
+                                <div style="display:flex;align-items:baseline;justify-content:space-between">
+                                  <span style="font:400 10px/1.3 'Karla',sans-serif;color:#8C7461">{{ f.label }}</span>
+                                  <span style="font:600 10.5px/1 'Karla',sans-serif;color:#2F5233">{{ f.pct }}%</span>
+                                </div>
+                                <div style="margin-top:7px;height:4px;border-radius:99px;background:#EBDCC3;overflow:hidden"><div style="width:{{ f.w }};height:100%;background:#4F8757"></div></div>
+                                <div style="margin-top:7px;font:400 10px/1.4 'Karla',sans-serif;color:#6B5544">{{ f.note }}</div>
+                              </div>
+                            </sc-for>
+                          </div>
+                          <div style="margin-top:11px;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:#1B3220">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DBB863" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            <div style="flex:1">
+                              <div style="font:500 11px/1.4 'Karla',sans-serif;color:#FDFBF6">Private screening: compatible</div>
+                              <div style="font:400 10px/1.4 'Karla',sans-serif;color:rgba(253,251,246,.6)">The confidential answers of both families were checked by the system alone. No reason is shown — to you, or to anyone.</div>
+                            </div>
+                          </div>
+                          <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+                            <span style="font:400 10.5px/1 'Karla',sans-serif;color:#8C7461">Was this useful?</span>
+                            <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="outline" size="sm" onClick="{{ s.onGood }}" hint-size="122px,32px">Good suggestion</x-import>
+                            <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="sm" onClick="{{ s.onBad }}" hint-size="118px,32px">Poor suggestion</x-import>
+                          </div>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <!-- right rail -->
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <!-- quick actions -->
+                <div style="background:#FDFBF6;border:1px solid #DDD1C3;border-radius:14px;padding:15px">
+                  <div style="font:400 13.5px/1.3 'Tiro Bangla',serif;color:#241A12">দ্রুত কাজ</div>
+                  <div style="font:400 10.5px/1.4 'Karla',sans-serif;color:#8C7461;margin-top:1px">Quick actions</div>
+                  <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+                    <div onClick="{{ addProfile }}" style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;background:#2F5233;cursor:pointer" style-hover="background:#20421F">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DBB863" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                      <span style="flex:1">
+                        <span style="display:block;font:600 12px/1.3 'Hind Siliguri',sans-serif;color:#FDFBF6">নতুন প্রোফাইল যোগ করুন</span>
+                        <span style="display:block;font:400 10px/1.3 'Karla',sans-serif;color:rgba(253,251,246,.6)">Add profile</span>
+                      </span>
+                    </div>
+                    <div onClick="{{ genPdf }}" style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;border:1px solid #DDD1C3;background:#FBF6EC;cursor:pointer" style-hover="border-color:#8C7461">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F5233" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+                      <span style="flex:1">
+                        <span style="display:block;font:600 12px/1.3 'Hind Siliguri',sans-serif;color:#241A12">বায়োডাটা তৈরি করুন</span>
+                        <span style="display:block;font:400 10px/1.3 'Karla',sans-serif;color:#8C7461">Generate biodata PDF</span>
+                      </span>
+                    </div>
+                    <div onClick="{{ waShare }}" style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;border:1px solid #DDD1C3;background:#FBF6EC;cursor:pointer" style-hover="border-color:#8C7461">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F5233" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path></svg>
+                      <span style="flex:1">
+                        <span style="display:block;font:600 12px/1.3 'Hind Siliguri',sans-serif;color:#241A12">হোয়াটসঅ্যাপে পাঠান</span>
+                        <span style="display:block;font:400 10px/1.3 'Karla',sans-serif;color:#8C7461">Share via WhatsApp</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- attestation queue -->
+                <div style="background:#FAF1DF;border:1px solid #E9CE96;border-radius:14px;padding:15px">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C6318" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>
+                    <div style="font:600 12px/1.3 'Karla',sans-serif;color:#8C6318">Needs your confirmation</div>
+                  </div>
+                  <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6B5544;margin-top:5px">Profiles auto-archive at 90 days. One tap keeps them in the matching pool.</div>
+                  <div style="display:flex;flex-direction:column;gap:8px;margin-top:11px">
+                    <sc-for list="{{ attestQueue }}" as="a" hint-placeholder-count="2">
+                      <div style="background:#FDFBF6;border:1px solid #E9CE96;border-radius:10px;padding:10px 11px">
+                        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+                          <span style="font:600 11.5px/1.3 'Karla',sans-serif;color:#241A12">{{ a.name }}</span>
+                          <span style="font:400 10px/1 'Karla',sans-serif;color:#8C6318;font-variant-numeric:tabular-nums">{{ a.days }}d</span>
+                        </div>
+                        <div style="font:400 10px/1.4 'Karla',sans-serif;color:#8C7461;margin-top:2px">{{ a.prn }} · archives in {{ a.left }} days</div>
+                        <sc-if value="{{ a.pending }}" hint-placeholder-val="{{ true }}">
+                          <div style="margin-top:9px">
+                            <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="sm" onClick="{{ a.onAttest }}" style="{{ btnFull }}" hint-size="100%,34px">I confirm this profile is still active</x-import>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{ a.done }}" hint-placeholder-val="{{ false }}">
+                          <div style="margin-top:9px;padding:9px;border-radius:8px;background:#EAF2EA;color:#2F5233;font:600 11px/1 'Karla',sans-serif;text-align:center">Confirmed · 90 days reset</div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- profile list -->
+            <div style="background:#FDFBF6;border:1px solid #DDD1C3;border-radius:14px;overflow:hidden">
+              <div style="padding:14px 18px;border-bottom:1px solid #EBDCC3;display:flex;align-items:center;gap:14px">
+                <div style="flex:1">
+                  <div style="font:400 14.5px/1.3 'Tiro Bangla',serif;color:#241A12">আমার প্রোফাইল তালিকা</div>
+                  <div style="font:400 10.5px/1.4 'Karla',sans-serif;color:#8C7461;margin-top:1px">My profiles · 42 active · 6 shown</div>
+                </div>
+                <div style="display:flex;gap:6px">
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Tabs" items="{{ filterTabs }}" active="{{ filterActive }}" onChange="{{ onFilter }}" hint-size="400px,42px"></x-import>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:2.1fr 1.5fr 1fr 1.15fr 1.25fr;gap:0;padding:9px 18px;background:#F5EBDA;border-bottom:1px solid #EBDCC3;font:500 9.5px/1.3 'Karla',sans-serif;color:#8C7461;letter-spacing:.08em;text-transform:uppercase">
+                <span>Profile</span><span>Education · profession</span><span>Location</span><span>Status</span><span>Network pool · updated</span>
+              </div>
+              <sc-for list="{{ profiles }}" as="p" hint-placeholder-count="6">
+                <div style="display:grid;grid-template-columns:2.1fr 1.5fr 1fr 1.15fr 1.25fr;gap:0;padding:12px 18px;border-bottom:1px solid #F5EBDA;align-items:center" style-hover="background:#FBF6EC">
+                  <div style="display:flex;align-items:center;gap:11px;min-width:0">
+                    <div style="position:relative;width:40px;height:40px;flex:none;border-radius:11px;overflow:hidden;background:repeating-linear-gradient(135deg,#EBDCC3 0 4px,#F5EBDA 4px 8px)">
+                      <sc-if value="{{ p.locked }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:absolute;inset:0;background:rgba(36,26,18,.72);display:grid;place-items:center">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EBDCC3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ p.open }}" hint-placeholder-val="{{ true }}">
+                        <div style="position:absolute;inset:0;display:grid;place-items:center;font:600 11px/1 'Karla',sans-serif;color:#8C7461">{{ p.init }}</div>
+                      </sc-if>
+                    </div>
+                    <div style="min-width:0">
+                      <div style="display:flex;align-items:center;gap:6px">
+                        <span style="font:600 12.5px/1.3 'Karla',sans-serif;color:#241A12;white-space:nowrap">{{ p.name }}</span>
+                        <sc-if value="{{ p.verified }}" hint-placeholder-val="{{ true }}">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B08628" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                        </sc-if>
+                      </div>
+                      <div style="font:400 10.5px/1.4 'Karla',sans-serif;color:#8C7461;font-variant-numeric:tabular-nums">{{ p.prn }} · {{ p.age }} · {{ p.height }}</div>
+                    </div>
+                  </div>
+                  <div style="min-width:0">
+                    <div style="font:500 11.5px/1.35 'Karla',sans-serif;color:#241A12">{{ p.edu }}</div>
+                    <div style="font:400 10.5px/1.35 'Karla',sans-serif;color:#8C7461">{{ p.job }}</div>
+                  </div>
+                  <div style="min-width:0">
+                    <div style="font:500 11.5px/1.35 'Karla',sans-serif;color:#241A12">{{ p.city }}</div>
+                    <div style="font:400 10.5px/1.35 'Karla',sans-serif;color:#8C7461">{{ p.region }}</div>
+                  </div>
+                  <div>
+                    <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="{{ p.tone }}" hint-size="96px,24px">{{ p.status }}</x-import>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:11px">
+                    <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Switch" checked="{{ p.pool }}" onChange="{{ p.onPool }}" hint-size="38px,22px"></x-import>
+                    <div style="min-width:0">
+                      <div style="font:400 10.5px/1.35 'Karla',sans-serif;color:{{ p.updFg }}">{{ p.upd }}</div>
+                      <sc-if value="{{ p.warn }}" hint-placeholder-val="{{ false }}">
+                        <div onClick="{{ p.onRefresh }}" style="font:600 10px/1.35 'Karla',sans-serif;color:#8C6318;cursor:pointer;text-decoration:underline">Tap to refresh</div>
+                      </sc-if>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+              <div style="padding:12px 18px;display:flex;align-items:center;justify-content:space-between">
+                <span style="font:400 11px/1 'Karla',sans-serif;color:#8C7461">Showing 6 of 42</span>
+                <span style="font:500 11.5px/1 'Karla',sans-serif;color:#2F5233;cursor:pointer">View all profiles →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────── 1b — Ledger (dense) ─────────── -->
+    <div id="1b" style="flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px">
+      <div style="display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 'Karla',sans-serif;color:rgba(36,26,18,.55)">
+        <a href="#1b" style="font:600 10.5px/1 ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(36,26,18,.08);color:#241A12;border-radius:5px">1b</a>
+        Desktop · “Ledger” — dense, book-of-business first; suggestions in a rail. Search filters live.
+      </div>
+      <div style="width:1320px;background:#FBF6EC;border:1px solid #DDD1C3;border-radius:14px;box-shadow:0 10px 30px rgba(36,26,18,.10);overflow:hidden">
+
+        <!-- compressed top bar -->
+        <div style="background:#1B3220;padding:0 20px;display:flex;align-items:center;gap:18px;height:54px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:24px;height:24px;border-radius:7px;background:#FDFBF6;display:grid;place-items:center;font:600 12px/1 'Lora',serif;color:#1B3220">স</div>
+            <span style="font:600 13.5px/1 'Lora',serif;color:#FDFBF6">SongiSathi</span>
+          </div>
+          <div style="display:flex;gap:2px;font:500 11.5px/1 'Karla',sans-serif">
+            <span style="padding:7px 11px;border-radius:8px;background:rgba(253,251,246,.13);color:#FDFBF6">ড্যাশবোর্ড</span>
+            <span style="padding:7px 11px;border-radius:8px;color:rgba(253,251,246,.6);cursor:pointer" style-hover="color:#FDFBF6">প্রোফাইল</span>
+            <span style="padding:7px 11px;border-radius:8px;color:rgba(253,251,246,.6);cursor:pointer" style-hover="color:#FDFBF6">অনুসন্ধান</span>
+            <span style="padding:7px 11px;border-radius:8px;color:rgba(253,251,246,.6);cursor:pointer" style-hover="color:#FDFBF6">এআই ম্যাচিং</span>
+            <span style="padding:7px 11px;border-radius:8px;color:rgba(253,251,246,.6);cursor:pointer" style-hover="color:#FDFBF6">কমিশন</span>
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:14px">
+            <div style="display:flex;align-items:center;gap:9px;padding:5px 11px 5px 8px;border-radius:99px;background:rgba(253,251,246,.09)">
+              <span style="display:inline-flex;align-items:center;gap:4px">
+                <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="gold" hint-size="70px,22px">BUREAU</x-import>
+              </span>
+              <span style="font:600 11px/1 'Karla',sans-serif;color:#FDFBF6;font-variant-numeric:tabular-nums">42/50</span>
+              <span style="width:44px;height:4px;border-radius:99px;background:rgba(253,251,246,.2);overflow:hidden;display:block"><span style="display:block;width:84%;height:100%;background:#DBB863"></span></span>
+            </div>
+            <div onClick="{{ toggleLang }}" style="display:flex;border:1px solid rgba(253,251,246,.25);border-radius:8px;overflow:hidden;cursor:pointer;font:600 10.5px/1 'Karla',sans-serif">
+              <span style="padding:7px 9px;font-family:'Hind Siliguri',sans-serif;background:{{ bnBg2 }};color:{{ bnFg2 }}">বাংলা</span>
+              <span style="padding:7px 9px;background:{{ enBg2 }};color:{{ enFg2 }}">EN</span>
+            </div>
+            <div style="width:28px;height:28px;border-radius:50%;overflow:hidden;border:1px solid rgba(253,251,246,.3)">
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Avatar" initials="RA" size="{{ sz28 }}" hint-size="28px,28px"></x-import>
+            </div>
+          </div>
+        </div>
+
+        <!-- one-line stat strip -->
+        <div style="display:flex;background:#FDFBF6;border-bottom:1px solid #DDD1C3">
+          <sc-for list="{{ strip }}" as="k" hint-placeholder-count="5">
+            <div style="flex:1;padding:12px 18px;border-right:1px solid #EBDCC3;display:flex;align-items:center;gap:11px">
+              <div style="flex:1;min-width:0">
+                <div style="font:400 10px/1.3 'Karla',sans-serif;color:#8C7461;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap">{{ k.bn }}</div>
+                <div style="display:flex;align-items:baseline;gap:5px;margin-top:3px">
+                  <span style="font:600 19px/1 'Lora',serif;color:{{ k.fg }};font-variant-numeric:tabular-nums">{{ k.val }}</span>
+                  <span style="font:400 10.5px/1 'Karla',sans-serif;color:#AA9683">{{ k.sub }}</span>
+                </div>
+                <div style="font:400 9.5px/1.3 'Karla',sans-serif;color:#AA9683;margin-top:3px">{{ k.en }}</div>
+              </div>
+              <sc-if value="{{ k.meter }}" hint-placeholder-val="{{ false }}">
+                <div style="width:34px;height:34px;flex:none;border-radius:50%;background:conic-gradient(#B08628 0 84%,#EBDCC3 84% 100%);display:grid;place-items:center">
+                  <div style="width:25px;height:25px;border-radius:50%;background:#FDFBF6;display:grid;place-items:center;font:600 8.5px/1 'Karla',sans-serif;color:#8C6318">84%</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:0;align-items:start">
+
+          <!-- ledger table -->
+          <div style="padding:16px 18px 20px;min-width:0">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+              <div style="flex:1;min-width:0">
+                <div style="font:400 15px/1.3 'Tiro Bangla',serif;color:#241A12">আমার প্রোফাইল খাতা</div>
+                <div style="font:400 10.5px/1.4 'Karla',sans-serif;color:#8C7461">My book of business · {{ shownCount }} of 8 shown</div>
+              </div>
+              <div style="position:relative;width:230px;flex:none">
+                <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Input" placeholder="নাম, PRN, জেলা খুঁজুন" value="{{ q }}" onChange="{{ onQ }}" hint-size="230px,42px"></x-import>
+              </div>
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="sm" onClick="{{ addProfile }}" hint-size="104px,34px">+ প্রোফাইল</x-import>
+            </div>
+
+            <div style="border:1px solid #DDD1C3;border-radius:12px;overflow:hidden;background:#FDFBF6">
+              <div style="display:grid;grid-template-columns:1.9fr 1.35fr .95fr 1.05fr .8fr .55fr;padding:8px 14px;background:#F5EBDA;border-bottom:1px solid #EBDCC3;font:500 9px/1.3 'Karla',sans-serif;color:#8C7461;letter-spacing:.09em;text-transform:uppercase">
+                <span>Profile</span><span>Education</span><span>Location</span><span>Status</span><span>Updated</span><span style="text-align:right">Pool</span>
+              </div>
+              <sc-for list="{{ rows }}" as="p" hint-placeholder-count="8">
+                <div style="display:grid;grid-template-columns:1.9fr 1.35fr .95fr 1.05fr .8fr .55fr;padding:8px 14px;border-bottom:1px solid #F5EBDA;align-items:center" style-hover="background:#FBF6EC">
+                  <div style="display:flex;align-items:center;gap:9px;min-width:0">
+                    <div style="position:relative;width:26px;height:26px;flex:none;border-radius:8px;overflow:hidden;background:repeating-linear-gradient(135deg,#EBDCC3 0 3px,#F5EBDA 3px 6px);display:grid;place-items:center;font:600 9px/1 'Karla',sans-serif;color:#8C7461">{{ p.init }}</div>
+                    <div style="min-width:0">
+                      <div style="font:600 11.5px/1.3 'Karla',sans-serif;color:#241A12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</div>
+                      <div style="font:400 9.5px/1.3 'Karla',sans-serif;color:#8C7461;font-variant-numeric:tabular-nums">{{ p.prn }} · {{ p.age }}</div>
+                    </div>
+                  </div>
+                  <div style="font:400 10.5px/1.35 'Karla',sans-serif;color:#6B5544;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.edu }}</div>
+                  <div style="font:400 10.5px/1.35 'Karla',sans-serif;color:#6B5544">{{ p.city }}</div>
+                  <div><x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="{{ p.tone }}" hint-size="92px,24px">{{ p.status }}</x-import></div>
+                  <div style="font:400 10px/1.35 'Karla',sans-serif;color:{{ p.updFg }};font-variant-numeric:tabular-nums">{{ p.updShort }}</div>
+                  <div style="display:flex;justify-content:flex-end">
+                    <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Switch" checked="{{ p.pool }}" onChange="{{ p.onPool }}" hint-size="38px,22px"></x-import>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noRows }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:34px 20px;text-align:center">
+                  <div style="width:40px;height:40px;margin:0 auto;border-radius:12px;border:1px dashed #C7B7A6;display:grid;place-items:center">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#AA9683" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13.5 8.5-5 5"></path><path d="m8.5 8.5 5 5"></path><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                  </div>
+                  <div style="font:500 12px/1.4 'Karla',sans-serif;color:#241A12;margin-top:10px">No profile matches “{{ q }}”</div>
+                  <div style="font:400 11px/1.5 'Karla',sans-serif;color:#8C7461;margin-top:3px">Try a district, a PRN, or search the trusted network pool instead.</div>
+                </div>
+              </sc-if>
+            </div>
+
+            <!-- inline commission ledger -->
+            <div style="margin-top:14px;border:1px solid #DDD1C3;border-radius:12px;background:#FDFBF6;overflow:hidden">
+              <div style="padding:11px 14px;border-bottom:1px solid #EBDCC3;display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font:400 13px/1.3 'Tiro Bangla',serif;color:#241A12">কমিশন হিসাব</div>
+                  <div style="font:400 10px/1.3 'Karla',sans-serif;color:#8C7461">Commission tracking · August 2026</div>
+                </div>
+                <span style="font:600 14px/1 'Lora',serif;color:#2F5233;font-variant-numeric:tabular-nums">৳48,000</span>
+              </div>
+              <sc-for list="{{ ledger }}" as="l" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:2fr 1fr .9fr .7fr;padding:9px 14px;border-bottom:1px solid #F5EBDA;align-items:center;font:400 10.5px/1.35 'Karla',sans-serif;color:#6B5544">
+                  <span style="color:#241A12;font-weight:500">{{ l.pair }}</span>
+                  <span>{{ l.date }}</span>
+                  <span style="font-variant-numeric:tabular-nums;color:#241A12">{{ l.amt }}</span>
+                  <span style="text-align:right"><x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="{{ l.tone }}" hint-size="76px,24px">{{ l.state }}</x-import></span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <!-- suggestions rail -->
+          <div style="border-left:1px solid #DDD1C3;background:#F5EBDA;padding:16px 16px 20px;display:flex;flex-direction:column;gap:12px;min-height:640px">
+            <div>
+              <div style="font:400 14px/1.3 'Tiro Bangla',serif;color:#241A12">সাপ্তাহিক প্রস্তাব</div>
+              <div style="font:400 10.5px/1.4 'Karla',sans-serif;color:#6B5544;margin-top:1px">Weekly suggestions · 3 to review</div>
+            </div>
+            <sc-for list="{{ sugs }}" as="s" hint-placeholder-count="3">
+              <div style="background:#FDFBF6;border:1px solid {{ s.border }};border-radius:12px;padding:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <span style="font:600 18px/1 'Lora',serif;color:#2F5233;font-variant-numeric:tabular-nums">{{ s.score }}%</span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;font:500 9.5px/1.3 'Karla',sans-serif;color:#2F5233">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2F5233" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+                    Screening passed
+                  </span>
+                </div>
+                <div style="margin-top:9px;display:flex;flex-direction:column;gap:6px">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="width:24px;height:24px;flex:none;border-radius:7px;background:repeating-linear-gradient(135deg,#EBDCC3 0 3px,#F5EBDA 3px 6px);display:grid;place-items:center;font:600 9px/1 'Karla',sans-serif;color:#8C7461">{{ s.aInit }}</div>
+                    <div style="min-width:0"><div style="font:600 11.5px/1.3 'Karla',sans-serif;color:#241A12">{{ s.aName }}</div><div style="font:400 9.5px/1.3 'Karla',sans-serif;color:#8C7461">{{ s.aMeta }}</div></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="width:24px;height:24px;flex:none;border-radius:7px;background:repeating-linear-gradient(135deg,#EBDCC3 0 3px,#F5EBDA 3px 6px);display:grid;place-items:center;font:600 9px/1 'Karla',sans-serif;color:#8C7461">{{ s.bInit }}</div>
+                    <div style="min-width:0"><div style="font:600 11.5px/1.3 'Karla',sans-serif;color:#241A12">{{ s.bName }}</div><div style="font:400 9.5px/1.3 'Karla',sans-serif;color:#8C7461">{{ s.bMeta }}</div></div>
+                  </div>
+                </div>
+                <sc-if value="{{ s.open }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;gap:6px;margin-top:11px">
+                    <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="sm" onClick="{{ s.onAccept }}" style="{{ btnGrow }}" hint-size="120px,34px">Introduce</x-import>
+                    <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="outline" size="sm" onClick="{{ s.onWhy }}" hint-size="62px,34px">Why?</x-import>
+                    <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="sm" onClick="{{ s.onDismiss }}" hint-size="44px,34px">Skip</x-import>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ s.resolved }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:11px;padding:8px;border-radius:8px;background:{{ s.resBg }};color:{{ s.resFg }};font:600 11px/1.3 'Karla',sans-serif;text-align:center">{{ s.resLabel }}</div>
+                </sc-if>
+                <sc-if value="{{ s.whyOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:10px;border-top:1px dashed #DDD1C3;padding-top:9px;animation:ghfade .18s ease-out">
+                    <sc-for list="{{ s.factors }}" as="f" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                        <span style="width:58px;flex:none;font:400 9.5px/1.3 'Karla',sans-serif;color:#8C7461">{{ f.label }}</span>
+                        <span style="flex:1;height:4px;border-radius:99px;background:#EBDCC3;overflow:hidden;display:block"><span style="display:block;width:{{ f.w }};height:100%;background:#4F8757"></span></span>
+                        <span style="font:600 9.5px/1 'Karla',sans-serif;color:#2F5233;font-variant-numeric:tabular-nums">{{ f.pct }}</span>
+                      </div>
+                    </sc-for>
+                    <div style="display:flex;align-items:center;gap:7px;padding:8px 9px;border-radius:8px;background:#1B3220;margin-top:8px">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#DBB863" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                      <span style="font:400 9.5px/1.4 'Karla',sans-serif;color:rgba(253,251,246,.75)">Private layer sealed. No reason shown to anyone.</span>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+
+            <div onClick="{{ upgrade }}" style="margin-top:auto;border:1px dashed #C7B7A6;border-radius:12px;padding:12px;background:#FBF6EC;cursor:pointer" style-hover="border-color:#B08628">
+              <div style="font:600 11.5px/1.3 'Karla',sans-serif;color:#8C6318">42 of 50 profiles used</div>
+              <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6B5544;margin-top:3px">You are close to the Bureau limit. Raise it to 150 profiles →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────── 1c — Mobile ─────────── -->
+    <div id="1c" style="flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px">
+      <div style="display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 'Karla',sans-serif;color:rgba(36,26,18,.55)">
+        <a href="#1c" style="font:600 10.5px/1 ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(36,26,18,.08);color:#241A12;border-radius:5px">1c</a>
+        Mobile ghotok · 390pt — one column, 48pt targets, budget-Android safe
+      </div>
+      <div style="width:390px;background:#FBF6EC;border:1px solid #DDD1C3;border-radius:20px;box-shadow:0 10px 30px rgba(36,26,18,.10);overflow:hidden">
+        <!-- status + header -->
+        <div style="background:#1B3220;padding:8px 16px 12px">
+          <div style="display:flex;justify-content:space-between;font:600 10px/1.4 'Karla',sans-serif;color:rgba(253,251,246,.65)">
+            <span>9:41</span><span>4G · 78%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+            <div style="width:34px;height:34px;flex:none;border-radius:50%;overflow:hidden">
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Avatar" initials="RA" size="{{ sz34 }}" hint-size="34px,34px"></x-import>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font:400 14px/1.25 'Tiro Bangla',serif;color:#FDFBF6">রাহিমা আপা</div>
+              <div style="font:400 10px/1.3 'Karla',sans-serif;color:rgba(253,251,246,.55)">Sylhet bureau · GHT-0042</div>
+            </div>
+            <div onClick="{{ toggleLang }}" style="display:flex;border:1px solid rgba(253,251,246,.25);border-radius:8px;overflow:hidden;cursor:pointer;font:600 10px/1 'Karla',sans-serif;flex:none">
+              <span style="padding:9px 8px;font-family:'Hind Siliguri',sans-serif;background:{{ bnBg2 }};color:{{ bnFg2 }}">বাং</span>
+              <span style="padding:9px 8px;background:{{ enBg2 }};color:{{ enFg2 }}">EN</span>
+            </div>
+          </div>
+          <!-- tier meter -->
+          <div style="margin-top:12px;background:rgba(253,251,246,.08);border-radius:11px;padding:10px 12px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="display:inline-flex;align-items:center;gap:5px">
+                <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="gold" hint-size="70px,22px">BUREAU</x-import>
+              </span>
+              <span style="font:600 11.5px/1 'Karla',sans-serif;color:#FDFBF6;font-variant-numeric:tabular-nums">42 / 50 প্রোফাইল</span>
+            </div>
+            <div style="margin-top:8px;height:6px;border-radius:99px;background:rgba(253,251,246,.18);overflow:hidden"><div style="width:84%;height:100%;background:#DBB863"></div></div>
+          </div>
+        </div>
+
+        <div style="padding:14px 14px 0;display:flex;flex-direction:column;gap:12px">
+          <!-- stat scroller -->
+          <div style="display:flex;gap:9px;overflow-x:auto;padding-bottom:3px">
+            <sc-for list="{{ mobileStats }}" as="m" hint-placeholder-count="4">
+              <div style="flex:none;min-width:112px;background:{{ m.bg }};border:1px solid {{ m.bd }};border-radius:12px;padding:11px 12px">
+                <div style="font:400 9.5px/1.3 'Karla',sans-serif;color:{{ m.lb }};letter-spacing:.05em;text-transform:uppercase">{{ m.bn }}</div>
+                <div style="font:600 21px/1.1 'Lora',serif;color:{{ m.fg }};margin-top:6px;font-variant-numeric:tabular-nums">{{ m.val }}</div>
+                <div style="font:400 9.5px/1.3 'Karla',sans-serif;color:{{ m.lb }}">{{ m.en }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <!-- one suggestion, tall -->
+          <div style="background:#FDFBF6;border:1px solid #DDD1C3;border-radius:14px;overflow:hidden">
+            <div style="padding:12px 14px;border-bottom:1px solid #EBDCC3">
+              <div style="font:400 14px/1.3 'Tiro Bangla',serif;color:#241A12">এই সপ্তাহের প্রস্তাব</div>
+              <div style="font:400 10px/1.4 'Karla',sans-serif;color:#8C7461">3 AI suggestions this week</div>
+            </div>
+            <div style="padding:13px 14px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font:600 24px/1 'Lora',serif;color:#2F5233;font-variant-numeric:tabular-nums">{{ topScore }}%</span>
+                <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:99px;background:#EAF2EA;font:500 10px/1.3 'Karla',sans-serif;color:#2F5233">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2F5233" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+                  স্ক্রিনিং পাস
+                </span>
+              </div>
+              <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:center;gap:10px;padding:9px;border:1px solid #EBDCC3;border-radius:11px;background:#FBF6EC">
+                  <div style="width:38px;height:38px;flex:none;border-radius:10px;background:repeating-linear-gradient(135deg,#EBDCC3 0 4px,#F5EBDA 4px 8px);display:grid;place-items:center;font:600 11px/1 'Karla',sans-serif;color:#8C7461">{{ topAInit }}</div>
+                  <div style="min-width:0"><div style="font:600 12.5px/1.3 'Karla',sans-serif;color:#241A12">{{ topAName }}</div><div style="font:400 10.5px/1.35 'Karla',sans-serif;color:#8C7461">{{ topAMeta }}</div></div>
+                </div>
+                <div style="display:flex;justify-content:center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#BD572F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"></path><path d="M17 20V4"></path><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path></svg>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;padding:9px;border:1px solid #EBDCC3;border-radius:11px;background:#FBF6EC">
+                  <div style="width:38px;height:38px;flex:none;border-radius:10px;background:repeating-linear-gradient(135deg,#EBDCC3 0 4px,#F5EBDA 4px 8px);display:grid;place-items:center;font:600 11px/1 'Karla',sans-serif;color:#8C7461">{{ topBInit }}</div>
+                  <div style="min-width:0"><div style="font:600 12.5px/1.3 'Karla',sans-serif;color:#241A12">{{ topBName }}</div><div style="font:400 10.5px/1.35 'Karla',sans-serif;color:#8C7461">{{ topBMeta }}</div></div>
+                </div>
+              </div>
+              <sc-if value="{{ topOpen }}" hint-placeholder-val="{{ true }}">
+                <div style="margin-top:13px;display:flex;flex-direction:column;gap:8px">
+                  <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="lg" onClick="{{ topAccept }}" style="{{ btnTall }}" hint-size="100%,48px">পরিচয় করান · Introduce</x-import>
+                  <div style="display:flex;gap:8px">
+                    <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="outline" size="md" onClick="{{ topWhy }}" style="{{ btnHalf }}" hint-size="60%,46px">Why this match?</x-import>
+                    <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="md" onClick="{{ topDismiss }}" style="{{ btnQuarter }}" hint-size="88px,46px">Not now</x-import>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ topResolved }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:13px;height:48px;border-radius:11px;background:{{ topResBg }};color:{{ topResFg }};display:grid;place-items:center;font:600 13px/1 'Karla',sans-serif">{{ topResLabel }}</div>
+              </sc-if>
+              <sc-if value="{{ topWhyOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:12px;border-top:1px dashed #DDD1C3;padding-top:11px;animation:ghfade .18s ease-out">
+                  <sc-for list="{{ topFactors }}" as="f" hint-placeholder-count="4">
+                    <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px">
+                      <span style="width:66px;flex:none;font:400 10.5px/1.3 'Karla',sans-serif;color:#8C7461">{{ f.label }}</span>
+                      <span style="flex:1;height:5px;border-radius:99px;background:#EBDCC3;overflow:hidden;display:block"><span style="display:block;width:{{ f.w }};height:100%;background:#4F8757"></span></span>
+                      <span style="font:600 10px/1 'Karla',sans-serif;color:#2F5233;font-variant-numeric:tabular-nums">{{ f.pct }}</span>
+                    </div>
+                  </sc-for>
+                  <div style="display:flex;align-items:flex-start;gap:8px;padding:10px;border-radius:10px;background:#1B3220;margin-top:9px">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#DBB863" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <span style="font:400 10.5px/1.5 'Karla',sans-serif;color:rgba(253,251,246,.75)">গোপন স্তর সিল করা — private screening reasons are never shown, not even to you.</span>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+
+          <!-- attestation nudge -->
+          <div style="background:#FAF1DF;border:1px solid #E9CE96;border-radius:13px;padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C6318" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>
+              <span style="font:600 12px/1.3 'Karla',sans-serif;color:#8C6318">২টি প্রোফাইল নিশ্চিত করুন</span>
+            </div>
+            <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6B5544;margin-top:5px">Sadia Islam and Mahmudul Hasan auto-archive in under two weeks.</div>
+            <sc-if value="{{ mAttestPending }}" hint-placeholder-val="{{ true }}">
+              <div style="margin-top:11px">
+                <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="md" onClick="{{ mAttest }}" style="{{ btnTall }}" hint-size="100%,46px">Both are still active — confirm</x-import>
+              </div>
+            </sc-if>
+            <sc-if value="{{ mAttestDone }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:11px;height:46px;border-radius:11px;background:#EAF2EA;color:#2F5233;display:grid;place-items:center;font:600 12.5px/1 'Karla',sans-serif">Confirmed · both reset to 90 days</div>
+            </sc-if>
+          </div>
+
+          <!-- compact profile list -->
+          <div style="background:#FDFBF6;border:1px solid #DDD1C3;border-radius:14px;overflow:hidden">
+            <div style="padding:12px 14px;border-bottom:1px solid #EBDCC3;display:flex;align-items:baseline;justify-content:space-between">
+              <div>
+                <div style="font:400 13.5px/1.3 'Tiro Bangla',serif;color:#241A12">আমার প্রোফাইল</div>
+                <div style="font:400 10px/1.3 'Karla',sans-serif;color:#8C7461">42 active</div>
+              </div>
+              <span style="font:600 11px/1 'Karla',sans-serif;color:#2F5233">সব দেখুন →</span>
+            </div>
+            <sc-for list="{{ mobileProfiles }}" as="p" hint-placeholder-count="4">
+              <div style="padding:11px 14px;border-bottom:1px solid #F5EBDA;display:flex;align-items:center;gap:11px">
+                <div style="position:relative;width:44px;height:44px;flex:none;border-radius:12px;overflow:hidden;background:repeating-linear-gradient(135deg,#EBDCC3 0 4px,#F5EBDA 4px 8px);display:grid;place-items:center;font:600 12px/1 'Karla',sans-serif;color:#8C7461">{{ p.init }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:5px">
+                    <span style="font:600 13px/1.3 'Karla',sans-serif;color:#241A12">{{ p.name }}</span>
+                    <sc-if value="{{ p.verified }}" hint-placeholder-val="{{ true }}">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B08628" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                    </sc-if>
+                  </div>
+                  <div style="font:400 10.5px/1.4 'Karla',sans-serif;color:#8C7461">{{ p.age }} · {{ p.city }} · {{ p.prn }}</div>
+                  <div style="margin-top:5px;display:flex;align-items:center;gap:7px">
+                    <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="{{ p.tone }}" hint-size="92px,24px">{{ p.status }}</x-import>
+                    <span style="font:400 9.5px/1.3 'Karla',sans-serif;color:{{ p.updFg }}">{{ p.updShort }}</span>
+                  </div>
+                </div>
+                <div onClick="{{ p.onWa }}" style="width:44px;height:44px;flex:none;border-radius:12px;border:1px solid #DDD1C3;display:grid;place-items:center;cursor:pointer;background:#FBF6EC" style-hover="border-color:#2F5233">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2F5233" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path></svg>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <!-- referral -->
+          <div style="border:1px dashed #C7B7A6;border-radius:13px;padding:13px 14px;background:#F5EBDA">
+            <div style="font:500 12px/1.4 'Hind Siliguri',sans-serif;color:#241A12">সহকর্মী ঘটককে আমন্ত্রণ করুন</div>
+            <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6B5544;margin-top:2px">Invite a fellow ghotok — you both get one month free.</div>
+            <div onClick="{{ copyInvite }}" style="margin-top:10px;height:44px;border-radius:11px;background:#FDFBF6;border:1px solid #DDD1C3;display:flex;align-items:center;justify-content:space-between;padding:0 13px;cursor:pointer" style-hover="border-color:#2F5233">
+              <span style="font:600 11.5px/1 ui-monospace,Menlo,monospace;color:#241A12;letter-spacing:.08em">RAHIMA-SYL</span>
+              <span style="font:600 11px/1 'Karla',sans-serif;color:#2F5233">Copy link</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- tab bar -->
+        <div style="margin-top:16px;border-top:1px solid #DDD1C3;background:#FDFBF6;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 4px 14px">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;cursor:pointer">
+              <span style="width:20px;height:20px;border-radius:6px;background:{{ t.icon }}"></span>
+              <span style="font:500 9.5px/1.2 'Hind Siliguri',sans-serif;color:{{ t.fg }}">{{ t.bn }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin:26px 0 0;font:400 12px/1.6 'Karla',sans-serif;color:rgba(36,26,18,.5)">
+    Try next: “take <a href="#1b" style="font:600 10.5px/1 ui-monospace,Menlo,monospace;padding:2px 6px;background:rgba(36,26,18,.08);border-radius:5px">1b</a>’s stat strip into <a href="#1a" style="font:600 10.5px/1 ui-monospace,Menlo,monospace;padding:2px 6px;background:rgba(36,26,18,.08);border-radius:5px">1a</a>” · “show the marriage-closed celebration” · “now do the Add/Edit Profile vault step”
+  </p>
+</section>
+
+<!-- toast layer -->
+<sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:90;animation:ghfade .2s ease-out">
+    <div style="display:flex;align-items:center;gap:11px;padding:13px 18px;border-radius:12px;background:{{ toastBg }};box-shadow:0 12px 34px rgba(36,26,18,.28);max-width:520px">
+      <span style="width:26px;height:26px;flex:none;border-radius:50%;background:{{ toastDotBg }};display:grid;place-items:center">
+        <sc-if value="{{ toastJoy }}" hint-placeholder-val="{{ false }}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B3220" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+        </sc-if>
+        <sc-if value="{{ toastPlain }}" hint-placeholder-val="{{ true }}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DBB863" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+        </sc-if>
+      </span>
+      <span style="font:500 12.5px/1.45 'Karla',sans-serif;color:{{ toastFg }}">{{ toastMsg }}</span>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ confettiOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:0;right:0;top:0;height:0;z-index:95;pointer-events:none">{{ confetti }}</div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const P = [
+  {id:'p1',init:'NJ',name:'Nusrat Jahan',prn:'PRN-10245',age:26,height:'5′4″',edu:'MBA, IBA Dhaka',job:'Banker',city:'Dhanmondi',region:'Dhaka',status:'Active',upd:'Updated 12 days ago',updShort:'12d',verified:true,locked:false,days:12},
+  {id:'p2',init:'TA',name:'Tanvir Ahmed',prn:'PRN-10188',age:31,height:'5′9″',edu:'MSc CSE, BUET',job:'Software engineer',city:'Auckland',region:'New Zealand',status:'In discussion',upd:'Updated 4 days ago',updShort:'4d',verified:true,locked:false,days:4},
+  {id:'p3',init:'SI',name:'Sadia Islam',prn:'PRN-10302',age:24,height:'5′2″',edu:'BSc Pharmacy, SUST',job:'Pharmacist',city:'Zindabazar',region:'Sylhet',status:'Match in progress',upd:'Updated 78 days ago',updShort:'78d',verified:false,locked:true,days:78},
+  {id:'p4',init:'RK',name:'Rezaul Karim',prn:'PRN-10077',age:29,height:'5′11″',edu:'LLB, Chittagong Univ.',job:'Advocate',city:'Khulshi',region:'Chattogram',status:'Active',upd:'Updated 33 days ago',updShort:'33d',verified:true,locked:false,days:33},
+  {id:'p5',init:'FA',name:'Farhana Akter',prn:'PRN-10411',age:27,height:'5′3″',edu:'BBA, North South',job:'HR executive',city:'Uttara',region:'Dhaka',status:'Married',upd:'Closed 2 days ago',updShort:'2d',verified:true,locked:false,days:2},
+  {id:'p6',init:'MH',name:'Mahmudul Hasan',prn:'PRN-10015',age:34,height:'5′8″',edu:'MBBS, Rajshahi Med.',job:'Doctor',city:'Boalia',region:'Rajshahi',status:'Active',upd:'Updated 86 days ago',updShort:'86d',verified:true,locked:false,days:86},
+  {id:'p7',init:'AS',name:'Ayesha Siddika',prn:'PRN-10466',age:23,height:'5′1″',edu:'Honours in Bangla',job:'Student',city:'Mymensingh',region:'Mymensingh',status:'Auto-archived',upd:'Archived at 90 days',updShort:'91d',verified:false,locked:true,days:91},
+  {id:'p8',init:'IC',name:'Imran Chowdhury',prn:'PRN-10233',age:30,height:'5′10″',edu:'MEng, Univ. of Toronto',job:'Civil engineer',city:'Toronto',region:'Canada',status:'In discussion',upd:'Updated 9 days ago',updShort:'9d',verified:true,locked:false,days:9}
+];
+
+const ST = {
+  'Active':{bg:'#EAF2EA',fg:'#3D6B44',tone:'success'},
+  'In discussion':{bg:'#FBEBE1',fg:'#BD572F',tone:'pending'},
+  'Match in progress':{bg:'#FAF1DF',fg:'#8C6318',tone:'warning'},
+  'Married':{bg:'#2F5233',fg:'#FDFBF6',tone:'gold'},
+  'Auto-archived':{bg:'#F5EBDA',fg:'#8C7461',tone:'neutral'}
+};
+
+const SUGS = [
+  {id:'s1',aId:'p1',bId:'p2',score:87,factors:[
+    {label:'Education',pct:94,note:'Both postgraduate, business + technical'},
+    {label:'Family type',pct:88,note:'Nuclear, both fathers retired service'},
+    {label:'Location',pct:79,note:'Dhaka family, Auckland-settled groom'},
+    {label:'Lifestyle',pct:85,note:'Similar practice level, both non-smoking'}]},
+  {id:'s2',aId:'p3',bId:'p4',score:81,factors:[
+    {label:'Education',pct:83,note:'Professional degrees on both sides'},
+    {label:'Family type',pct:90,note:'Joint family, both Sylhet-rooted'},
+    {label:'Location',pct:72,note:'Sylhet and Chattogram — travel expected'},
+    {label:'Lifestyle',pct:80,note:'Age gap of five years, both agreed'}]},
+  {id:'s3',aId:'p7',bId:'p8',score:74,factors:[
+    {label:'Education',pct:68,note:'Honours vs. postgraduate'},
+    {label:'Family type',pct:82,note:'Both nuclear, elder-led decisions'},
+    {label:'Location',pct:64,note:'Mymensingh family, Toronto-settled groom'},
+    {label:'Lifestyle',pct:81,note:'Both open to settling abroad'}]}
+];
+
+class Component extends DCLogic {
+  state = {
+    langBn: true,
+    sugState: {},
+    whyOpen: null,
+    pool: {p1:true,p2:true,p3:false,p4:true,p5:false,p6:true,p7:false,p8:false},
+    attested: {},
+    mAttested: false,
+    filter: 'all',
+    q: '',
+    closed: 27,
+    toast: null,
+    confettiOn: false
+  };
+
+  componentWillUnmount(){ clearTimeout(this._t); clearTimeout(this._c); }
+
+  say(msg, kind){
+    clearTimeout(this._t);
+    this.setState({toast:{msg, kind: kind || 'plain'}});
+    this._t = setTimeout(() => this.setState({toast:null}), 4200);
+  }
+
+  celebrate(msg){
+    clearTimeout(this._c);
+    this.setState({confettiOn:true});
+    this._c = setTimeout(() => this.setState({confettiOn:false}), 2600);
+    this.say(msg, 'joy');
+  }
+
+  find(id){ return P.find(p => p.id === id); }
+  pairLabel(s){ return this.find(s.aId).name + ' ↔ ' + this.find(s.bId).name; }
+
+  buildSug(s){
+    const st = this.state.sugState[s.id];
+    const a = this.find(s.aId), b = this.find(s.bId);
+    const res = {
+      accepted:{label:'Introduction sent',bg:'#EAF2EA',fg:'#2F5233'},
+      dismissed:{label:'Dismissed',bg:'#F5EBDA',fg:'#8C7461'}
+    }[st];
+    return {
+      id:s.id, score:s.score,
+      aInit:a.init, aName:a.name, aMeta:a.age + ' · ' + a.job + ' · ' + a.city,
+      bInit:b.init, bName:b.name, bMeta:b.age + ' · ' + b.job + ' · ' + b.city,
+      border: st === 'accepted' ? '#A9C9AD' : '#DDD1C3',
+      bg: st === 'accepted' ? '#F3F8F3' : '#FDFBF6',
+      open: !st, resolved: !!st,
+      resLabel: res ? res.label : '', resBg: res ? res.bg : '#F5EBDA', resFg: res ? res.fg : '#8C7461',
+      whyOpen: this.state.whyOpen === s.id,
+      factors: s.factors.map(f => ({label:f.label, pct:f.pct, w:f.pct + '%', note:f.note})),
+      onAccept: () => {
+        this.setState(p => ({sugState:{...p.sugState,[s.id]:'accepted'}, whyOpen:null}));
+        this.say('Introduction sent to both guardians on WhatsApp. ' + this.pairLabel(s) + ' is now in progress.');
+      },
+      onDismiss: () => {
+        this.setState(p => ({sugState:{...p.sugState,[s.id]:'dismissed'}, whyOpen:null}));
+        this.say('Dismissed. The system will not suggest this pair again this quarter.');
+      },
+      onWhy: () => this.setState(p => ({whyOpen: p.whyOpen === s.id ? null : s.id})),
+      onGood: () => this.say('Thank you — recorded as a good suggestion. Next week’s matching will weigh this.'),
+      onBad: () => this.say('Recorded as a poor suggestion. Tell us more in the weekly digest if you wish.')
+    };
+  }
+
+  buildProfile(p){
+    const st = ST[p.status];
+    const on = !!this.state.pool[p.id];
+    const attested = !!this.state.attested[p.id];
+    const days = attested ? 0 : p.days;
+    const warn = !attested && p.days >= 75 && p.status !== 'Auto-archived';
+    return {
+      init:p.init, name:p.name, prn:p.prn, age:p.age + ' yrs', height:p.height,
+      edu:p.edu, job:p.job, city:p.city, region:p.region, status:p.status,
+      stBg:st.bg, stFg:st.fg, tone:st.tone, verified:p.verified,
+      pool: on,
+      locked:p.locked, open:!p.locked,
+      upd: attested ? 'Confirmed today' : p.upd,
+      updShort: attested ? '0d' : p.updShort,
+      updFg: warn ? '#8C6318' : '#8C7461',
+      warn,
+      swBg: on ? '#2F5233' : '#C7B7A6',
+      swX: on ? '16px' : '2px',
+      swX2: on ? '14px' : '2px',
+      onPool: () => {
+        this.setState(s => ({pool:{...s.pool,[p.id]:!s.pool[p.id]}}));
+        this.say(on
+          ? p.name + ' removed from the trusted network pool. Only you can see this profile now.'
+          : p.name + ' is now visible to trusted-network matching. Contact still routes through you.');
+      },
+      onRefresh: () => {
+        this.setState(s => ({attested:{...s.attested,[p.id]:true}}));
+        this.say(p.name + ' confirmed as active. The 90-day archive clock has reset.');
+      },
+      onWa: () => this.say('Opening WhatsApp with ' + p.name + '’s biodata link. The link expires in 7 days.')
+    };
+  }
+
+  confettiEl(){
+    const cols = ['#B08628','#DBB863','#2F5233','#BD572F','#4F8757','#E9CE96'];
+    return React.createElement('div', {style:{position:'relative',height:0}},
+      Array.from({length:34}).map((_, i) => React.createElement('span', {
+        key:i,
+        style:{
+          position:'absolute', left:(4 + i * 2.8) + '%', top:0,
+          width: i % 3 === 0 ? '7px' : '5px', height: i % 3 === 0 ? '11px' : '5px',
+          borderRadius: i % 3 === 0 ? '2px' : '50%',
+          background: cols[i % cols.length],
+          '--dx': ((i % 7) - 3) * 26 + 'px',
+          animation: 'ghfall ' + (1500 + (i % 6) * 260) + 'ms ' + (i % 9) * 60 + 'ms ease-in forwards'
+        }
+      }))
+    );
+  }
+
+  renderVals(){
+    const s = this.state;
+    const bn = s.langBn;
+    const sugs = SUGS.map(x => this.buildSug(x));
+    const fl = s.filter;
+    const filtered = fl === 'discussion' ? P.filter(p => p.status === 'In discussion')
+      : fl === 'refresh' ? P.filter(p => p.days >= 75 && p.status !== 'Auto-archived')
+      : fl === 'married' ? P.filter(p => p.status === 'Married')
+      : P;
+    const profiles = filtered.slice(0, 6).map(p => this.buildProfile(p));
+    const all = P.map(p => this.buildProfile(p));
+    const q = s.q.trim().toLowerCase();
+    const rows = q
+      ? all.filter(r => (r.name + ' ' + r.prn + ' ' + r.city + ' ' + r.region + ' ' + r.edu).toLowerCase().includes(q))
+      : all;
+    const top = sugs[0];
+    const t = s.toast;
+    const joy = t && t.kind === 'joy';
+
+    const navRaw = [
+      {bn:'ড্যাশবোর্ড',en:'Dashboard',count:'',active:true},
+      {bn:'প্রোফাইল',en:'Profiles',count:'42'},
+      {bn:'অনুসন্ধান',en:'Search',count:''},
+      {bn:'এআই ম্যাচিং',en:'AI matching',count:'9'},
+      {bn:'বায়োডাটা',en:'Biodata studio',count:''},
+      {bn:'কমিশন',en:'Commission',count:'4'},
+      {bn:'নেটওয়ার্ক পুল',en:'Network pool',count:''}
+    ];
+
+    return {
+      // language pills
+      bnBg: bn ? '#2F5233' : '#FDFBF6', bnFg: bn ? '#FDFBF6' : '#6B5544',
+      enBg: bn ? '#FDFBF6' : '#2F5233', enFg: bn ? '#6B5544' : '#FDFBF6',
+      bnBg2: bn ? '#FDFBF6' : 'transparent', bnFg2: bn ? '#1B3220' : 'rgba(253,251,246,.7)',
+      enBg2: bn ? 'transparent' : '#FDFBF6', enFg2: bn ? 'rgba(253,251,246,.7)' : '#1B3220',
+      toggleLang: () => {
+        this.setState(p => ({langBn: !p.langBn}));
+        this.say(bn ? 'Interface language set to English. Bangla stays as the caption layer.' : 'বাংলা ইন্টারফেস চালু হলো। ইংরেজি ক্যাপশন হিসেবে থাকবে।');
+      },
+
+      nav: navRaw.map(n => ({
+        bn:n.bn, en:n.en, count:n.count,
+        bg: n.active ? 'rgba(253,251,246,.13)' : 'transparent',
+        fg: n.active ? '#FDFBF6' : 'rgba(253,251,246,.78)',
+        dot: n.active ? '#DBB863' : 'rgba(253,251,246,.25)'
+      })),
+
+      closed: s.closed,
+      sz28: 28, sz32: 32, sz34: 34,
+      btnFull: {width:'100%', justifyContent:'center'},
+      btnGrow: {flex:1, justifyContent:'center'},
+      btnTall: {width:'100%', justifyContent:'center', height:48},
+      btnHalf: {flex:1, justifyContent:'center', height:46},
+      btnQuarter: {width:88, justifyContent:'center', height:46},
+      filterTabs: [
+        {value:'all', label:'All', count:42},
+        {value:'discussion', label:'In discussion', count:2},
+        {value:'refresh', label:'Needs refresh', count:2},
+        {value:'married', label:'Married', count:1}
+      ],
+      filterActive: s.filter,
+      onFilter: v => this.setState({filter: v}),
+      sugs, profiles, rows,
+      shownCount: rows.length,
+      noRows: rows.length === 0,
+      q: s.q,
+      onQ: e => this.setState({q: e.target.value}),
+
+      strip: [
+        {bn:'সক্রিয় প্রোফাইল',en:'Active profiles',val:'42',sub:'/ 50',fg:'#241A12',meter:true},
+        {bn:'এ সপ্তাহের প্রস্তাব',en:'Suggested this week',val:'9',sub:'',fg:'#241A12',meter:false},
+        {bn:'চলমান পরিচয়',en:'Introductions in progress',val:'5',sub:'',fg:'#BD572F',meter:false},
+        {bn:'সম্পন্ন বিবাহ',en:'Marriages closed · lifetime',val:String(s.closed),sub:'',fg:'#2F5233',meter:false},
+        {bn:'এ মাসের কমিশন',en:'Commission this month',val:'৳48,000',sub:'',fg:'#241A12',meter:false}
+      ],
+
+      ledger: [
+        {pair:'Farhana Akter ↔ Sabbir Rahman',date:'5 Aug 2026',amt:'৳25,000',state:'Received',tone:'success'},
+        {pair:'Sumaiya Haque ↔ Arif Mahmud',date:'28 Jul 2026',amt:'৳15,000',state:'Received',tone:'success'},
+        {pair:'Rifat Jahan ↔ Nayeem Uddin',date:'19 Jul 2026',amt:'৳8,000',state:'Due',tone:'warning'}
+      ],
+
+      attestQueue: [
+        {id:'p3',name:'Sadia Islam',prn:'PRN-10302',days:78,left:12},
+        {id:'p6',name:'Mahmudul Hasan',prn:'PRN-10015',days:86,left:4}
+      ].map(a => ({
+        name:a.name, prn:a.prn, days:a.days, left:a.left,
+        pending: !this.state.attested[a.id],
+        done: !!this.state.attested[a.id],
+        onAttest: () => {
+          this.setState(st => ({attested:{...st.attested,[a.id]:true}}));
+          this.say(a.name + ' confirmed as active and accurate. Archive clock reset to 90 days.');
+        }
+      })),
+
+      // mobile
+      mobileStats: [
+        {bn:'প্রোফাইল',en:'Active',val:'42',bg:'#FDFBF6',bd:'#DDD1C3',fg:'#241A12',lb:'#8C7461'},
+        {bn:'প্রস্তাব',en:'Suggested',val:'9',bg:'#FDFBF6',bd:'#DDD1C3',fg:'#241A12',lb:'#8C7461'},
+        {bn:'বিবাহ',en:'Closed',val:String(s.closed),bg:'#2F5233',bd:'#20421F',fg:'#FDFBF6',lb:'rgba(253,251,246,.6)'},
+        {bn:'কমিশন',en:'This month',val:'৳48k',bg:'#FDFBF6',bd:'#DDD1C3',fg:'#241A12',lb:'#8C7461'}
+      ],
+      mobileProfiles: P.slice(0, 4).map(p => this.buildProfile(p)),
+      tabs: [
+        {bn:'হোম',icon:'#2F5233',fg:'#241A12'},
+        {bn:'প্রোফাইল',icon:'#C7B7A6',fg:'#8C7461'},
+        {bn:'ম্যাচ',icon:'#C7B7A6',fg:'#8C7461'},
+        {bn:'বায়োডাটা',icon:'#C7B7A6',fg:'#8C7461'},
+        {bn:'আমি',icon:'#C7B7A6',fg:'#8C7461'}
+      ],
+      topScore: top.score, topAInit: top.aInit, topAName: top.aName, topAMeta: top.aMeta,
+      topBInit: top.bInit, topBName: top.bName, topBMeta: top.bMeta,
+      topOpen: top.open, topResolved: top.resolved, topResLabel: top.resLabel,
+      topResBg: top.resBg, topResFg: top.resFg,
+      topWhyOpen: top.whyOpen, topFactors: top.factors,
+      topAccept: top.onAccept, topDismiss: top.onDismiss, topWhy: top.onWhy,
+      mAttestPending: !s.mAttested,
+      mAttestDone: s.mAttested,
+      mAttest: () => {
+        this.setState(st => ({mAttested:true, attested:{...st.attested,p3:true,p6:true}}));
+        this.say('Both profiles confirmed. Archive clocks reset to 90 days.');
+      },
+
+      addProfile: () => this.say('Add profile — Step 1 of 4: basic details. Steps 3 and 4 hand the confidential section to the family.'),
+      genPdf: () => this.say('Biodata studio open — 8 bilingual templates. Photo and address precision are off by default.'),
+      waShare: () => this.say('WhatsApp share link created. Expires in 7 days; contact details stay hidden until you release them.'),
+      copyInvite: () => this.say('Invite link copied. When your colleague activates, you both get one month free.'),
+      upgrade: () => this.say('Upgrade to the 150-profile plan — ৳5,000/mo, or ৳4,000 on annual billing.'),
+      markMarried: () => this.celebrate('Congratulations — marriage closed. That is 28 in your career.'),
+
+      toastOn: !!t,
+      toastMsg: t ? t.msg : '',
+      toastBg: joy ? '#2F5233' : '#241A12',
+      toastFg: joy ? '#FDFBF6' : '#FBF6EC',
+      toastDotBg: joy ? '#DBB863' : 'rgba(253,251,246,.16)',
+      toastJoy: !!joy,
+      toastPlain: !!t && !joy,
+      confettiOn: s.confettiOn,
+      confetti: s.confettiOn ? this.confettiEl() : null
+    };
+  }
+}
+
+</script>
+</body>
+</html>

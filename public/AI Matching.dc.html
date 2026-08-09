@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/colors.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/typography.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/styles.css">
+<script src="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&amp;family=Hind+Siliguri:wght@400;500;600;700&amp;display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-sunken);font-family:var(--font-sans-body);color:var(--text-primary);-webkit-font-smoothing:antialiased}
+a{color:var(--brand-primary);text-decoration:none}
+a:hover{color:var(--brand-primary-hover)}
+@keyframes mfade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(36,26,18,.18);border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+
+<section id="t11" style="padding:40px 44px 44px;border-bottom:1px solid var(--border-subtle)">
+  <div style="display:flex;align-items:baseline;gap:10px;margin:0 0 6px">
+    <a href="#t11" style="font-size:10px;font-weight:600;padding:4px 7px;background:var(--text-primary);color:var(--surface-card);border-radius:4px">11</a>
+    <span style="font-size:13px;font-weight:600;color:var(--text-primary)">AI matching, explained where it is used</span>
+  </div>
+  <p style="max-width:820px;margin:0 0 26px;font-size:12.5px;line-height:1.6;color:var(--text-secondary);text-wrap:pretty">A ghotok will not act on a score she cannot argue with. So the matching console shows its working: which factors it weighed, which it was forbidden to read, why a pair she expected is missing, and what her own accept and dismiss history has already changed. The weights are hers to move — the sealed layer is not.</p>
+
+  <div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start">
+
+    <!-- 11a desktop -->
+    <div id="11a" style="flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px">
+      <div style="display:flex;align-items:baseline;gap:8px;font-size:11px;color:var(--text-secondary)">
+        <a href="#11a" style="font-size:10.5px;font-weight:600;padding:3px 7px;background:rgba(36,26,18,.08);color:var(--text-primary);border-radius:5px">11a</a>
+        Desktop · move a weight and every score recalculates
+      </div>
+
+      <div style="position:relative;width:1320px;background:var(--surface-page);border:1px solid var(--border-subtle);border-radius:14px;box-shadow:var(--shadow-2);overflow:hidden">
+
+        <div style="background:var(--green-900);padding:0 20px;display:flex;align-items:center;gap:16px;height:54px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:24px;height:24px;border-radius:7px;background:var(--surface-card);display:grid;place-items:center;font-family:var(--font-serif-display);font-size:12px;font-weight:600;color:var(--green-900)">স</div>
+            <span style="font-family:var(--font-serif-display);font-size:13.5px;font-weight:600;color:var(--surface-card)">SongiSathi</span>
+          </div>
+          <div style="display:flex;gap:2px;font-size:11.5px;font-weight:500;font-family:'Hind Siliguri',sans-serif">
+            <span style="padding:7px 11px;border-radius:8px;color:rgba(253,251,246,.6);cursor:pointer" style-hover="color:#FDFBF6">ড্যাশবোর্ড</span>
+            <span style="padding:7px 11px;border-radius:8px;color:rgba(253,251,246,.6);cursor:pointer" style-hover="color:#FDFBF6">প্রোফাইল</span>
+            <span style="padding:7px 11px;border-radius:8px;background:rgba(253,251,246,.13);color:#FDFBF6">এআই ম্যাচিং</span>
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+            <span style="font-size:11px;color:rgba(253,251,246,.6)">Last run Monday 4 August, 6:00 · next in 3 days</span>
+            <div style="width:28px;height:28px;border-radius:50%;overflow:hidden">
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Avatar" initials="RA" size="{{ sz28 }}" hint-size="28px,28px"></x-import>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:320px 1fr;align-items:stretch;min-height:800px">
+
+          <!-- weights -->
+          <div style="border-right:1px solid var(--border-subtle);background:var(--surface-card);padding:18px 16px 22px;display:flex;flex-direction:column;gap:16px">
+            <div>
+              <div style="font-family:'Tiro Bangla',serif;font-size:17px;color:var(--text-primary)">আপনার অগ্রাধিকার</div>
+              <div style="font-size:11.5px;line-height:1.55;color:var(--text-secondary);margin-top:3px">What you weigh heavily, the system weighs heavily. These are yours alone — no other ghotok sees or inherits them.</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:15px">
+              <sc-for list="{{ weights }}" as="w" hint-placeholder-count="5">
+                <div>
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:9px">
+                    <span style="font-size:12.5px;font-weight:600;color:var(--text-primary)">{{ w.label }}</span>
+                    <span style="font-size:11px;font-weight:600;color:var(--brand-primary);font-variant-numeric:tabular-nums">{{ w.pct }}</span>
+                  </div>
+                  <div style="font-family:'Hind Siliguri',sans-serif;font-size:11px;color:var(--text-secondary);margin-top:1px">{{ w.bn }}</div>
+                  <input type="range" min="0" max="10" value="{{ w.value }}" onChange="{{ w.onChange }}" style="width:100%;margin-top:8px;accent-color:var(--brand-primary)">
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="padding:14px;border-radius:12px;background:var(--surface-page);border:1px solid var(--border-subtle)">
+              <div style="font-size:12px;font-weight:600;color:var(--text-primary)">Learned from you</div>
+              <div style="font-size:11px;line-height:1.6;color:var(--text-secondary);margin-top:5px">{{ learned }}</div>
+              <div onClick="{{ resetWeights }}" style="margin-top:10px;font-size:11.5px;font-weight:600;color:var(--brand-primary);cursor:pointer">Reset to the district average</div>
+            </div>
+
+            <div style="margin-top:auto;background:var(--green-900);border-radius:12px;padding:14px">
+              <div style="display:flex;align-items:center;gap:9px">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold-400)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"></rect><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"></path></svg>
+                <span style="font-size:12px;font-weight:600;color:var(--surface-card)">Not yours to weigh</span>
+              </div>
+              <div style="font-size:11px;line-height:1.6;color:rgba(253,251,246,.72);margin-top:7px">The sealed answers are a gate, not a slider. A pair that fails the private screening is never suggested at any weighting — including yours.</div>
+            </div>
+          </div>
+
+          <!-- runs -->
+          <div style="min-width:0;padding:20px 22px 26px;display:flex;flex-direction:column;gap:16px">
+
+            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+              <div style="flex:1;min-width:260px">
+                <div style="font-family:'Tiro Bangla',serif;font-size:20px;color:var(--text-primary)">সোমবারের ফলাফল</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">{{ pairCount }} pairs surfaced from {{ considered }} possible combinations</div>
+              </div>
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="outline" size="md" onClick="{{ rerun }}" hint-size="150px,40px">Run again now</x-import>
+            </div>
+
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:18px">
+              <div style="font-size:12.5px;font-weight:600;color:var(--text-primary)">How {{ considered }} became {{ pairCount }}</div>
+              <div style="display:flex;gap:10px;margin-top:14px;align-items:stretch">
+                <sc-for list="{{ funnel }}" as="fn" hint-placeholder-count="5">
+                  <div style="flex:{{ fn.flex }};min-width:0">
+                    <div style="height:10px;border-radius:3px;background:{{ fn.bar }}"></div>
+                    <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-top:9px;font-variant-numeric:tabular-nums">{{ fn.n }}</div>
+                    <div style="font-size:10.5px;line-height:1.45;color:var(--text-secondary);margin-top:2px">{{ fn.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ pairs }}" as="p" hint-placeholder-count="3">
+                <div style="background:var(--surface-card);border:1px solid {{ p.bd }};border-radius:14px;overflow:hidden">
+                  <div style="padding:16px 18px;display:flex;align-items:center;gap:16px">
+                    <div style="flex:1;min-width:0;display:flex;align-items:center;gap:12px">
+                      <div style="min-width:0">
+                        <div style="font-size:13px;font-weight:600;color:var(--text-primary)">{{ p.aName }}</div>
+                        <div style="font-size:11px;color:var(--text-secondary);margin-top:1px">{{ p.aMeta }}</div>
+                      </div>
+                      <span style="flex:none;width:26px;height:26px;border-radius:50%;border:1px solid var(--border-subtle);background:var(--surface-page);display:grid;place-items:center;color:var(--terracotta-600);font-size:12px">↔</span>
+                      <div style="min-width:0">
+                        <div style="font-size:13px;font-weight:600;color:var(--text-primary)">{{ p.bName }}</div>
+                        <div style="font-size:11px;color:var(--text-secondary);margin-top:1px">{{ p.bMeta }}</div>
+                      </div>
+                    </div>
+                    <div style="flex:none;width:150px">
+                      <div style="display:flex;align-items:baseline;gap:7px">
+                        <span style="font-family:var(--font-serif-display);font-size:24px;font-weight:600;color:var(--brand-primary);font-variant-numeric:tabular-nums">{{ p.score }}%</span>
+                        <span style="font-size:11px;color:{{ p.deltaFg }}">{{ p.delta }}</span>
+                      </div>
+                      <div style="margin-top:7px;height:5px;border-radius:99px;background:var(--surface-card-alt);overflow:hidden"><div style="width:{{ p.scoreW }};height:100%;background:var(--brand-primary);transition:width .2s ease-out"></div></div>
+                    </div>
+                    <span onClick="{{ p.toggle }}" style="flex:none;font-size:11.5px;font-weight:600;color:var(--brand-primary);cursor:pointer" style-hover="color:var(--brand-primary-hover)">{{ p.toggleLabel }}</span>
+                  </div>
+
+                  <sc-if value="{{ p.open }}" hint-placeholder-val="{{ true }}">
+                    <div style="border-top:1px dashed var(--border-subtle);background:var(--surface-page);padding:16px 18px;animation:mfade .16s ease-out">
+                      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+                        <sc-for list="{{ p.factors }}" as="f" hint-placeholder-count="5">
+                          <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:11px;padding:11px">
+                            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:6px">
+                              <span style="font-size:11px;color:var(--text-secondary)">{{ f.label }}</span>
+                              <span style="font-size:11px;font-weight:600;color:var(--brand-primary);font-variant-numeric:tabular-nums">{{ f.pct }}</span>
+                            </div>
+                            <div style="margin-top:7px;height:4px;border-radius:99px;background:var(--surface-card-alt);overflow:hidden"><div style="width:{{ f.w }};height:100%;background:var(--green-500)"></div></div>
+                            <div style="font-size:10.5px;line-height:1.45;color:var(--text-secondary);margin-top:7px">{{ f.note }}</div>
+                            <div style="font-size:10.5px;color:var(--text-secondary);margin-top:5px">weight {{ f.weight }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                      <div style="display:flex;gap:12px;margin-top:13px;flex-wrap:wrap;align-items:center">
+                        <div style="flex:1;min-width:300px;display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:11px;background:var(--green-900)">
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold-400)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"></rect><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"></path></svg>
+                          <span style="font-size:11px;line-height:1.55;color:rgba(253,251,246,.75)">Private screening: passed. That is the whole of what the gate returned — no factor, no percentage, no reason.</span>
+                        </div>
+                        <sc-if value="{{ p.actionable }}" hint-placeholder-val="{{ true }}">
+                          <div style="display:flex;align-items:center;gap:9px">
+                            <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="sm" onClick="{{ p.introduce }}" hint-size="120px,34px">Introduce</x-import>
+                            <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="sm" onClick="{{ p.dismiss }}" hint-size="100px,34px">Dismiss</x-import>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{ p.resolved }}" hint-placeholder-val="{{ false }}">
+                          <span style="padding:9px 14px;border-radius:10px;background:{{ p.resBg }};font-size:11.5px;font-weight:600;color:{{ p.resFg }}">{{ p.resLabel }}</span>
+                        </sc-if>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:18px">
+              <div style="font-size:12.5px;font-weight:600;color:var(--text-primary)">Pairs you might have expected</div>
+              <div style="font-size:11.5px;line-height:1.6;color:var(--text-secondary);margin-top:4px">The ones a ghotok notices are missing. Where the reason is visible, it is given.</div>
+              <div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
+                <sc-for list="{{ misses }}" as="m" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:11px;background:var(--surface-page);border:1px solid var(--border-subtle)">
+                    <span style="flex:1;min-width:0;font-size:12.5px;font-weight:600;color:var(--text-primary)">{{ m.pair }}</span>
+                    <span style="flex:none;font-size:11.5px;color:var(--text-secondary)">{{ m.reason }}</span>
+                    <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="{{ m.tone }}" hint-size="112px,22px">{{ m.tag }}</x-import>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11b digest -->
+    <div id="11b" style="flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px">
+      <div style="display:flex;align-items:baseline;gap:8px;font-size:11px;color:var(--text-secondary)">
+        <a href="#11b" style="font-size:10.5px;font-weight:600;padding:3px 7px;background:rgba(36,26,18,.08);color:var(--text-primary);border-radius:5px">11b</a>
+        Monday digest · what arrives on WhatsApp at 6am
+      </div>
+      <div style="width:390px;background:var(--surface-page);border:1px solid var(--border-subtle);border-radius:20px;box-shadow:var(--shadow-2);overflow:hidden">
+        <div style="background:var(--green-900);padding:8px 16px 14px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:rgba(253,251,246,.65)">
+            <span>6:04</span><span>4G · 94%</span>
+          </div>
+          <div style="margin-top:10px;font-family:'Tiro Bangla',serif;font-size:17px;color:var(--surface-card)">সোমবারের প্রস্তাব</div>
+          <div style="font-size:11px;color:rgba(253,251,246,.6);margin-top:1px">Monday digest · 4 August 2026</div>
+        </div>
+
+        <div style="padding:14px 14px 18px;display:flex;flex-direction:column;gap:12px">
+          <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:15px">
+            <div style="font-family:'Hind Siliguri',sans-serif;font-size:13.5px;line-height:1.75;color:var(--text-primary);text-wrap:pretty">রাহিমা আপা, এই সপ্তাহে {{ pairCount }}টি নতুন প্রস্তাব আছে। সর্বোচ্চ সঙ্গতি {{ topScore }}% — {{ topPair }}।</div>
+            <div style="font-size:11.5px;line-height:1.65;color:var(--text-secondary);margin-top:9px">Three suggestions, two profiles that need confirming, and one commission still outstanding. Nothing else — you will not hear from us again until next Monday.</div>
+          </div>
+
+          <sc-for list="{{ digest }}" as="d" hint-placeholder-count="3">
+            <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px">
+              <span style="width:34px;height:34px;flex:none;border-radius:11px;background:{{ d.bg }};display:grid;place-items:center;font-family:var(--font-serif-display);font-size:14px;font-weight:600;color:{{ d.fg }}">{{ d.n }}</span>
+              <span style="flex:1;min-width:0">
+                <span style="display:block;font-size:12.5px;font-weight:600;color:var(--text-primary)">{{ d.title }}</span>
+                <span style="display:block;font-size:11px;line-height:1.5;color:var(--text-secondary);margin-top:2px">{{ d.body }}</span>
+              </span>
+            </div>
+          </sc-for>
+
+          <div onClick="{{ openApp }}" style="min-height:50px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:var(--brand-primary);color:var(--text-on-brand);font-size:13.5px;font-weight:600;font-family:'Hind Siliguri',sans-serif;cursor:pointer" style-hover="background:var(--brand-primary-hover)">প্রস্তাবগুলো দেখুন</div>
+
+          <div style="font-size:11px;line-height:1.6;color:var(--text-secondary);text-align:center;padding:0 8px">One message a week. Reply STOP to receive none — your suggestions will still be waiting in the app.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin:26px 0 0;font-size:12px;line-height:1.6;color:var(--text-secondary)">
+    Try next: “a ghotok’s public profile as families see it” · “the empty states across all screens” · “what a first week looks like”
+  </p>
+</section>
+
+<sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:90;animation:mfade .2s ease-out">
+    <div style="display:flex;align-items:center;gap:11px;padding:13px 18px;border-radius:12px;background:var(--text-primary);box-shadow:var(--shadow-3);max-width:560px">
+      <span style="width:24px;height:24px;flex:none;border-radius:50%;background:rgba(253,251,246,.14);display:grid;place-items:center;color:var(--gold-400);font-size:12px;font-weight:700">✓</span>
+      <span style="font-size:12.5px;line-height:1.45;color:var(--surface-card)">{{ toastMsg }}</span>
+    </div>
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const FACTORS = [
+  {k:'education', label:'Education', bn:'শিক্ষা'},
+  {k:'family', label:'Family type', bn:'পারিবারিক ধরন'},
+  {k:'location', label:'Location', bn:'অবস্থান'},
+  {k:'religion', label:'Religious practice', bn:'ধর্মীয় অনুশীলন'},
+  {k:'age', label:'Age difference', bn:'বয়সের ব্যবধান'}
+];
+
+const PAIRS = [
+  {id:'m1', aName:'Nusrat Jahan', aMeta:'26 · MBA, IBA Dhaka · Dhanmondi',
+   bName:'Tanvir Ahmed', bMeta:'31 · MSc CSE, BUET · Auckland',
+   scores:{education:94, family:88, location:72, religion:85, age:80},
+   notes:{education:'Both postgraduate, business and technical', family:'Nuclear, both fathers retired service',
+          location:'Dhaka family, groom settled abroad', religion:'Both moderately practising', age:'Five years apart, both families content'}},
+  {id:'m2', aName:'Sadia Islam', aMeta:'24 · BSc Pharmacy, SUST · Sylhet',
+   bName:'Rezaul Karim', bMeta:'29 · LLB, Chittagong Univ. · Khulshi',
+   scores:{education:83, family:90, location:64, religion:92, age:78},
+   notes:{education:'Professional degrees on both sides', family:'Joint family, both Sylhet-rooted',
+          location:'Sylhet and Chattogram — travel expected', religion:'Both strictly practising', age:'Five years apart'}},
+  {id:'m3', aName:'Ayesha Siddika', aMeta:'23 · Honours in Bangla · Mymensingh',
+   bName:'Imran Chowdhury', bMeta:'30 · MEng, Toronto · civil engineer',
+   scores:{education:66, family:82, location:58, religion:74, age:62},
+   notes:{education:'Honours against a postgraduate degree', family:'Both nuclear, elder-led decisions',
+          location:'Mymensingh family, groom in Toronto', religion:'Observant against moderately practising', age:'Seven years apart'}}
+];
+
+const MISSES = [
+  {pair:'Nusrat Jahan ↔ Imran Chowdhury', reason:'Below your 60% threshold on location', tag:'Scored 54%', tone:'neutral'},
+  {pair:'Sadia Islam ↔ Tanvir Ahmed', reason:'Not suggested by the private screening', tag:'Gate closed', tone:'warning'},
+  {pair:'Ayesha Siddika ↔ Rezaul Karim', reason:'You dismissed this pair in July', tag:'Dismissed', tone:'neutral'}
+];
+
+class Component extends DCLogic {
+  state = {
+    w:{education:8, family:7, location:6, religion:7, age:5},
+    open:'m1', decision:{}, toast:null
+  };
+
+  componentWillUnmount(){ clearTimeout(this._t); }
+
+  say(msg){
+    clearTimeout(this._t);
+    this.setState({toast: msg});
+    this._t = setTimeout(() => this.setState({toast:null}), 4400);
+  }
+
+  score(p){
+    const w = this.state.w;
+    const total = FACTORS.reduce((n, f) => n + w[f.k], 0) || 1;
+    return Math.round(FACTORS.reduce((n, f) => n + p.scores[f.k] * w[f.k], 0) / total);
+  }
+
+  baseScore(p){
+    const base = {education:8, family:7, location:6, religion:7, age:5};
+    const total = FACTORS.reduce((n, f) => n + base[f.k], 0);
+    return Math.round(FACTORS.reduce((n, f) => n + p.scores[f.k] * base[f.k], 0) / total);
+  }
+
+  renderVals(){
+    const s = this.state;
+    const wTotal = FACTORS.reduce((n, f) => n + s.w[f.k], 0) || 1;
+    const ranked = PAIRS.slice().sort((a, b) => this.score(b) - this.score(a));
+    const top = ranked[0];
+    const heaviest = FACTORS.slice().sort((a, b) => s.w[b.k] - s.w[a.k])[0];
+
+    const res = {
+      introduced:{label:'Introduction sent', bg:'var(--green-100)', fg:'var(--brand-primary)'},
+      dismissed:{label:'Dismissed — not suggested again this quarter', bg:'var(--surface-card-alt)', fg:'var(--text-secondary)'}
+    };
+
+    return {
+      sz28:28,
+      weights: FACTORS.map(f => ({
+        label:f.label, bn:f.bn, value:s.w[f.k],
+        pct: Math.round(s.w[f.k] / wTotal * 100) + '%',
+        onChange: e => {
+          const v = Number(e.target.value);
+          this.setState(st => ({w:{...st.w, [f.k]: v}}));
+        }
+      })),
+      learned: 'You have dismissed 7 pairs where the families were more than 200km apart. Distance counts for more in your suggestions than it did in June — you can undo that by moving the slider yourself.',
+      resetWeights: () => {
+        this.setState({w:{education:7, family:7, location:7, religion:6, age:5}});
+        this.say('Weights reset to the Sylhet district average. Your dismissals will start shifting them again from Monday.');
+      },
+
+      pairCount: ranked.length,
+      considered: '1,482',
+      funnel: [
+        {n:'1,482', label:'Possible pairs in your book and the pool', flex:6, bar:'var(--surface-card-alt)'},
+        {n:'624', label:'Met the family’s stated criteria', flex:4, bar:'var(--green-200)'},
+        {n:'91', label:'Both profiles confirmed active', flex:3, bar:'var(--green-300)'},
+        {n:'12', label:'Passed the private screening gate', flex:2, bar:'var(--gold-400)'},
+        {n:String(ranked.length), label:'Scored above your threshold', flex:1.4, bar:'var(--brand-primary)'}
+      ],
+
+      pairs: ranked.map(p => {
+        const sc = this.score(p);
+        const diff = sc - this.baseScore(p);
+        const st = s.decision[p.id];
+        const r = res[st];
+        return {
+          aName:p.aName, aMeta:p.aMeta, bName:p.bName, bMeta:p.bMeta,
+          score: sc, scoreW: sc + '%',
+          delta: diff === 0 ? 'at default weights' : (diff > 0 ? '+' : '') + diff + ' from your weights',
+          deltaFg: diff > 0 ? 'var(--brand-primary)' : diff < 0 ? 'var(--terracotta-600)' : 'var(--text-secondary)',
+          bd: st === 'introduced' ? 'var(--green-300)' : 'var(--border-subtle)',
+          open: s.open === p.id,
+          toggleLabel: s.open === p.id ? 'Hide working' : 'Show working',
+          toggle: () => this.setState(x => ({open: x.open === p.id ? null : p.id})),
+          factors: FACTORS.map(f => ({
+            label:f.label, pct: p.scores[f.k] + '%', w: p.scores[f.k] + '%',
+            note: p.notes[f.k],
+            weight: s.w[f.k] + '/10'
+          })),
+          actionable: !st, resolved: !!st,
+          resLabel: r ? r.label : '', resBg: r ? r.bg : '', resFg: r ? r.fg : '',
+          introduce: () => {
+            this.setState(x => ({decision:{...x.decision, [p.id]:'introduced'}}));
+            this.say('Introduction sent to both managers. ' + p.aName + ' ↔ ' + p.bName + ' is now in progress.');
+          },
+          dismiss: () => {
+            this.setState(x => ({decision:{...x.decision, [p.id]:'dismissed'}}));
+            this.say('Dismissed. Your weights shift slightly away from what this pair had in common.');
+          }
+        };
+      }),
+
+      misses: MISSES,
+      rerun: () => this.say('Re-run finished in 4 seconds. ' + ranked.length + ' pairs, same gate — ' + heaviest.label.toLowerCase() + ' is currently your heaviest factor.'),
+
+      topPair: top.aName + ' ↔ ' + top.bName,
+      topScore: this.score(top),
+      digest: [
+        {n:'৩', title:'Three new suggestions', body:'Top pair at ' + this.score(top) + '% — ' + top.aName + ' and ' + top.bName + '.', bg:'var(--green-100)', fg:'var(--brand-primary)'},
+        {n:'২', title:'Two profiles need confirming', body:'Sadia Islam and Mahmudul Hasan archive within a fortnight.', bg:'var(--gold-100)', fg:'var(--gold-700)'},
+        {n:'১', title:'One commission outstanding', body:'৳25,000 from the Rifat Jahan marriage, three weeks on.', bg:'var(--terracotta-100)', fg:'var(--terracotta-700)'}
+      ],
+      openApp: () => this.say('Opening the matching console with this week’s three pairs.'),
+
+      toastOn: !!s.toast,
+      toastMsg: s.toast || ''
+    };
+  }
+}
+
+</script>
+</body>
+</html>

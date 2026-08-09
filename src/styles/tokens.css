@@ -1,0 +1,156 @@
+/* SongiSathi design tokens — ported from the _ds design system.
+   Colors, typography, spacing, elevation, motion, and font-family aliases. */
+:root {
+  /* --- base palette --- */
+  --green-900: #1b3220;
+  --green-800: #20421f;
+  --green-700: #2f5233;
+  --green-600: #3d6b44;
+  --green-500: #4f8757;
+  --green-400: #79a97f;
+  --green-300: #a9c9ad;
+  --green-200: #d3e4d5;
+  --green-100: #eaf2ea;
+
+  --terracotta-800: #7a3620;
+  --terracotta-700: #9a4425;
+  --terracotta-600: #bd572f;
+  --terracotta-500: #d06b41;
+  --terracotta-400: #de8b62;
+  --terracotta-300: #ebb198;
+  --terracotta-200: #f4d2c0;
+  --terracotta-100: #fbebe1;
+
+  --gold-700: #8c6318;
+  --gold-600: #b08628;
+  --gold-500: #c9a03f;
+  --gold-400: #dbb863;
+  --gold-300: #e9ce96;
+  --gold-200: #f3e4c3;
+  --gold-100: #faf1df;
+
+  --ivory-050: #fdfbf6;
+  --ivory-100: #fbf6ec;
+  --ivory-200: #f5ebda;
+  --ivory-300: #ebdcc3;
+
+  --brown-900: #241a12;
+  --brown-800: #382a1f;
+  --brown-700: #4e3b2c;
+  --brown-600: #6b5544;
+  --brown-500: #8c7461;
+  --brown-400: #aa9683;
+  --brown-300: #c7b7a6;
+  --brown-200: #ddd1c3;
+
+  --red-700: #8a2e23;
+  --red-600: #ae3a2a;
+  --red-500: #c64b38;
+  --red-100: #f8e1dc;
+
+  /* --- semantic aliases --- */
+  --brand-primary: var(--green-700);
+  --brand-primary-hover: var(--green-800);
+  --brand-primary-press: var(--green-900);
+  --brand-secondary: var(--terracotta-600);
+  --brand-secondary-hover: var(--terracotta-700);
+  --brand-accent-gold: var(--gold-600);
+
+  --surface-page: var(--ivory-100);
+  --surface-card: var(--ivory-050);
+  --surface-card-alt: var(--ivory-200);
+  --surface-sunken: var(--ivory-300);
+  --surface-overlay: rgba(36, 26, 18, 0.5);
+  --surface-inverse: var(--green-900);
+
+  --border-subtle: var(--brown-200);
+  --border-default: var(--brown-300);
+  --border-strong: var(--brown-500);
+  --border-focus: var(--green-600);
+
+  --text-primary: var(--brown-900);
+  --text-secondary: var(--brown-600);
+  --text-tertiary: var(--brown-400);
+  --text-on-brand: var(--ivory-050);
+  --text-link: var(--green-700);
+  --text-link-hover: var(--green-800);
+
+  --status-success: var(--green-600);
+  --status-success-bg: var(--green-100);
+  --status-warning: var(--gold-700);
+  --status-warning-bg: var(--gold-100);
+  --status-error: var(--red-600);
+  --status-error-bg: var(--red-100);
+  --status-pending: var(--terracotta-600);
+  --status-pending-bg: var(--terracotta-100);
+  --status-info: var(--green-600);
+  --status-info-bg: var(--green-100);
+
+  --verified-badge: var(--gold-600);
+  --photo-lock-scrim: rgba(36, 26, 18, 0.72);
+
+  /* --- typography --- */
+  --font-serif-display: 'Lora', 'Tiro Bangla', Georgia, serif;
+  --font-sans-body: 'Karla', 'Hind Siliguri', -apple-system, sans-serif;
+  --font-bengali-serif: 'Tiro Bangla', 'Lora', serif;
+  --font-bengali-sans: 'Hind Siliguri', 'Karla', sans-serif;
+
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 21px;
+  --text-xl: 26px;
+  --text-2xl: 32px;
+  --text-3xl: 40px;
+  --text-4xl: 52px;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.04em;
+  --tracking-label: 0.08em;
+
+  /* --- spacing / radius --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  --container-max: 1160px;
+
+  /* --- elevation / motion --- */
+  --shadow-1: 0 1px 2px rgba(56, 42, 31, 0.08);
+  --shadow-2: 0 2px 8px rgba(56, 42, 31, 0.1), 0 1px 2px rgba(56, 42, 31, 0.06);
+  --shadow-3: 0 8px 24px rgba(56, 42, 31, 0.14), 0 2px 6px rgba(56, 42, 31, 0.08);
+  --shadow-inset: inset 0 1px 2px rgba(56, 42, 31, 0.1);
+
+  --ease-standard: cubic-bezier(0.3, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 320ms;
+}

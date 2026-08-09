@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+*.local
+
+# Vite / build
+.vite/
+
+# OS
+.DS_Store
+Thumbs.db

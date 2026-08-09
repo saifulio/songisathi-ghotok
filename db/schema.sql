@@ -1,0 +1,384 @@
+-- SongiSathi Ghotok — full MySQL schema (pure SQL, no Prisma).
+-- Engine: MySQL / MariaDB.
+--
+-- Apply with:  npm run db:migrate      (runs db/migrate.mjs, which executes this file)
+-- Reset  with: npm run db:reset         (drops every table, re-applies, then re-seeds)
+--
+-- Tables are created parents-first so the inline foreign keys resolve.
+-- `updatedAt` columns use ON UPDATE CURRENT_TIMESTAMP so MySQL maintains them
+-- (Prisma used to do this in application code).
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ─────────────────────────── identity / auth ───────────────────────────
+
+CREATE TABLE IF NOT EXISTS `users` (
+    `id`              INTEGER      NOT NULL AUTO_INCREMENT,
+    `role`            ENUM('GHOTOK', 'GUARDIAN', 'CANDIDATE', 'ADMIN') NOT NULL,
+    `fullName`        VARCHAR(191) NOT NULL,
+    `phone`           VARCHAR(191) NOT NULL,
+    `email`           VARCHAR(191) NULL,
+    `passwordHash`    VARCHAR(191) NOT NULL,
+    `isActive`        BOOLEAN      NOT NULL DEFAULT true,
+    `emailVerifiedAt` DATETIME(3)  NULL,
+    `createdAt`       DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt`       DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `users_phone_key`(`phone`),
+    UNIQUE INDEX `users_email_key`(`email`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `ghotoks` (
+    `id`                 INTEGER      NOT NULL AUTO_INCREMENT,
+    `userId`             INTEGER      NOT NULL,
+    `code`               VARCHAR(191) NOT NULL,
+    `bureauName`         VARCHAR(191) NULL,
+    `district`           VARCHAR(191) NOT NULL,
+    `tier`               ENUM('SOLO', 'BUREAU', 'AGENCY') NOT NULL DEFAULT 'SOLO',
+    `verified`           BOOLEAN      NOT NULL DEFAULT false,
+    `marriagesClosed`    INTEGER      NOT NULL DEFAULT 0,
+    `yearsActive`        INTEGER      NOT NULL DEFAULT 0,
+    `activeProfileLimit` INTEGER      NOT NULL DEFAULT 20,
+    `referralCode`       VARCHAR(191) NULL,
+    `memberSince`        INTEGER      NOT NULL,
+    `createdAt`          DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `ghotoks_userId_key`(`userId`),
+    UNIQUE INDEX `ghotoks_code_key`(`code`),
+    UNIQUE INDEX `ghotoks_referralCode_key`(`referralCode`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `ghotoks_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `guardians` (
+    `id`          INTEGER      NOT NULL AUTO_INCREMENT,
+    `userId`      INTEGER      NOT NULL,
+    `relation`    VARCHAR(191) NULL,
+    `district`    VARCHAR(191) NULL,
+    `selfManaged` BOOLEAN      NOT NULL DEFAULT false,
+    `createdAt`   DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `guardians_userId_key`(`userId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `guardians_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `email_verification_tokens` (
+    `id`        INTEGER      NOT NULL AUTO_INCREMENT,
+    `userId`    INTEGER      NOT NULL,
+    `tokenHash` VARCHAR(191) NOT NULL,
+    `expiresAt` DATETIME(3)  NOT NULL,
+    `usedAt`    DATETIME(3)  NULL,
+    `createdAt` DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `email_verification_tokens_tokenHash_key`(`tokenHash`),
+    INDEX `email_verification_tokens_userId_idx`(`userId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `email_verification_tokens_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
+    `id`        INTEGER      NOT NULL AUTO_INCREMENT,
+    `userId`    INTEGER      NOT NULL,
+    `tokenHash` VARCHAR(191) NOT NULL,
+    `expiresAt` DATETIME(3)  NOT NULL,
+    `usedAt`    DATETIME(3)  NULL,
+    `createdAt` DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `password_reset_tokens_tokenHash_key`(`tokenHash`),
+    INDEX `password_reset_tokens_userId_idx`(`userId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `password_reset_tokens_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- ─────────────────────────── biodata / profiles ───────────────────────────
+
+CREATE TABLE IF NOT EXISTS `profiles` (
+    `id`                  INTEGER      NOT NULL AUTO_INCREMENT,
+    `prn`                 VARCHAR(191) NULL,
+    `fullName`            VARCHAR(191) NOT NULL,
+    `gender`              ENUM('MALE', 'FEMALE') NOT NULL,
+    `dob`                 DATETIME(3)  NULL,
+    `heightLabel`         VARCHAR(191) NULL,
+    `maritalStatus`       VARCHAR(191) NOT NULL DEFAULT 'Never married',
+    `district`            VARCHAR(191) NOT NULL,
+    `area`                VARCHAR(191) NULL,
+    `degree`              VARCHAR(191) NULL,
+    `institution`         VARCHAR(191) NULL,
+    `undergraduate`       VARCHAR(191) NULL,
+    `profession`          VARCHAR(191) NULL,
+    `organisation`        VARCHAR(191) NULL,
+    `familyType`          ENUM('NUCLEAR', 'JOINT') NULL,
+    `fatherInfo`          VARCHAR(191) NULL,
+    `motherInfo`          VARCHAR(191) NULL,
+    `siblings`            VARCHAR(191) NULL,
+    `familyIncome`        VARCHAR(191) NULL,
+    `religion`            VARCHAR(191) NULL,
+    `religiousPractice`   VARCHAR(191) NULL,
+    `verified`            BOOLEAN      NOT NULL DEFAULT false,
+    `photoLocked`         BOOLEAN      NOT NULL DEFAULT true,
+    `status`              ENUM('DRAFT', 'ACTIVE', 'IN_DISCUSSION', 'MATCH_IN_PROGRESS', 'MARRIED', 'AUTO_ARCHIVED', 'PAUSED') NOT NULL DEFAULT 'DRAFT',
+    `inNetworkPool`       BOOLEAN      NOT NULL DEFAULT false,
+    `completeness`        INTEGER      NOT NULL DEFAULT 0,
+    `managerType`         ENUM('GHOTOK', 'GUARDIAN', 'SELF') NOT NULL,
+    `managedByGhotokId`   INTEGER      NULL,
+    `managedByGuardianId` INTEGER      NULL,
+    `candidateUserId`     INTEGER      NULL,
+    `lastUpdatedAt`       DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `createdAt`           DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `profiles_prn_key`(`prn`),
+    UNIQUE INDEX `profiles_candidateUserId_key`(`candidateUserId`),
+    INDEX `profiles_managedByGhotokId_idx`(`managedByGhotokId`),
+    INDEX `profiles_managedByGuardianId_idx`(`managedByGuardianId`),
+    INDEX `profiles_status_idx`(`status`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `profiles_managedByGhotokId_fkey`   FOREIGN KEY (`managedByGhotokId`)   REFERENCES `ghotoks`(`id`)   ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `profiles_managedByGuardianId_fkey` FOREIGN KEY (`managedByGuardianId`) REFERENCES `guardians`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `profiles_candidateUserId_fkey`     FOREIGN KEY (`candidateUserId`)     REFERENCES `users`(`id`)     ON DELETE SET NULL ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `profile_preferences` (
+    `id`        INTEGER      NOT NULL AUTO_INCREMENT,
+    `profileId` INTEGER      NOT NULL,
+    `label`     VARCHAR(191) NOT NULL,
+    `enabled`   BOOLEAN      NOT NULL DEFAULT true,
+
+    INDEX `profile_preferences_profileId_idx`(`profileId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `profile_preferences_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `profiles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- ─────────────────────────── sealed screening layer ───────────────────────────
+
+CREATE TABLE IF NOT EXISTS `screening_questions` (
+    `id`         INTEGER      NOT NULL AUTO_INCREMENT,
+    `code`       VARCHAR(191) NOT NULL,
+    `sortOrder`  INTEGER      NOT NULL,
+    `questionBn` TEXT         NOT NULL,
+    `questionEn` TEXT         NOT NULL,
+    `helpText`   TEXT         NULL,
+    `type`       ENUM('CHOICE', 'TEXT') NOT NULL DEFAULT 'CHOICE',
+
+    UNIQUE INDEX `screening_questions_code_key`(`code`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `screening_options` (
+    `id`         INTEGER      NOT NULL AUTO_INCREMENT,
+    `questionId` INTEGER      NOT NULL,
+    `label`      VARCHAR(191) NOT NULL,
+    `sortOrder`  INTEGER      NOT NULL DEFAULT 0,
+
+    INDEX `screening_options_questionId_idx`(`questionId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `screening_options_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `screening_questions`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `screening_responses` (
+    `id`             INTEGER     NOT NULL AUTO_INCREMENT,
+    `profileId`      INTEGER     NOT NULL,
+    `questionId`     INTEGER     NOT NULL,
+    `answerValue`    TEXT        NOT NULL,
+    `sealed`         BOOLEAN     NOT NULL DEFAULT false,
+    `sealedAt`       DATETIME(3) NULL,
+    `answeredByRole` ENUM('GUARDIAN', 'CANDIDATE', 'GHOTOK') NOT NULL DEFAULT 'GUARDIAN',
+    `createdAt`      DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `screening_responses_profileId_questionId_key`(`profileId`, `questionId`),
+    INDEX `screening_responses_profileId_idx`(`profileId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `screening_responses_profileId_fkey`  FOREIGN KEY (`profileId`)  REFERENCES `profiles`(`id`)            ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `screening_responses_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `screening_questions`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- ─────────────────────────── AI matching ───────────────────────────
+
+CREATE TABLE IF NOT EXISTS `match_suggestions` (
+    `id`              INTEGER     NOT NULL AUTO_INCREMENT,
+    `ghotokId`        INTEGER     NOT NULL,
+    `weekOf`          DATETIME(3) NOT NULL,
+    `profileAId`      INTEGER     NOT NULL,
+    `profileBId`      INTEGER     NOT NULL,
+    `score`           INTEGER     NOT NULL,
+    `status`          ENUM('OPEN', 'ACCEPTED', 'DISMISSED') NOT NULL DEFAULT 'OPEN',
+    `screeningPassed` BOOLEAN     NOT NULL DEFAULT true,
+    `createdAt`       DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `match_suggestions_ghotokId_idx`(`ghotokId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `match_suggestions_ghotokId_fkey`   FOREIGN KEY (`ghotokId`)   REFERENCES `ghotoks`(`id`)  ON DELETE CASCADE  ON UPDATE CASCADE,
+    CONSTRAINT `match_suggestions_profileAId_fkey` FOREIGN KEY (`profileAId`) REFERENCES `profiles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT `match_suggestions_profileBId_fkey` FOREIGN KEY (`profileBId`) REFERENCES `profiles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `match_factors` (
+    `id`           INTEGER      NOT NULL AUTO_INCREMENT,
+    `suggestionId` INTEGER      NOT NULL,
+    `label`        VARCHAR(191) NOT NULL,
+    `percentage`   INTEGER      NOT NULL,
+    `note`         TEXT         NULL,
+
+    INDEX `match_factors_suggestionId_idx`(`suggestionId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `match_factors_suggestionId_fkey` FOREIGN KEY (`suggestionId`) REFERENCES `match_suggestions`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- ─────────────────────────── interest inbox ───────────────────────────
+
+CREATE TABLE IF NOT EXISTS `interests` (
+    `id`                 INTEGER      NOT NULL AUTO_INCREMENT,
+    `kind`               ENUM('INTEREST', 'PHOTO_REQUEST', 'CONTACT_RELEASE') NOT NULL DEFAULT 'INTEREST',
+    `fromGhotokId`       INTEGER      NULL,
+    `fromGuardianId`     INTEGER      NULL,
+    `fromLabel`          VARCHAR(191) NOT NULL,
+    `theirProfileId`     INTEGER      NOT NULL,
+    `yourProfileId`      INTEGER      NOT NULL,
+    `status`             ENUM('PENDING', 'ACCEPTED', 'DECLINED', 'EXPIRED') NOT NULL DEFAULT 'PENDING',
+    `message`            TEXT         NULL,
+    `compatibilityScore` INTEGER      NULL,
+    `screeningResult`    VARCHAR(191) NULL,
+    `declineReason`      VARCHAR(191) NULL,
+    `createdAt`          DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `interests_yourProfileId_idx`(`yourProfileId`),
+    INDEX `interests_status_idx`(`status`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `interests_fromGhotokId_fkey`   FOREIGN KEY (`fromGhotokId`)   REFERENCES `ghotoks`(`id`)   ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `interests_fromGuardianId_fkey` FOREIGN KEY (`fromGuardianId`) REFERENCES `guardians`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `interests_theirProfileId_fkey` FOREIGN KEY (`theirProfileId`) REFERENCES `profiles`(`id`)  ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT `interests_yourProfileId_fkey`  FOREIGN KEY (`yourProfileId`)  REFERENCES `profiles`(`id`)  ON DELETE RESTRICT ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- ─────────────────────────── commission & closing ───────────────────────────
+
+CREATE TABLE IF NOT EXISTS `marriages` (
+    `id`             INTEGER      NOT NULL AUTO_INCREMENT,
+    `ghotokId`       INTEGER      NOT NULL,
+    `pairLabel`      VARCHAR(191) NOT NULL,
+    `prns`           VARCHAR(191) NULL,
+    `weddingDate`    DATETIME(3)  NOT NULL,
+    `brideFee`       INTEGER      NOT NULL DEFAULT 0,
+    `groomFee`       INTEGER      NOT NULL DEFAULT 0,
+    `agreedAmount`   INTEGER      NOT NULL DEFAULT 0,
+    `receivedAmount` INTEGER      NOT NULL DEFAULT 0,
+    `status`         ENUM('PAID', 'PART_PAID', 'UNPAID') NOT NULL DEFAULT 'UNPAID',
+    `createdAt`      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `marriages_ghotokId_idx`(`ghotokId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `marriages_ghotokId_fkey` FOREIGN KEY (`ghotokId`) REFERENCES `ghotoks`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `payments` (
+    `id`            INTEGER      NOT NULL AUTO_INCREMENT,
+    `ghotokId`      INTEGER      NOT NULL,
+    `transactionId` VARCHAR(191) NOT NULL,
+    `method`        ENUM('BKASH', 'NAGAD', 'ROCKET') NOT NULL,
+    `amount`        INTEGER      NOT NULL,
+    `tier`          ENUM('SOLO', 'BUREAU', 'AGENCY') NOT NULL,
+    `status`        ENUM('PENDING', 'CONFIRMED', 'FLAGGED') NOT NULL DEFAULT 'PENDING',
+    `paidAt`        DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `createdAt`     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `payments_transactionId_key`(`transactionId`),
+    INDEX `payments_ghotokId_idx`(`ghotokId`),
+    INDEX `payments_status_idx`(`status`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `payments_ghotokId_fkey` FOREIGN KEY (`ghotokId`) REFERENCES `ghotoks`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `pricing_tiers` (
+    `id`           INTEGER      NOT NULL AUTO_INCREMENT,
+    `code`         ENUM('SOLO', 'BUREAU', 'AGENCY') NOT NULL,
+    `nameEn`       VARCHAR(191) NOT NULL,
+    `nameBn`       VARCHAR(191) NOT NULL,
+    `monthlyPrice` INTEGER      NOT NULL,
+    `annualPrice`  INTEGER      NOT NULL,
+    `profileLimit` INTEGER      NOT NULL,
+
+    UNIQUE INDEX `pricing_tiers_code_key`(`code`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- ─────────────────────────── admin / moderation ───────────────────────────
+
+CREATE TABLE IF NOT EXISTS `verifications` (
+    `id`        INTEGER     NOT NULL AUTO_INCREMENT,
+    `ghotokId`  INTEGER     NOT NULL,
+    `status`    ENUM('PENDING', 'APPROVED', 'MORE_INFO', 'REJECTED') NOT NULL DEFAULT 'PENDING',
+    `note`      TEXT        NULL,
+    `appliedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `verifications_ghotokId_key`(`ghotokId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `verifications_ghotokId_fkey` FOREIGN KEY (`ghotokId`) REFERENCES `ghotoks`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `verification_checks` (
+    `id`             INTEGER      NOT NULL AUTO_INCREMENT,
+    `verificationId` INTEGER      NOT NULL,
+    `label`          VARCHAR(191) NOT NULL,
+    `passed`         BOOLEAN      NOT NULL DEFAULT false,
+    `note`           TEXT         NULL,
+
+    INDEX `verification_checks_verificationId_idx`(`verificationId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `verification_checks_verificationId_fkey` FOREIGN KEY (`verificationId`) REFERENCES `verifications`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `reports` (
+    `id`         INTEGER      NOT NULL AUTO_INCREMENT,
+    `title`      VARCHAR(191) NOT NULL,
+    `subjectRef` VARCHAR(191) NOT NULL,
+    `severity`   ENUM('SERIOUS', 'MODERATE', 'MINOR') NOT NULL,
+    `reportedBy` VARCHAR(191) NOT NULL,
+    `body`       TEXT         NOT NULL,
+    `status`     ENUM('OPEN', 'SUSPENDED', 'WARNED', 'DISMISSED') NOT NULL DEFAULT 'OPEN',
+    `createdAt`  DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `reports_status_idx`(`status`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `report_evidence` (
+    `id`       INTEGER      NOT NULL AUTO_INCREMENT,
+    `reportId` INTEGER      NOT NULL,
+    `text`     VARCHAR(191) NOT NULL,
+
+    INDEX `report_evidence_reportId_idx`(`reportId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `report_evidence_reportId_fkey` FOREIGN KEY (`reportId`) REFERENCES `reports`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- ─────────────────────────── misc ───────────────────────────
+
+CREATE TABLE IF NOT EXISTS `testimonials` (
+    `id`         INTEGER      NOT NULL AUTO_INCREMENT,
+    `ghotokId`   INTEGER      NOT NULL,
+    `quote`      TEXT         NOT NULL,
+    `byLabel`    VARCHAR(191) NOT NULL,
+    `monthLabel` VARCHAR(191) NULL,
+    `createdAt`  DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `testimonials_ghotokId_idx`(`ghotokId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `testimonials_ghotokId_fkey` FOREIGN KEY (`ghotokId`) REFERENCES `ghotoks`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `activity_log` (
+    `id`         INTEGER     NOT NULL AUTO_INCREMENT,
+    `ghotokId`   INTEGER     NULL,
+    `profileId`  INTEGER     NULL,
+    `text`       TEXT        NOT NULL,
+    `occurredAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `activity_log_ghotokId_idx`(`ghotokId`),
+    INDEX `activity_log_profileId_idx`(`profileId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `activity_log_ghotokId_fkey`  FOREIGN KEY (`ghotokId`)  REFERENCES `ghotoks`(`id`)  ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `activity_log_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `profiles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+SET FOREIGN_KEY_CHECKS = 1;

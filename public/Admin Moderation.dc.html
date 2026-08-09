@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/colors.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/typography.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/styles.css">
+<script src="_ds/songisathi-design-system-d7ffd31e-b003-4dab-ac55-a813b692cab8/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&amp;family=Hind+Siliguri:wght@400;500;600;700&amp;display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-sunken);font-family:var(--font-sans-body);color:var(--text-primary);-webkit-font-smoothing:antialiased}
+a{color:var(--brand-primary);text-decoration:none}
+a:hover{color:var(--brand-primary-hover)}
+@keyframes afade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(36,26,18,.18);border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+
+<section id="t9" style="padding:40px 44px 44px;border-bottom:1px solid var(--border-subtle)">
+  <div style="display:flex;align-items:baseline;gap:10px;margin:0 0 6px">
+    <a href="#t9" style="font-size:10px;font-weight:600;padding:4px 7px;background:var(--text-primary);color:var(--surface-card);border-radius:4px">9</a>
+    <span style="font-size:13px;font-weight:600;color:var(--text-primary)">Admin — verification, reports, and manual payments</span>
+  </div>
+  <p style="max-width:820px;margin:0 0 26px;font-size:12.5px;line-height:1.6;color:var(--text-secondary);text-wrap:pretty">Internal tooling for a small team doing careful work: approving the ghotoks whose gold seal families rely on, judging reports without ever opening the sealed layer, and matching bKash transaction IDs to accounts by hand. Every panel states what the reviewer cannot see, because an admin console is exactly where a privacy promise quietly dies.</p>
+
+  <div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start">
+
+    <div id="9a" style="flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px">
+      <div style="display:flex;align-items:baseline;gap:8px;font-size:11px;color:var(--text-secondary)">
+        <a href="#9a" style="font-size:10.5px;font-weight:600;padding:3px 7px;background:rgba(36,26,18,.08);color:var(--text-primary);border-radius:5px">9a</a>
+        Desktop · three queues — switch with the tabs, decisions are live
+      </div>
+
+      <div style="position:relative;width:1320px;background:var(--surface-page);border:1px solid var(--border-subtle);border-radius:14px;box-shadow:var(--shadow-2);overflow:hidden">
+
+        <div style="background:var(--brown-900);padding:0 20px;display:flex;align-items:center;gap:16px;height:54px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:24px;height:24px;border-radius:7px;background:var(--gold-400);display:grid;place-items:center;font-family:var(--font-serif-display);font-size:12px;font-weight:700;color:var(--brown-900)">স</div>
+            <span style="font-family:var(--font-serif-display);font-size:13.5px;font-weight:600;color:var(--surface-card)">SongiSathi</span>
+            <span style="padding:2px 8px;border-radius:99px;background:rgba(253,251,246,.14);color:var(--gold-400);font-size:9.5px;font-weight:700;letter-spacing:.08em">ADMIN</span>
+          </div>
+          <span style="font-size:11.5px;color:rgba(253,251,246,.5)">Internal · every action is logged against your account</span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+            <span style="font-size:11px;color:rgba(253,251,246,.6)">Farah H. · moderator</span>
+            <div style="width:28px;height:28px;border-radius:50%;overflow:hidden">
+              <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Avatar" initials="FH" size="{{ sz28 }}" hint-size="28px,28px"></x-import>
+            </div>
+          </div>
+        </div>
+
+        <!-- stat strip -->
+        <div style="display:flex;background:var(--surface-card);border-bottom:1px solid var(--border-subtle)">
+          <sc-for list="{{ strip }}" as="k" hint-placeholder-count="4">
+            <div style="flex:1;padding:14px 20px;border-right:1px solid var(--border-subtle)">
+              <div style="font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-secondary)">{{ k.label }}</div>
+              <div style="display:flex;align-items:baseline;gap:7px;margin-top:6px">
+                <span style="font-family:var(--font-serif-display);font-size:22px;font-weight:600;color:{{ k.fg }};font-variant-numeric:tabular-nums">{{ k.value }}</span>
+                <span style="font-size:11px;color:var(--text-secondary)">{{ k.note }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding:18px 22px 24px;display:flex;flex-direction:column;gap:16px">
+
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Tabs" items="{{ tabs }}" active="{{ tab }}" onChange="{{ onTab }}" hint-size="520px,42px"></x-import>
+            <span style="margin-left:auto;font-size:11.5px;color:var(--text-secondary)">{{ queueNote }}</span>
+          </div>
+
+          <!-- VERIFICATION -->
+          <sc-if value="{{ isVerify }}" hint-placeholder-val="{{ true }}">
+            <div style="animation:afade .16s ease-out;display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ verifications }}" as="v" hint-placeholder-count="3">
+                <div style="background:var(--surface-card);border:1px solid {{ v.bd }};border-radius:14px;padding:18px">
+                  <div style="display:flex;gap:18px;align-items:flex-start">
+                    <div style="width:44px;height:44px;flex:none;border-radius:50%;overflow:hidden">
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Avatar" initials="{{ v.init }}" size="{{ sz44 }}" hint-size="44px,44px"></x-import>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                        <span style="font-family:var(--font-serif-display);font-size:17px;font-weight:600;color:var(--text-primary)">{{ v.name }}</span>
+                        <span style="font-size:11.5px;color:var(--text-secondary);font-variant-numeric:tabular-nums">{{ v.id }}</span>
+                        <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="{{ v.tone }}" hint-size="128px,22px">{{ v.badge }}</x-import>
+                      </div>
+                      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">{{ v.meta }}</div>
+                      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px">
+                        <sc-for list="{{ v.checks }}" as="ck" hint-placeholder-count="4">
+                          <div style="padding:11px 12px;border-radius:11px;background:{{ ck.bg }};border:1px solid {{ ck.bd }}">
+                            <div style="display:flex;align-items:center;gap:7px">
+                              <span style="width:15px;height:15px;flex:none;border-radius:50%;background:{{ ck.dotBg }};color:{{ ck.dotFg }};display:grid;place-items:center;font-size:9px;font-weight:700">{{ ck.mark }}</span>
+                              <span style="font-size:11px;font-weight:600;color:var(--text-primary)">{{ ck.label }}</span>
+                            </div>
+                            <div style="font-size:10.5px;line-height:1.5;color:var(--text-secondary);margin-top:5px">{{ ck.note }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                      <div style="margin-top:13px;padding:12px 14px;border-radius:11px;background:var(--surface-page);border:1px solid var(--border-subtle);font-size:11.5px;line-height:1.6;color:var(--text-secondary)">{{ v.note }}</div>
+                    </div>
+                  </div>
+                  <sc-if value="{{ v.pending }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="md" onClick="{{ v.approve }}" hint-size="190px,40px">Approve · issue gold seal</x-import>
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="outline" size="md" onClick="{{ v.more }}" hint-size="170px,40px">Ask for a clearer scan</x-import>
+                      <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="md" onClick="{{ v.reject }}" hint-size="110px,40px">Reject</x-import>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ v.resolved }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:14px;padding:12px;border-radius:11px;background:{{ v.resBg }};font-size:12px;font-weight:600;color:{{ v.resFg }};text-align:center">{{ v.resLabel }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <!-- REPORTS -->
+          <sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:afade .16s ease-out;display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start">
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <sc-for list="{{ reports }}" as="r" hint-placeholder-count="3">
+                  <div style="background:var(--surface-card);border:1px solid {{ r.bd }};border-radius:14px;padding:18px">
+                    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                      <span style="font-size:14px;font-weight:600;color:var(--text-primary)">{{ r.title }}</span>
+                      <span style="font-size:11.5px;color:var(--text-secondary);font-variant-numeric:tabular-nums">{{ r.subject }}</span>
+                      <span style="margin-left:auto"><x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Badge" tone="{{ r.tone }}" hint-size="110px,22px">{{ r.severity }}</x-import></span>
+                    </div>
+                    <div style="font-size:11.5px;color:var(--text-secondary);margin-top:5px">Reported by {{ r.by }} · {{ r.when }}</div>
+                    <div style="margin-top:12px;padding:13px 14px;border-radius:11px;background:var(--surface-page);border:1px solid var(--border-subtle);font-size:12.5px;line-height:1.65;color:var(--text-primary);text-wrap:pretty">{{ r.body }}</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:9px;margin-top:12px">
+                      <sc-for list="{{ r.evidence }}" as="ev" hint-placeholder-count="3">
+                        <span style="padding:6px 11px;border-radius:99px;background:var(--surface-card-alt);font-size:11px;color:var(--text-secondary)">{{ ev }}</span>
+                      </sc-for>
+                    </div>
+                    <sc-if value="{{ r.pending }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+                        <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="md" onClick="{{ r.suspend }}" hint-size="170px,40px">Suspend and notify</x-import>
+                        <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="outline" size="md" onClick="{{ r.warn }}" hint-size="150px,40px">Warn the manager</x-import>
+                        <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="md" onClick="{{ r.dismiss }}" hint-size="130px,40px">No action needed</x-import>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ r.resolved }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin-top:14px;padding:12px;border-radius:11px;background:{{ r.resBg }};font-size:12px;font-weight:600;color:{{ r.resFg }};text-align:center">{{ r.resLabel }}</div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div style="background:var(--green-900);border-radius:14px;padding:18px">
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold-400)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"></rect><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"></path></svg>
+                    <span style="font-size:12.5px;font-weight:600;color:var(--surface-card)">What you cannot open</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+                    <sc-for list="{{ cannotSee }}" as="cs" hint-placeholder-count="4">
+                      <div style="display:flex;gap:9px;align-items:flex-start">
+                        <span style="width:15px;height:15px;flex:none;margin-top:2px;border-radius:50%;background:rgba(253,251,246,.12);color:var(--gold-400);display:grid;place-items:center;font-size:9px;font-weight:700">–</span>
+                        <span style="font-size:11.5px;line-height:1.55;color:rgba(253,251,246,.75)">{{ cs }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="font-size:11px;line-height:1.6;color:rgba(253,251,246,.55);margin-top:12px">A report can be judged on behaviour and metadata alone. If it cannot, it is escalated to a two-person review — never resolved by opening the vault, because that door does not exist.</div>
+                </div>
+
+                <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;padding:18px">
+                  <div style="font-size:12.5px;font-weight:600;color:var(--text-primary)">This week</div>
+                  <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+                    <sc-for list="{{ weekStats }}" as="ws" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                        <span style="font-size:11.5px;color:var(--text-secondary)">{{ ws.k }}</span>
+                        <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);font-variant-numeric:tabular-nums">{{ ws.v }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- PAYMENTS -->
+          <sc-if value="{{ isPayments }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:afade .16s ease-out;display:flex;flex-direction:column;gap:14px">
+              <div style="background:var(--gold-100);border:1px solid var(--gold-300);border-radius:14px;padding:15px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                <div style="flex:1;min-width:300px">
+                  <div style="font-size:12.5px;font-weight:600;color:var(--gold-700)">Payments are matched by hand, on purpose</div>
+                  <div style="font-size:11.5px;line-height:1.6;color:var(--text-secondary);margin-top:4px">Ghotoks send to the merchant number and enter the transaction ID. A person confirms it against the bKash statement — no card details ever enter the product.</div>
+                </div>
+                <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="outline" size="sm" onClick="{{ openStatement }}" hint-size="180px,36px">Open today’s statement</x-import>
+              </div>
+
+              <div style="background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:14px;overflow:hidden">
+                <div style="display:grid;grid-template-columns:1.5fr 1.1fr .9fr .9fr .8fr 1.5fr;padding:10px 18px;background:var(--surface-card-alt);border-bottom:1px solid var(--border-subtle);font-size:9.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary)">
+                  <span>Ghotok</span><span>Transaction ID</span><span>Method</span><span>Amount</span><span>Tier</span><span style="text-align:right">Action</span>
+                </div>
+                <sc-for list="{{ payments }}" as="p" hint-placeholder-count="5">
+                  <div style="display:grid;grid-template-columns:1.5fr 1.1fr .9fr .9fr .8fr 1.5fr;padding:13px 18px;border-bottom:1px solid var(--surface-card-alt);align-items:center">
+                    <div style="min-width:0">
+                      <div style="font-size:12.5px;font-weight:600;color:var(--text-primary)">{{ p.name }}</div>
+                      <div style="font-size:10.5px;color:var(--text-secondary);margin-top:1px;font-variant-numeric:tabular-nums">{{ p.id }} · {{ p.when }}</div>
+                    </div>
+                    <span style="font-size:12px;font-weight:600;color:var(--text-primary);letter-spacing:.04em">{{ p.txn }}</span>
+                    <span style="font-size:11.5px;font-weight:600;color:{{ p.methodFg }}">{{ p.method }}</span>
+                    <span style="font-size:12.5px;color:var(--text-primary);font-variant-numeric:tabular-nums">{{ p.amount }}</span>
+                    <span style="font-size:11.5px;color:var(--text-secondary)">{{ p.tier }}</span>
+                    <div style="display:flex;justify-content:flex-end;gap:8px">
+                      <sc-if value="{{ p.pending }}" hint-placeholder-val="{{ true }}">
+                        <div style="display:flex;gap:8px">
+                          <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="primary" size="sm" onClick="{{ p.confirm }}" hint-size="96px,34px">Confirm</x-import>
+                          <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Button" variant="ghost" size="sm" onClick="{{ p.flag }}" hint-size="110px,34px">Not found</x-import>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ p.resolved }}" hint-placeholder-val="{{ false }}">
+                        <span style="padding:7px 12px;border-radius:9px;background:{{ p.resBg }};font-size:11.5px;font-weight:600;color:{{ p.resFg }}">{{ p.resLabel }}</span>
+                      </sc-if>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <x-import component-from-global-scope="SongiSathiDesignSystem_d7ffd3.Dialog" open="{{ dialogOpen }}" title="{{ dialogTitle }}" onClose="{{ closeDialog }}" actions="{{ dialogActions }}" hint-size="380px,220px">
+          <span style="font-size:13px;line-height:1.65;color:var(--text-secondary)">{{ dialogBody }}</span>
+        </x-import>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin:26px 0 0;font-size:12px;line-height:1.6;color:var(--text-secondary)">
+    Try next: “commission tracking after a marriage closes” · “AI matching, explained in full” · “the weekly digest email”
+  </p>
+</section>
+
+<sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:90;animation:afade .2s ease-out">
+    <div style="display:flex;align-items:center;gap:11px;padding:13px 18px;border-radius:12px;background:var(--text-primary);box-shadow:var(--shadow-3);max-width:560px">
+      <span style="width:24px;height:24px;flex:none;border-radius:50%;background:rgba(253,251,246,.14);display:grid;place-items:center;color:var(--gold-400);font-size:12px;font-weight:700">✓</span>
+      <span style="font-size:12.5px;line-height:1.45;color:var(--surface-card)">{{ toastMsg }}</span>
+    </div>
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const VERIFY = [
+  {id:'v1', init:'KI', name:'Kamrul Islam', gid:'GHT-0311', meta:'Sylhet · applied 6 August · 31 profiles imported',
+   note:'Two existing verified ghotoks in Sylhet have vouched for him. His register photographs show entries going back to 2019.',
+   checks:[
+     {label:'NID', ok:true, note:'Front and back legible, name matches'},
+     {label:'Photograph', ok:true, note:'Clear, recent, face visible'},
+     {label:'Phone', ok:true, note:'Verified by OTP, not seen before'},
+     {label:'Referrals', ok:true, note:'Two verified ghotoks vouched'}
+   ]},
+  {id:'v2', init:'NB', name:'Nazma Begum', gid:'GHT-0198', meta:'Mymensingh · applied 7 August · 17 profiles imported',
+   note:'NID scan is readable but the photograph is a group photo cropped tightly. Ask for a plain one before issuing the seal.',
+   checks:[
+     {label:'NID', ok:true, note:'Legible, name matches'},
+     {label:'Photograph', ok:false, note:'Cropped from a group photo'},
+     {label:'Phone', ok:true, note:'Verified by OTP'},
+     {label:'Referrals', ok:false, note:'None yet — first in her district'}
+   ]},
+  {id:'v3', init:'MR', name:'Monir Rahman', gid:'GHT-0402', meta:'Dhaka · applied 7 August · 4 profiles imported',
+   note:'The phone number was registered to a suspended account in June. Same NID, different name spelling. Do not approve without a call.',
+   checks:[
+     {label:'NID', ok:false, note:'Name spelling differs from application'},
+     {label:'Photograph', ok:true, note:'Clear and recent'},
+     {label:'Phone', ok:false, note:'Previously on a suspended account'},
+     {label:'Referrals', ok:false, note:'None'}
+   ]}
+];
+
+const REPORTS = [
+  {id:'r1', title:'Contact details shared outside the platform', subject:'GHT-0402', severity:'Serious', tone:'error',
+   by:'A guardian in Uttara', when:'Yesterday',
+   body:'The guardian says this ghotok passed her daughter’s phone number to another family before any interest was accepted. She has the WhatsApp message.',
+   evidence:['Screenshot supplied','No release logged on the profile','Second report this month']},
+  {id:'r2', title:'Profile appears to be duplicated', subject:'PRN-31204', severity:'Moderate', tone:'warning',
+   by:'Automatic check', when:'2 days ago',
+   body:'The same name, date of birth and district appear under two managers. One is a self-managed guardian, the other a ghotok. Likely a genuine handover rather than fraud.',
+   evidence:['Matching DOB and district','Different phone numbers','Both created in the last month']},
+  {id:'r3', title:'Photograph does not match the biodata', subject:'PRN-19077', severity:'Minor', tone:'neutral',
+   by:'A ghotok in Sylhet', when:'4 days ago',
+   body:'A released photograph appears to be of a different person than described. May simply be an old photograph.',
+   evidence:['Released once, to one family','Manager verified in 2025']}
+];
+
+const PAYMENTS = [
+  {id:'p1', name:'Kamrul Islam', gid:'GHT-0311', txn:'BKS8H2K91M', method:'bKash', amount:'৳2,000', tier:'Bureau', when:'Today 09:12', ok:true},
+  {id:'p2', name:'Nazma Begum', gid:'GHT-0198', txn:'NGD4472PLQ', method:'Nagad', amount:'৳960', tier:'Solo', when:'Today 08:40', ok:true},
+  {id:'p3', name:'Shafiqul Alam', gid:'GHT-0155', txn:'BKS1120XZT', method:'bKash', amount:'৳4,000', tier:'Agency', when:'Yesterday 21:05', ok:true},
+  {id:'p4', name:'Rokeya Sultana', gid:'GHT-0287', txn:'BKS9910AAB', method:'bKash', amount:'৳2,000', tier:'Bureau', when:'Yesterday 19:22', ok:false},
+  {id:'p5', name:'Jashim Uddin', gid:'GHT-0361', txn:'RKT5567MNO', method:'Rocket', amount:'৳960', tier:'Solo', when:'Yesterday 17:48', ok:true}
+];
+
+class Component extends DCLogic {
+  state = {tab:'verify', vState:{}, rState:{}, pState:{}, dialog:null, toast:null};
+
+  componentWillUnmount(){ clearTimeout(this._t); }
+
+  say(msg){
+    clearTimeout(this._t);
+    this.setState({toast: msg});
+    this._t = setTimeout(() => this.setState({toast:null}), 4400);
+  }
+
+  dsButtons(specs){
+    const B = (window.SongiSathiDesignSystem_d7ffd3 || {}).Button;
+    if (!B) return null;
+    return specs.map((a, i) => React.createElement(B, {key:i, variant:a.variant, size:'md', onClick:a.onClick}, a.label));
+  }
+
+  renderVals(){
+    const s = this.state;
+
+    const vRes = {
+      approved:{label:'Approved — gold seal issued, ghotok notified', bg:'var(--green-100)', fg:'var(--brand-primary)'},
+      more:{label:'Asked for a clearer photograph — awaiting reply', bg:'var(--gold-100)', fg:'var(--gold-700)'},
+      rejected:{label:'Rejected — reason recorded, account closed', bg:'var(--red-100)', fg:'var(--red-700)'}
+    };
+    const rRes = {
+      suspended:{label:'Suspended · both families notified, profiles paused', bg:'var(--red-100)', fg:'var(--red-700)'},
+      warned:{label:'Warning sent to the manager', bg:'var(--gold-100)', fg:'var(--gold-700)'},
+      dismissed:{label:'Closed with no action', bg:'var(--surface-card-alt)', fg:'var(--text-secondary)'}
+    };
+    const pRes = {
+      confirmed:{label:'Confirmed', bg:'var(--green-100)', fg:'var(--brand-primary)'},
+      flagged:{label:'Not found', bg:'var(--red-100)', fg:'var(--red-700)'}
+    };
+
+    const pendingV = VERIFY.filter(v => !s.vState[v.id]).length;
+    const openReports = REPORTS.filter(r => !s.rState[r.id]);
+    const pendingR = openReports.length;
+    const seriousOpen = openReports.filter(r => r.severity === 'Serious').length;
+    const openPayments = PAYMENTS.filter(p => !s.pState[p.id]);
+    const pendingP = openPayments.length;
+    const owed = openPayments.reduce((n, p) => n + Number(p.amount.replace(/[^0-9]/g, '')), 0);
+    const taka = '৳' + owed.toLocaleString('en-US');
+    const flagged = PAYMENTS.filter(p => s.pState[p.id] === 'flagged').length;
+
+    const dlg = s.dialog ? {
+      title:'Suspend this ghotok?',
+      body:'Suspension pauses all ' + s.dialog.count + ' profiles this manager holds and notifies every family currently mid-proposal. They keep read access to their book so nothing is lost.',
+      actions:[
+        {label:'Cancel', variant:'ghost', onClick: () => this.setState({dialog:null})},
+        {label:'Suspend', variant:'primary', onClick: () => {
+          const id = s.dialog.id;
+          this.setState(st => ({rState:{...st.rState, [id]:'suspended'}, dialog:null}));
+          this.say('Suspended. 31 profiles paused, 4 families mid-proposal have been told their ghotok is under review.');
+        }}
+      ]
+    } : null;
+
+    return {
+      sz28:28, sz44:44,
+      strip: [
+        {label:'Awaiting verification', value:String(pendingV), note:'ghotoks', fg:'var(--text-primary)'},
+        {label:'Open reports', value:String(pendingR),
+         note: pendingR === 0 ? 'queue clear' : seriousOpen ? seriousOpen + ' serious' : 'none serious',
+         fg: seriousOpen ? 'var(--terracotta-600)' : 'var(--text-primary)'},
+        {label:'Payments to match', value:String(pendingP),
+         note: pendingP === 0 ? (flagged ? flagged + ' to chase' : 'all matched') : taka + ' total',
+         fg:'var(--text-primary)'},
+        {label:'Median decision time', value:'6h', note:'target is 24h', fg:'var(--brand-primary)'}
+      ],
+      tabs: [
+        {value:'verify', label:'Verification', count:pendingV},
+        {value:'reports', label:'Reports', count:pendingR},
+        {value:'payments', label:'Payments', count:pendingP}
+      ],
+      tab: s.tab,
+      onTab: v => this.setState({tab: v}),
+      isVerify: s.tab === 'verify', isReports: s.tab === 'reports', isPayments: s.tab === 'payments',
+      queueNote: {
+        verify:'Oldest first · a ghotok waiting on a seal cannot appear in the trusted pool',
+        reports:'Serious first · nothing here requires opening a sealed section',
+        payments:'Matched against the merchant statement by hand'
+      }[s.tab],
+
+      verifications: VERIFY.map(v => {
+        const st = s.vState[v.id];
+        const r = vRes[st];
+        const clean = v.checks.every(c => c.ok);
+        return {
+          init:v.init, name:v.name, id:v.gid, meta:v.meta, note:v.note,
+          tone: clean ? 'success' : 'warning',
+          badge: clean ? 'All checks passed' : 'Needs a closer look',
+          bd: clean ? 'var(--border-subtle)' : 'var(--gold-300)',
+          checks: v.checks.map(c => ({
+            label:c.label, note:c.note, mark: c.ok ? '✓' : '!',
+            bg: c.ok ? 'var(--green-100)' : 'var(--gold-100)',
+            bd: c.ok ? 'var(--green-300)' : 'var(--gold-300)',
+            dotBg: c.ok ? 'var(--brand-primary)' : 'var(--gold-600)',
+            dotFg: c.ok ? 'var(--text-on-brand)' : 'var(--brown-900)'
+          })),
+          pending: !st, resolved: !!st,
+          resLabel: r ? r.label : '', resBg: r ? r.bg : '', resFg: r ? r.fg : '',
+          approve: () => {
+            this.setState(p => ({vState:{...p.vState, [v.id]:'approved'}}));
+            this.say(v.name + ' approved. The gold seal is live and his profiles enter the trusted pool tonight.');
+          },
+          more: () => {
+            this.setState(p => ({vState:{...p.vState, [v.id]:'more'}}));
+            this.say('Asked ' + v.name.split(' ')[0] + ' for a clearer photograph. Nothing else about the application changes.');
+          },
+          reject: () => {
+            this.setState(p => ({vState:{...p.vState, [v.id]:'rejected'}}));
+            this.say('Rejected with a written reason. The imported profiles are deleted, not retained.');
+          }
+        };
+      }),
+
+      reports: REPORTS.map(r => {
+        const st = s.rState[r.id];
+        const res = rRes[st];
+        return {
+          title:r.title, subject:r.subject, severity:r.severity, tone:r.tone,
+          by:r.by, when:r.when, body:r.body, evidence:r.evidence,
+          bd: r.tone === 'error' ? 'var(--red-500)' : 'var(--border-subtle)',
+          pending: !st, resolved: !!st,
+          resLabel: res ? res.label : '', resBg: res ? res.bg : '', resFg: res ? res.fg : '',
+          suspend: () => this.setState({dialog:{id:r.id, count:31}}),
+          warn: () => {
+            this.setState(p => ({rState:{...p.rState, [r.id]:'warned'}}));
+            this.say('Warning sent. A second warning within six months triggers automatic suspension.');
+          },
+          dismiss: () => {
+            this.setState(p => ({rState:{...p.rState, [r.id]:'dismissed'}}));
+            this.say('Closed with no action. The reporter is told a decision was made, not what it was.');
+          }
+        };
+      }),
+      cannotSee: [
+        'The private screening answers of any profile',
+        'Released photographs — only the release log',
+        'Message content between managers',
+        'Phone numbers, unless a report names one'
+      ],
+      weekStats: [
+        {k:'Reports resolved', v:'14'},
+        {k:'Ghotoks verified', v:'6'},
+        {k:'Accounts suspended', v:'1'},
+        {k:'Escalated to two-person review', v:'2'}
+      ],
+
+      payments: PAYMENTS.map(p => {
+        const st = s.pState[p.id];
+        const r = pRes[st];
+        return {
+          name:p.name, id:p.gid, txn:p.txn, method:p.method, amount:p.amount, tier:p.tier, when:p.when,
+          methodFg: p.method === 'bKash' ? 'var(--terracotta-600)' : p.method === 'Nagad' ? 'var(--terracotta-700)' : 'var(--brand-primary)',
+          pending: !st, resolved: !!st,
+          resLabel: r ? r.label : '', resBg: r ? r.bg : '', resFg: r ? r.fg : '',
+          confirm: () => {
+            this.setState(x => ({pState:{...x.pState, [p.id]:'confirmed'}}));
+            this.say(p.name + '’s ' + p.tier + ' plan is active for the month. Receipt sent by SMS.');
+          },
+          flag: () => {
+            this.setState(x => ({pState:{...x.pState, [p.id]:'flagged'}}));
+            this.say('Marked not found. ' + p.name.split(' ')[0] + ' is asked to re-check the transaction ID — no account change yet.');
+          }
+        };
+      }),
+      openStatement: () => this.say('Opening today’s bKash merchant statement — 12 incoming, 5 unmatched.'),
+
+      dialogOpen: !!dlg,
+      dialogTitle: dlg ? dlg.title : '',
+      dialogBody: dlg ? dlg.body : '',
+      dialogActions: dlg ? this.dsButtons(dlg.actions) : null,
+      closeDialog: () => this.setState({dialog:null}),
+
+      toastOn: !!s.toast,
+      toastMsg: s.toast || ''
+    };
+  }
+}
+
+</script>
+</body>
+</html>
