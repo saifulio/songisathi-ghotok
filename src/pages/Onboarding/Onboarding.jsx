@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Input, Select, Badge } from '../../components/ui/index.jsx';
 import './Onboarding.css';
 
+// value must match the ghotoks.tier enum (SOLO/BUREAU/AGENCY) so "Choose"
+// can carry it straight to the real signup form.
 const TIERS = [
-  { value: 'solo', name: 'Solo', bn: 'একক ঘটক', monthly: '৳1,200', annual: '৳960', limit: '20', features: ['Weekly AI match suggestions', 'Bilingual biodata studio', 'Private screening on every profile', 'WhatsApp sharing with revocable links'] },
-  { value: 'bureau', name: 'Bureau', bn: 'ব্যুরো', monthly: '৳2,500', annual: '৳2,000', limit: '50', featured: true, features: ['Everything in Solo', 'Trusted network pool access', 'Commission tracking', 'Two staff logins', 'Priority verification'] },
-  { value: 'agency', name: 'Agency', bn: 'এজেন্সি', monthly: '৳5,000', annual: '৳4,000', limit: '150', features: ['Everything in Bureau', 'Six staff logins', 'Branded biodata templates', 'District-level insight reports', 'A named support contact'] },
+  { value: 'SOLO', name: 'Solo', bn: 'একক ঘটক', monthly: '৳1,200', annual: '৳960', limit: '20', features: ['Weekly AI match suggestions', 'Bilingual biodata studio', 'Private screening on every profile', 'WhatsApp sharing with revocable links'] },
+  { value: 'BUREAU', name: 'Bureau', bn: 'ব্যুরো', monthly: '৳2,500', annual: '৳2,000', limit: '50', featured: true, features: ['Everything in Solo', 'Trusted network pool access', 'Commission tracking', 'Two staff logins', 'Priority verification'] },
+  { value: 'AGENCY', name: 'Agency', bn: 'এজেন্সি', monthly: '৳5,000', annual: '৳4,000', limit: '150', features: ['Everything in Bureau', 'Six staff logins', 'Branded biodata templates', 'District-level insight reports', 'A named support contact'] },
 ];
 
 const DOCS = [
@@ -29,6 +32,7 @@ const UNIVERSAL = ['Private screening on every profile', 'Photos locked until yo
 const METHODS = [{ name: 'bKash', note: 'merchant', fg: 'var(--terracotta-600)' }, { name: 'Nagad', note: 'merchant', fg: 'var(--terracotta-700)' }, { name: 'Rocket', note: 'merchant', fg: 'var(--brand-primary)' }];
 
 export default function Onboarding() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState('01712 345 678');
   const [otpSent, setOtpSent] = useState(false);
@@ -225,7 +229,7 @@ export default function Onboarding() {
                     <div className="ob-tier-features">
                       {t.features.map((ft) => (<div key={ft} className="ob-tier-feature"><span className="ob-tier-tick">✓</span><span>{ft}</span></div>))}
                     </div>
-                    <div className="ob-tier-cta" onClick={() => say(`${t.name} selected — ${annual ? t.annual : t.monthly}/month. Pay by bKash and enter the transaction ID.`)}>Choose {t.name}</div>
+                    <div className="ob-tier-cta" onClick={() => navigate(`/signup?as=matchmaker&tier=${t.value}&district=${encodeURIComponent(district)}`)}>Choose {t.name}</div>
                   </div>
                 );
               })}

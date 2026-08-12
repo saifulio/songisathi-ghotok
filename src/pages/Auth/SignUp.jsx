@@ -15,6 +15,7 @@ const TYPE_VALUES = ACCOUNT_TYPES.map((t) => t.value);
 const opts = (a) => a.map((v) => ({ value: v, label: v }));
 const DISTRICTS = ['Dhaka', 'Sylhet', 'Chattogram', 'Rajshahi', 'Khulna', 'Mymensingh', 'Barishal', 'Rangpur'];
 const HEIGHTS = ["4′10″", "4′11″", "5′0″", "5′1″", "5′2″", "5′3″", "5′4″", "5′5″", "5′6″", "5′7″", "5′8″", "5′9″", "5′10″", "5′11″", "6′0″", "6′1″"];
+const TIER_VALUES = ['SOLO', 'BUREAU', 'AGENCY'];
 
 export default function SignUp() {
   const { signup } = useAuth();
@@ -26,10 +27,14 @@ export default function SignUp() {
   const [accountType, setAccountType] = useState(
     TYPE_VALUES.includes(requestedType) ? requestedType : 'matchmaker'
   );
+  // ?tier= / ?district= carry a plan and district picked on the pricing or
+  // onboarding page through to the matchmaker fields below.
+  const requestedTier = (params.get('tier') || '').toUpperCase();
+  const requestedDistrict = params.get('district');
   const [f, setF] = useState({
     fullName: '', phone: '', password: '', confirm: '',
     // matchmaker
-    bureauName: '', tier: 'SOLO',
+    bureauName: '', tier: TIER_VALUES.includes(requestedTier) ? requestedTier : 'SOLO',
     // guardian
     relation: '',
     // self (bride/groom)
@@ -37,7 +42,7 @@ export default function SignUp() {
     area: '', degree: '', institution: '', profession: '', familyType: 'NUCLEAR',
     religion: '', religiousPractice: 'Moderately practising',
     // shared
-    district: 'Dhaka',
+    district: DISTRICTS.includes(requestedDistrict) ? requestedDistrict : 'Dhaka',
   });
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
