@@ -27,6 +27,13 @@ export const NAV_GROUPS = [
     items: [
       { path: '/onboarding', label: 'Onboarding & pricing', public: true },
       { path: '/guardian', label: 'Guardian & candidate', roles: ['GUARDIAN', 'CANDIDATE'] },
+      // A guardian always decides for the profile they manage. A candidate
+      // only reaches these when their own profile is self-managed (see
+      // requiresSelfManaged in Layout's canSee) — otherwise their guardian
+      // does this for them, same as the rest of the app.
+      { path: '/my-search', label: 'Search & profiles', roles: ['GUARDIAN', 'CANDIDATE'], requiresSelfManaged: true },
+      { path: '/my-biodata', label: 'Biodata studio', roles: ['GUARDIAN', 'CANDIDATE'], requiresSelfManaged: true },
+      { path: '/my-matches', label: 'AI matching', roles: ['GUARDIAN', 'CANDIDATE'], requiresSelfManaged: true },
     ],
   },
   {

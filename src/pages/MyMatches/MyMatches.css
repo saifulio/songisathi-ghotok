@@ -1,0 +1,49 @@
+.mm { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
+.mm-frame { max-width: 900px; margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
+
+.mm-blocked { max-width: 520px; margin: 60px auto; background: var(--surface-page); border: 1px solid var(--gold-300); border-radius: 14px; padding: 28px; text-align: center; }
+.mm-blocked-t { font-family: var(--font-serif-display); font-size: 18px; font-weight: 600; color: var(--text-primary); }
+.mm-blocked-b { font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin-top: 8px; }
+.mm-blocked-link { display: inline-block; margin-top: 16px; font-size: 13px; font-weight: 600; color: var(--brand-primary); }
+
+.mm-topbar { background: var(--green-900); padding: 0 20px; display: flex; align-items: center; gap: 16px; height: 54px; }
+.mm-topbar-brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif-display); font-size: 13.5px; font-weight: 600; color: var(--surface-card); }
+.mm-logo { width: 24px; height: 24px; border-radius: 7px; background: var(--surface-card); display: grid; place-items: center; font-family: var(--font-serif-display); font-size: 12px; font-weight: 600; color: var(--green-900); }
+.mm-topbar-note { font-size: 11.5px; color: rgba(253, 251, 246, 0.6); }
+.mm-topbar-right { margin-left: auto; }
+
+.mm-body { padding: 24px 24px 28px; display: flex; flex-direction: column; gap: 18px; }
+.mm-h-bn { font-family: 'Tiro Bangla', serif; font-size: 20px; color: var(--text-primary); }
+.mm-h-sub { font-size: 12px; line-height: 1.55; color: var(--text-secondary); margin-top: 4px; max-width: 560px; }
+
+.mm-list { display: flex; flex-direction: column; gap: 12px; }
+.mm-pair { background: var(--surface-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 16px; }
+.mm-pair-row { display: flex; align-items: center; gap: 16px; }
+.mm-pair-person { flex: 1; min-width: 0; }
+.mm-pair-name { font-size: 14.5px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; }
+.mm-pair-meta { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+.mm-pair-score { width: 140px; }
+.mm-pair-score-num { font-size: 16px; font-weight: 700; color: var(--brand-primary); font-variant-numeric: tabular-nums; }
+.mm-pair-bar { height: 5px; border-radius: 4px; background: var(--surface-card-alt); overflow: hidden; margin-top: 6px; }
+.mm-pair-bar div { height: 100%; background: var(--brand-primary); }
+.mm-pair-toggle { font-size: 11.5px; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
+.mm-pair-toggle:hover { color: var(--text-primary); }
+
+.mm-pair-detail { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 14px; }
+.mm-factors { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mm-factor-top { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.mm-factor-pct { color: var(--text-secondary); font-weight: 500; }
+.mm-factor-bar { height: 5px; border-radius: 4px; background: var(--surface-card-alt); overflow: hidden; margin-top: 6px; }
+.mm-factor-bar div { height: 100%; background: var(--gold-500); }
+.mm-factor-note { font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
+.mm-pair-actions { display: flex; gap: 9px; }
+.mm-pair-res { font-size: 12px; font-weight: 600; color: var(--brand-primary); }
+
+.mm-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 90; display: flex; align-items: center; gap: 11px; padding: 13px 18px; border-radius: 12px; background: var(--text-primary); box-shadow: var(--shadow-3); max-width: min(560px, calc(100vw - 32px)); }
+.mm-toast-check { width: 24px; height: 24px; flex: none; border-radius: 50%; background: rgba(253, 251, 246, 0.14); display: grid; place-items: center; color: var(--gold-400); font-size: 12px; font-weight: 700; }
+.mm-toast span:last-child { font-size: 12.5px; line-height: 1.45; color: var(--surface-card); }
+
+@media (max-width: 640px) {
+  .mm-factors { grid-template-columns: 1fr; }
+  .mm-pair-row { flex-wrap: wrap; }
+}

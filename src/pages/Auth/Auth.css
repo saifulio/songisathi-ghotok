@@ -43,13 +43,14 @@
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: var(--gold-400);
+  background: var(--surface-card);
   color: var(--green-900);
   display: grid;
   place-items: center;
   font-family: var(--font-serif-display);
   font-size: 16px;
   font-weight: 700;
+  box-shadow: var(--shadow-1);
 }
 .auth-aside-title {
   font-family: 'Tiro Bangla', serif;

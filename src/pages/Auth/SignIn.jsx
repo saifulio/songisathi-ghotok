@@ -41,7 +41,7 @@ export default function SignIn() {
     <div className="auth">
       <div className="auth-card">
         <aside className="auth-aside">
-          <div className="auth-brand"><span className="auth-logo">স</span><span>SongiSathi</span></div>
+          <Link to="/" className="auth-brand"><span className="auth-logo">স</span><span>SongiSathi</span></Link>
           <div className="auth-aside-title">সঙ্গীসাথী</div>
           <p className="auth-aside-copy">Sign in to your workspace. Matchmakers, guardians, and members — everything routes through the person you trust.</p>
           <div className="auth-aside-foot">A companion for the journey.</div>

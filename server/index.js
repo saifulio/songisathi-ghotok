@@ -435,7 +435,7 @@ app.post('/api/auth/signup', async (req, res) => {
   const token = signToken(user);
   return res.status(201).json({
     token,
-    user: publicUser(user, { profileId: result.profileId, gender, accountType }),
+    user: publicUser(user, { profileId: result.profileId, gender, accountType, selfManaged: true }),
   });
 });
 
@@ -454,7 +454,7 @@ app.post('/api/auth/signin', async (req, res) => {
   const extra = {};
   if (user.ghotok) { extra.code = user.ghotok.code; extra.tier = user.ghotok.tier; extra.referralCode = user.ghotok.referralCode; }
   if (user.guardian) { extra.relation = user.guardian.relation; }
-  if (user.candidate) { extra.profileId = user.candidate.id; extra.gender = user.candidate.gender; }
+  if (user.candidate) { extra.profileId = user.candidate.id; extra.gender = user.candidate.gender; extra.selfManaged = user.candidate.managerType === 'SELF'; }
 
   const token = signToken(user);
   return res.json({ token, user: publicUser(user, extra) });
@@ -467,7 +467,7 @@ app.get('/api/auth/me', requireAuth, async (req, res) => {
   const extra = {};
   if (user.ghotok) { extra.code = user.ghotok.code; extra.tier = user.ghotok.tier; }
   if (user.guardian) { extra.relation = user.guardian.relation; }
-  if (user.candidate) { extra.profileId = user.candidate.id; extra.gender = user.candidate.gender; }
+  if (user.candidate) { extra.profileId = user.candidate.id; extra.gender = user.candidate.gender; extra.selfManaged = user.candidate.managerType === 'SELF'; }
   return res.json({ user: publicUser(user, extra) });
 });
 
@@ -1221,6 +1221,263 @@ app.patch('/api/my-profile/proposals/:id', requireAuth, requireRole('GUARDIAN', 
   return res.json({ proposal: interestItem(row) });
 });
 
+// ── send interest (guardian / self-managed candidate) ──
+// A guardian always decides for the profile they manage; a candidate only
+// when selfManaged (see myProfileForReq) — otherwise their guardian sends it.
+// body: { targetProfileId, message? }
+app.post('/api/interests', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
+  const me = await myProfileForReq(req);
+  if (!me) return bad(res, 'No profile is linked to this account.', 403);
+  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, 'Your guardian sends interest on your behalf.', 403);
+
+  const targetProfileId = Number(req.body?.targetProfileId);
+  if (!targetProfileId) return bad(res, 'targetProfileId is required.');
+  if (targetProfileId === me.profile.id) return bad(res, 'You cannot send interest to your own profile.');
+  const target = await queryOne('SELECT id FROM profiles WHERE id = ? LIMIT 1', [targetProfileId]);
+  if (!target) return bad(res, 'Profile not found.', 404);
+
+  const already = await queryOne(
+    "SELECT id FROM interests WHERE theirProfileId = ? AND yourProfileId = ? AND kind = 'INTEREST' AND status = 'PENDING' LIMIT 1",
+    [me.profile.id, targetProfileId]
+  );
+  if (already) return bad(res, 'Interest already sent and awaiting a reply.', 409);
+
+  const message = String(req.body?.message || '').trim() || null;
+  let fromGuardianId = null;
+  let fromLabel;
+  if (req.auth.role === 'GUARDIAN') {
+    const guardian = await queryOne('SELECT * FROM guardians WHERE userId = ? LIMIT 1', [req.auth.sub]);
+    if (!guardian) return bad(res, 'No guardian profile is linked to this account.', 403);
+    fromGuardianId = guardian.id;
+    const guardianUser = await queryOne('SELECT fullName FROM users WHERE id = ?', [req.auth.sub]);
+    fromLabel = `Guardian — ${guardianUser?.fullName || ''}`.trim();
+  } else {
+    fromLabel = `${me.profile.fullName} (self)`;
+  }
+
+  const newId = await withTransaction((tx) => insert(
+    tx,
+    `INSERT INTO interests (kind, fromGhotokId, fromGuardianId, fromLabel, theirProfileId, yourProfileId, status, message)
+     VALUES ('INTEREST', NULL, ?, ?, ?, ?, 'PENDING', ?)`,
+    [fromGuardianId, fromLabel, me.profile.id, targetProfileId, message]
+  ));
+  const [row] = await query(`${INTEREST_SELECT} WHERE i.id = ?`, [newId]);
+  return res.status(201).json({ interest: interestItem(row) });
+});
+
+// ── search: the pool visible to a guardian / self-managed candidate ──
+// Same visibility rule as the ghotok's search (inNetworkPool = 1), minus the
+// "your own book" concept — a guardian/candidate has exactly one profile,
+// which is excluded from its own results.
+app.get('/api/my-search', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
+  const me = await myProfileForReq(req);
+  if (!me) return res.json({ profiles: [] });
+  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, 'Your guardian searches on your behalf.', 403);
+
+  const rows = await query(
+    `SELECT p.*,
+        gu.fullName AS ghotokName, g.code AS ghotokCode, g.district AS ghotokDistrict, g.marriagesClosed AS ghotokMarriages,
+        gdu.fullName AS guardianName, gd.relation AS guardianRelation,
+        cu.fullName AS candidateName,
+        (SELECT COUNT(*) FROM screening_responses sr WHERE sr.profileId = p.id AND sr.sealed = 1) AS sealedCount
+       FROM profiles p
+       LEFT JOIN ghotoks g   ON p.managedByGhotokId = g.id
+       LEFT JOIN users gu    ON g.userId = gu.id
+       LEFT JOIN guardians gd ON p.managedByGuardianId = gd.id
+       LEFT JOIN users gdu   ON gd.userId = gdu.id
+       LEFT JOIN users cu    ON p.candidateUserId = cu.id
+      WHERE p.id != ? AND p.inNetworkPool = 1 AND p.status = 'ACTIVE'
+      ORDER BY p.lastUpdatedAt DESC`,
+    [me.profile.id]
+  );
+
+  const ids = rows.map((r) => r.id);
+  const prefsByProfile = {};
+  if (ids.length) {
+    const prefs = await query(
+      `SELECT profileId, label FROM profile_preferences WHERE enabled = 1 AND profileId IN (${ids.map(() => '?').join(',')})`,
+      ids
+    );
+    for (const pr of prefs) (prefsByProfile[pr.profileId] ||= []).push(pr.label);
+  }
+
+  return res.json({ profiles: rows.map((r) => searchProfile(r, null, prefsByProfile[r.id] || [])), myGender: me.profile.gender });
+});
+
+// ── full biodata detail for a guardian / candidate's own profile ──
+app.get('/api/my-profile/biodata', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
+  const me = await myProfileForReq(req);
+  if (!me) return res.json({ profile: null });
+  const p = me.profile;
+  const prefs = await query('SELECT label, enabled FROM profile_preferences WHERE profileId = ? ORDER BY id', [p.id]);
+
+  return res.json({
+    profile: {
+      id: p.id,
+      prn: p.prn,
+      name: p.fullName,
+      gender: p.gender,
+      age: yearsSince(p.dob),
+      heightLabel: p.heightLabel,
+      maritalStatus: p.maritalStatus,
+      district: p.district,
+      area: p.area,
+      degree: p.degree,
+      institution: p.institution,
+      undergraduate: p.undergraduate,
+      profession: p.profession,
+      organisation: p.organisation,
+      familyType: p.familyType,
+      fatherInfo: p.fatherInfo,
+      motherInfo: p.motherInfo,
+      siblings: p.siblings,
+      familyIncome: p.familyIncome,
+      religion: p.religion,
+      religiousPractice: p.religiousPractice,
+      photoLocked: Boolean(p.photoLocked),
+      inNetworkPool: Boolean(p.inNetworkPool),
+      status: p.status,
+      statusLabel: STATUS_LABEL[p.status] || p.status,
+      completeness: p.completeness,
+      preferences: prefs.map((r) => ({ label: r.label, enabled: Boolean(r.enabled) })),
+    },
+    selfManaged: me.selfManaged,
+  });
+});
+
+// Fields a guardian / self-managed candidate may edit on their own biodata —
+// identity basics (name, gender, dob, district) stay out of scope here, same
+// as the ghotok's own PATCH /api/profiles/:id.
+const BIODATA_EDITABLE = [
+  'heightLabel', 'maritalStatus', 'area', 'degree', 'institution', 'undergraduate',
+  'profession', 'organisation', 'familyType', 'fatherInfo', 'motherInfo', 'siblings',
+  'familyIncome', 'religion', 'religiousPractice',
+];
+const completenessOf = (row) => Math.round(
+  100 * BIODATA_EDITABLE.filter((f) => String(row[f] ?? '').trim() !== '').length / BIODATA_EDITABLE.length
+);
+
+// body: { ...BIODATA_EDITABLE fields, photoLocked?, inNetworkPool?, preferences?: [{label,enabled}], publish? }
+// publish: true moves a DRAFT profile to ACTIVE and issues a PRN — the one
+// step a self-signed-up candidate needs to become visible/searchable.
+app.patch('/api/my-profile/biodata', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
+  const me = await myProfileForReq(req);
+  if (!me) return bad(res, 'No profile is linked to this account.', 403);
+  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, 'Your guardian edits your biodata for you.', 403);
+
+  const b = req.body || {};
+  const merged = { ...me.profile };
+  for (const f of BIODATA_EDITABLE) {
+    if (f in b) merged[f] = b[f] === '' ? null : b[f];
+  }
+  if (b.familyType && !['NUCLEAR', 'JOINT'].includes(String(b.familyType).toUpperCase())) {
+    return bad(res, 'familyType must be NUCLEAR or JOINT.');
+  }
+
+  const sets = BIODATA_EDITABLE.map((f) => `${f} = ?`);
+  const params = BIODATA_EDITABLE.map((f) => merged[f] ?? null);
+  sets.push('completeness = ?');
+  params.push(completenessOf(merged));
+  if (typeof b.photoLocked === 'boolean') { sets.push('photoLocked = ?'); params.push(b.photoLocked ? 1 : 0); }
+  if (typeof b.inNetworkPool === 'boolean') { sets.push('inNetworkPool = ?'); params.push(b.inNetworkPool ? 1 : 0); }
+
+  let newPrn = me.profile.prn;
+  if (b.publish === true && me.profile.status === 'DRAFT') {
+    newPrn = me.profile.prn || await nextPrn();
+    sets.push('prn = ?', "status = 'ACTIVE'");
+    params.push(newPrn);
+  }
+  sets.push('lastUpdatedAt = ?');
+  params.push(new Date());
+
+  await withTransaction(async (tx) => {
+    await tx.execute(`UPDATE profiles SET ${sets.join(', ')} WHERE id = ?`, [...params, me.profile.id]);
+    if (Array.isArray(b.preferences)) {
+      await tx.execute('DELETE FROM profile_preferences WHERE profileId = ?', [me.profile.id]);
+      for (const p of b.preferences) {
+        if (p && p.label) {
+          await insert(tx, 'INSERT INTO profile_preferences (profileId, label, enabled) VALUES (?, ?, ?)', [me.profile.id, String(p.label), p.enabled ? 1 : 0]);
+        }
+      }
+    }
+  });
+
+  const updated = await queryOne('SELECT * FROM profiles WHERE id = ?', [me.profile.id]);
+  const prefs = await query('SELECT label, enabled FROM profile_preferences WHERE profileId = ? ORDER BY id', [me.profile.id]);
+  return res.json({
+    profile: {
+      ...updated,
+      age: yearsSince(updated.dob),
+      statusLabel: STATUS_LABEL[updated.status] || updated.status,
+      preferences: prefs.map((r) => ({ label: r.label, enabled: Boolean(r.enabled) })),
+    },
+  });
+});
+
+// A transparent, deterministic compatibility score against one candidate
+// profile — not a learned model, but real arithmetic over real fields (no
+// hardcoded pairs, unlike the ghotok console's mocked funnel/misses panels).
+function scoreMatch(mine, cand) {
+  const factors = [];
+  const ageA = yearsSince(mine.dob);
+  const ageB = yearsSince(cand.dob);
+  const ageDiff = ageA != null && ageB != null ? Math.abs(ageA - ageB) : null;
+  const agePct = ageDiff == null ? 50 : Math.max(20, 100 - ageDiff * 12);
+  factors.push({ label: 'Age', pct: Math.round(agePct), note: ageDiff == null ? 'Age not on file' : `${ageDiff} year${ageDiff === 1 ? '' : 's'} apart` });
+
+  const sameDistrict = mine.district && mine.district === cand.district;
+  factors.push({ label: 'Location', pct: sameDistrict ? 92 : 55, note: sameDistrict ? `Both in ${mine.district}` : [mine.district, cand.district].filter(Boolean).join(' · ') });
+
+  const eduMatch = eduLevelOf(mine.degree) === eduLevelOf(cand.degree);
+  factors.push({ label: 'Education', pct: eduMatch ? 88 : 62, note: eduMatch ? `Both ${eduLevelOf(mine.degree).toLowerCase()}` : `${eduLevelOf(mine.degree)} · ${eduLevelOf(cand.degree)}` });
+
+  const sameRel = mine.religiousPractice && mine.religiousPractice === cand.religiousPractice;
+  factors.push({ label: 'Religious practice', pct: sameRel ? 90 : 60, note: sameRel ? mine.religiousPractice : 'Different stated practice' });
+
+  const sameFam = mine.familyType && mine.familyType === cand.familyType;
+  factors.push({ label: 'Family type', pct: sameFam ? 85 : 65, note: sameFam ? `Both ${capWord(mine.familyType)}` : 'Different family structure' });
+
+  const score = Math.round(factors.reduce((n, f) => n + f.pct, 0) / factors.length);
+  return { score, factors };
+}
+
+// ── AI matching for a guardian / self-managed candidate ──
+// Computed on demand over the same visible pool as /api/my-search — no
+// persisted suggestion table (that one is keyed to a ghotok's book).
+app.get('/api/my-matches', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
+  const me = await myProfileForReq(req);
+  if (!me) return res.json({ matches: [] });
+  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, 'Your guardian reviews matches on your behalf.', 403);
+
+  const mine = me.profile;
+  const opposite = mine.gender === 'MALE' ? 'FEMALE' : 'MALE';
+  const rows = await query(
+    "SELECT * FROM profiles WHERE gender = ? AND id != ? AND inNetworkPool = 1 AND status = 'ACTIVE' ORDER BY lastUpdatedAt DESC LIMIT 60",
+    [opposite, mine.id]
+  );
+
+  const matches = rows
+    .map((r) => {
+      const { score, factors } = scoreMatch(mine, r);
+      return {
+        profileId: r.id,
+        prn: r.prn,
+        name: r.fullName,
+        init: initialsOf(r.fullName),
+        age: yearsSince(r.dob),
+        edu: [r.degree, r.institution].filter(Boolean).join(', '),
+        city: r.area || r.district,
+        verified: Boolean(r.verified),
+        score,
+        factors,
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 8);
+
+  return res.json({ matches });
+});
+
 // ── verify email ──
 // body: { token }  — the raw token from the emailed link.
 app.post('/api/auth/verify-email', async (req, res) => {
@@ -1321,6 +1578,18 @@ app.post('/api/auth/reset-password', async (req, res) => {
   });
 
   return res.json({ ok: true, message: 'Password updated. You can now sign in with your new password.' });
+});
+
+// ── fallbacks ──
+// Any route not matched above.
+app.use((_req, res) => bad(res, 'Not found.', 404));
+
+// Catches anything thrown/rejected in a route (e.g. the DB being unreachable)
+// so the client always gets JSON, never Express's default HTML error page.
+// eslint-disable-next-line no-unused-vars
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  bad(res, 'Something went wrong on our end. Please try again in a moment.', 500);
 });
 
 app.listen(PORT, () => {

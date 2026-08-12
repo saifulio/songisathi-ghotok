@@ -226,13 +226,21 @@ export default function GuardianCandidate() {
               <div className="gc-cand-note-t">Saying no costs you nothing</div>
               <div className="gc-cand-note-b">A “not interested” is passed on as a family decision, with no reason attached and no note about you. Your mother sees the count, not your reasoning.</div>
             </div>
-            <div className="gc-cannot">
-              <div className="gc-cannot-t">What you cannot do here</div>
-              <div className="gc-cannot-list">
-                {CANNOT.map((cn) => (<div key={cn} className="gc-cannot-item"><span className="gc-cannot-dot">–</span><span>{cn}</span></div>))}
+            {!loading && !selfManaged && (
+              <div className="gc-cannot">
+                <div className="gc-cannot-t">What you cannot do here</div>
+                <div className="gc-cannot-list">
+                  {CANNOT.map((cn) => (<div key={cn} className="gc-cannot-item"><span className="gc-cannot-dot">–</span><span>{cn}</span></div>))}
+                </div>
+                <div className="gc-cannot-note">Search, messaging, and contact details sit with your guardian and ghotok. This is the product working as intended, not a limitation of your account.</div>
               </div>
-              <div className="gc-cannot-note">Search, messaging, and contact details sit with your guardian and ghotok. This is the product working as intended, not a limitation of your account.</div>
-            </div>
+            )}
+            {!loading && selfManaged && (
+              <div className="gc-cannot">
+                <div className="gc-cannot-t">Your profile is self-managed</div>
+                <div className="gc-cannot-note">You decide for yourself — search the network, edit your own biodata, and review AI matches from the menu above. Contact details still stay sealed until both sides agree to release them.</div>
+              </div>
+            )}
           </div>
         </div>
         )}

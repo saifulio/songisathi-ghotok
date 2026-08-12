@@ -79,7 +79,7 @@ export default function SignUp() {
     <div className="auth">
       <div className="auth-card wide">
         <aside className="auth-aside">
-          <div className="auth-brand"><span className="auth-logo">স</span><span>SongiSathi</span></div>
+          <Link to="/" className="auth-brand"><span className="auth-logo">স</span><span>SongiSathi</span></Link>
           <div className="auth-aside-title">Create your account</div>
           <p className="auth-aside-copy">Whether you are a matchmaker, a guardian, or searching for yourself — your details stay behind you. Contact and photos are never the opening move.</p>
           <ul className="auth-aside-list">

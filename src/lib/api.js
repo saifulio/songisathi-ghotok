@@ -1,22 +1,32 @@
 // Tiny fetch wrapper for the SongiSathi auth API (proxied at /api by Vite).
 
 async function request(path, { method = 'GET', body, token } = {}) {
-  const res = await fetch(`/api${path}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  let res;
+  try {
+    res = await fetch(`/api${path}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    // fetch() itself threw — the API server can't be reached at all.
+    throw new Error("We can't reach the server right now. Check your connection and try again.");
+  }
+
   let data = null;
   try {
     data = await res.json();
   } catch {
-    /* no body */
+    /* no body, or not JSON */
   }
   if (!res.ok) {
-    throw new Error((data && data.error) || `Request failed (${res.status})`);
+    const friendly = res.status >= 500
+      ? 'Something went wrong on our end. Please try again in a moment.'
+      : 'Something went wrong with that request. Please try again.';
+    throw new Error((data && data.error) || friendly);
   }
   return data;
 }
@@ -62,6 +72,11 @@ export const api = {
   myProposals: (token) => request('/my-profile/proposals', { token }),
   myActivity: (token) => request('/my-profile/activity', { token }),
   decideProposal: (token, id, patch) => request(`/my-profile/proposals/${id}`, { method: 'PATCH', body: patch, token }),
+  myBiodata: (token) => request('/my-profile/biodata', { token }),
+  updateMyBiodata: (token, patch) => request('/my-profile/biodata', { method: 'PATCH', body: patch, token }),
+  mySearch: (token) => request('/my-search', { token }),
+  myMatches: (token) => request('/my-matches', { token }),
+  sendInterest: (token, targetProfileId, message) => request('/interests', { method: 'POST', body: { targetProfileId, message }, token }),
 
   // Email verification
   verifyEmail: (token) => request('/auth/verify-email', { method: 'POST', body: { token } }),
