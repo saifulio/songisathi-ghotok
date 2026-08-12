@@ -40,6 +40,24 @@ const publicUser = (user, extra = {}) => ({
 
 const bad = (res, msg, code = 400) => res.status(code).json({ error: msg });
 
+// ── auth middleware ──
+// requireAuth verifies the Bearer token and hangs { sub, role } on req.auth.
+// requireRole(...roles) gates a route to specific roles (use after requireAuth).
+function requireAuth(req, res, next) {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+  if (!token) return bad(res, 'Not authenticated.', 401);
+  try {
+    req.auth = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    return bad(res, 'Invalid or expired token.', 401);
+  }
+}
+
+const requireRole = (...roles) => (req, res, next) =>
+  roles.includes(req.auth?.role) ? next() : bad(res, 'Not allowed for your role.', 403);
+
 // A one-time token: a raw random string (returned, goes in the email link) and
 // its SHA-256 hash (stored, so a DB leak never exposes a usable token).
 const makeToken = () => {
@@ -84,6 +102,17 @@ async function nextGhotokCode() {
   }, 0);
   const next = Math.max(500, max + 1);
   return `GHT-${String(next).padStart(4, '0')}`;
+}
+
+// Next profile reference number, e.g. PRN-10512 — scans existing PRNs and
+// increments the highest (with a floor so new installs start at a sensible number).
+async function nextPrn() {
+  const rows = await query('SELECT prn FROM profiles WHERE prn IS NOT NULL');
+  const max = rows.reduce((m, r) => {
+    const n = parseInt(String(r.prn).replace(/\D/g, ''), 10);
+    return Number.isFinite(n) && n > m ? n : m;
+  }, 0);
+  return `PRN-${Math.max(10500, max + 1)}`;
 }
 
 const makeReferral = (fullName) => {
@@ -236,22 +265,120 @@ app.post('/api/auth/signin', async (req, res) => {
 });
 
 // ── current user (from token) ──
-app.get('/api/auth/me', async (req, res) => {
-  const auth = req.headers.authorization || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
-  if (!token) return bad(res, 'Not authenticated.', 401);
-  try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    const user = await findUserWithRelations('id', payload.sub);
-    if (!user) return bad(res, 'User not found.', 404);
-    const extra = {};
-    if (user.ghotok) { extra.code = user.ghotok.code; extra.tier = user.ghotok.tier; }
-    if (user.guardian) { extra.relation = user.guardian.relation; }
-    if (user.candidate) { extra.profileId = user.candidate.id; extra.gender = user.candidate.gender; }
-    return res.json({ user: publicUser(user, extra) });
-  } catch {
-    return bad(res, 'Invalid or expired token.', 401);
+app.get('/api/auth/me', requireAuth, async (req, res) => {
+  const user = await findUserWithRelations('id', req.auth.sub);
+  if (!user) return bad(res, 'User not found.', 404);
+  const extra = {};
+  if (user.ghotok) { extra.code = user.ghotok.code; extra.tier = user.ghotok.tier; }
+  if (user.guardian) { extra.relation = user.guardian.relation; }
+  if (user.candidate) { extra.profileId = user.candidate.id; extra.gender = user.candidate.gender; }
+  return res.json({ user: publicUser(user, extra) });
+});
+
+// ── screening questions (the sealed layer) ──
+// The private questions shown in the Add-profile wizard, from the DB.
+app.get('/api/screening-questions', requireAuth, async (_req, res) => {
+  const qs = await query(
+    'SELECT id, code, questionBn, questionEn, helpText, type FROM screening_questions ORDER BY sortOrder'
+  );
+  const optionRows = await query(
+    'SELECT questionId, label FROM screening_options ORDER BY sortOrder'
+  );
+  const optionsByQ = {};
+  for (const o of optionRows) (optionsByQ[o.questionId] ||= []).push(o.label);
+  res.json({
+    questions: qs.map((q) => ({
+      id: q.code,
+      bn: q.questionBn,
+      en: q.questionEn,
+      help: q.helpText || '',
+      type: q.type === 'TEXT' ? 'text' : 'choice',
+      options: optionsByQ[q.id] || [],
+    })),
+  });
+});
+
+// ── create a profile ──
+// A ghotok adds a candidate to their book. Creates the biodata, the "looking
+// for" preferences, and any sealed screening answers, in one transaction.
+// body: { fullName, gender, dob, heightLabel, maritalStatus, district, area,
+//         degree, institution, profession, familyType, religion, religiousPractice,
+//         preferences:[{label,enabled}], screening:{ q1:.., q6:.. }, owner,
+//         sealed, inNetworkPool, publish }
+app.post('/api/profiles', requireAuth, requireRole('GHOTOK'), async (req, res) => {
+  const b = req.body || {};
+  const ghotok = await queryOne('SELECT id FROM ghotoks WHERE userId = ? LIMIT 1', [req.auth.sub]);
+  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
+
+  const fullName = (b.fullName || '').trim();
+  if (!fullName) return bad(res, 'Full name is required.');
+  const gender = ['MALE', 'FEMALE'].includes(b.gender) ? b.gender : null;
+  if (!gender) return bad(res, 'Gender is required.');
+  if (!b.district) return bad(res, 'District is required.');
+
+  let dob = null;
+  if (b.dob) {
+    dob = new Date(b.dob);
+    if (Number.isNaN(dob.getTime())) return bad(res, 'Date of birth is invalid.');
   }
+  const familyType = ['NUCLEAR', 'JOINT'].includes(String(b.familyType || '').toUpperCase())
+    ? String(b.familyType).toUpperCase()
+    : null;
+
+  const publish = Boolean(b.publish);
+  const sealed = Boolean(b.sealed);
+  const inNetworkPool = Boolean(b.inNetworkPool);
+  const owner = { guardian: 'GUARDIAN', candidate: 'CANDIDATE', ghotok: 'GHOTOK' }[b.owner] || 'GHOTOK';
+  const screening = b.screening && typeof b.screening === 'object' ? b.screening : {};
+
+  // Completeness: a filled biodata is ~60%, screening answers make up the rest.
+  const questionRows = await query('SELECT id, code FROM screening_questions');
+  const totalQ = questionRows.length || 1;
+  const answeredQ = questionRows.filter((q) => String(screening[q.code] ?? '').trim() !== '').length;
+  const completeness = Math.min(100, 60 + Math.round((answeredQ / totalQ) * 40));
+
+  const prn = publish ? await nextPrn() : null;
+  const status = publish ? 'ACTIVE' : 'DRAFT';
+
+  const { profileId } = await withTransaction(async (tx) => {
+    const id = await insert(
+      tx,
+      `INSERT INTO profiles
+        (prn, fullName, gender, dob, heightLabel, maritalStatus, district, area, degree, institution,
+         profession, familyType, religion, religiousPractice, managerType, managedByGhotokId,
+         status, photoLocked, inNetworkPool, completeness)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'GHOTOK', ?, ?, ?, ?, ?)`,
+      [
+        prn, fullName, gender, dob, b.heightLabel || null, b.maritalStatus || 'Never married',
+        b.district, b.area || null, b.degree || null, b.institution || null, b.profession || null,
+        familyType, b.religion || null, b.religiousPractice || null, ghotok.id,
+        status, true, inNetworkPool, completeness,
+      ]
+    );
+
+    if (Array.isArray(b.preferences)) {
+      for (const p of b.preferences) {
+        if (p && p.label) {
+          await insert(tx, 'INSERT INTO profile_preferences (profileId, label, enabled) VALUES (?, ?, ?)', [id, String(p.label), p.enabled ? 1 : 0]);
+        }
+      }
+    }
+
+    const sealedAt = sealed ? new Date() : null;
+    for (const q of questionRows) {
+      const val = screening[q.code];
+      if (val == null || String(val).trim() === '') continue;
+      await insert(
+        tx,
+        'INSERT INTO screening_responses (profileId, questionId, answerValue, sealed, sealedAt, answeredByRole) VALUES (?, ?, ?, ?, ?, ?)',
+        [id, q.id, String(val), sealed ? 1 : 0, sealedAt, owner]
+      );
+    }
+    return { profileId: id };
+  });
+
+  const profile = await queryOne('SELECT * FROM profiles WHERE id = ?', [profileId]);
+  return res.status(201).json({ profile });
 });
 
 // ── verify email ──

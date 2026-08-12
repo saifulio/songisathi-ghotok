@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Avatar, Badge, Input, Select, Checkbox, Switch, Radio, Tabs, StatusPill, Dialog } from '../../components/ui/index.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { api } from '../../lib/api.js';
 import './AddProfile.css';
 
 const QS = [
@@ -12,26 +15,90 @@ const QS = [
 ];
 const opts = (a) => a.map((v) => ({ value: v, label: v }));
 const OWNERS = [{ value: 'guardian', label: 'The guardian' }, { value: 'candidate', label: 'The candidate' }, { value: 'ghotok', label: 'I will fill it in' }];
+// The DB stores question text but not the textarea placeholder — supply it here.
+const PLACEHOLDERS = { q6: 'e.g. a managed chronic condition, a hereditary consideration — in the family’s own words' };
 
 export default function AddProfile() {
+  const { token } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [owner, setOwner] = useState('guardian');
+  const [questions, setQuestions] = useState(QS);
   const [answers, setAnswers] = useState({});
   const [text, setText] = useState('');
   const [consent, setConsent] = useState(false);
   const [sealed, setSealed] = useState(false);
   const [poolOn, setPoolOn] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [publishedPrn, setPublishedPrn] = useState(null);
   const [dialog, setDialog] = useState(null);
   const [toast, setToast] = useState(null);
-  const [f, setF] = useState({ name: 'Nusrat Jahan', dob: '2000-03-14', height: '5′4″', marital: 'Never married', district: 'Dhaka', area: 'Dhanmondi', degree: 'MBA', inst: 'IBA, University of Dhaka', job: 'Banker', family: 'Nuclear' });
+  const [f, setF] = useState({ name: 'Nusrat Jahan', gender: 'FEMALE', dob: '2000-03-14', height: '5′4″', marital: 'Never married', district: 'Dhaka', area: 'Dhanmondi', degree: 'MBA', inst: 'IBA, University of Dhaka', job: 'Banker', family: 'Nuclear' });
   const [prefs, setPrefs] = useState({ 'Postgraduate degree': true, 'Settled abroad': false, 'Same district': true, 'Government service': false, 'Within 4 years of age': true, 'Family known to ours': false });
   const timer = useRef(null);
   const say = useCallback((msg) => { clearTimeout(timer.current); setToast(msg); timer.current = setTimeout(() => setToast(null), 4200); }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
+
+  // Load the sealed-layer questions from the API (falls back to the built-in
+  // list if the request fails, so the wizard still works offline).
+  useEffect(() => {
+    let live = true;
+    api.screeningQuestions(token)
+      .then((data) => {
+        if (!live || !data?.questions?.length) return;
+        setQuestions(data.questions.map((q) => (
+          q.type === 'text' ? { ...q, placeholder: PLACEHOLDERS[q.id] || 'In the family’s own words' } : q
+        )));
+      })
+      .catch(() => { /* keep the built-in QS fallback */ });
+    return () => { live = false; };
+  }, [token]);
+
   const setField = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }));
 
-  const total = QS.length;
-  const answered = QS.filter((q) => q.type !== 'text' && answers[q.id]).length + (text.trim() ? 1 : 0);
+  const textQ = questions.find((q) => q.type === 'text');
+  const total = questions.length;
+  const answered = questions.filter((q) => q.type !== 'text' && answers[q.id]).length + (text.trim() ? 1 : 0);
+
+  // Assemble the wizard state into the API payload.
+  const buildPayload = (publish) => ({
+    fullName: f.name,
+    gender: f.gender,
+    dob: f.dob,
+    heightLabel: f.height,
+    maritalStatus: f.marital,
+    district: f.district,
+    area: f.area,
+    degree: f.degree,
+    institution: f.inst,
+    profession: f.job,
+    familyType: f.family,
+    preferences: Object.entries(prefs).map(([label, enabled]) => ({ label, enabled })),
+    screening: { ...answers, ...(textQ ? { [textQ.id]: text.trim() } : {}) },
+    owner,
+    sealed,
+    inNetworkPool: poolOn,
+    publish,
+  });
+
+  const submit = async (publish) => {
+    if (busy || publishedPrn) return;
+    setBusy(true);
+    try {
+      const { profile } = await api.createProfile(token, buildPayload(publish));
+      if (publish) {
+        setPublishedPrn(profile.prn);
+        say(`Profile published. ${profile.prn} issued — it enters matching from Monday’s run.`);
+        setTimeout(() => navigate('/dashboard'), 1600);
+      } else {
+        say('Draft saved. You can return to this profile from the dashboard.');
+      }
+    } catch (err) {
+      say(err.message || 'Could not save the profile. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
   const vaultPct = Math.round((answered / total) * 100);
   const completePct = 46 + Math.round((answered / total) * 34) + (sealed ? 8 : 0);
   const stepDone = { 1: true, 2: true, 3: sealed, 4: false };
@@ -120,6 +187,7 @@ export default function AddProfile() {
                 <div><div className="ap-step-title">মৌলিক তথ্য</div><div className="ap-step-desc">Basic details · visible on the biodata once you publish</div></div>
                 <div className="ap-card ap-form-grid">
                   <Input label="Full name" caption="পুরো নাম" placeholder="e.g. Nusrat Jahan" value={f.name} onChange={setField('name')} />
+                  <Select label="Profile for" caption="পাত্র/পাত্রী" value={f.gender} onChange={setField('gender')} options={[{ value: 'FEMALE', label: 'Bride (female)' }, { value: 'MALE', label: 'Groom (male)' }]} />
                   <Input label="Date of birth" caption="জন্ম তারিখ" type="date" value={f.dob} onChange={setField('dob')} />
                   <Select label="Height" value={f.height} onChange={setField('height')} options={opts(['5′0″', '5′1″', '5′2″', '5′3″', '5′4″', '5′5″', '5′6″'])} />
                   <Select label="Marital status" value={f.marital} onChange={setField('marital')} options={opts(['Never married', 'Divorced', 'Widowed'])} />
@@ -207,7 +275,7 @@ export default function AddProfile() {
                 {!sealed ? (
                   <>
                     <div className="ap-questions">
-                      {QS.map((q, i) => {
+                      {questions.map((q, i) => {
                         const a = answers[q.id];
                         const done = q.type === 'text' ? !!text.trim() : !!a;
                         return (
@@ -249,7 +317,7 @@ export default function AddProfile() {
                         <div className="ap-seal-note">A sealed section can only be reopened by asking the family to answer again — you request it, they re-answer, the old answers are destroyed.</div>
                       </div>
                       <div className="ap-seal-actions">
-                        <Button variant="ghost" onClick={() => say('Draft saved. You can return to this profile from the dashboard.')}>Save draft</Button>
+                        <Button variant="ghost" disabled={busy} onClick={() => submit(false)}>Save draft</Button>
                         <Button variant="primary" disabled={sealDisabled} onClick={() => setDialog('seal')}>Seal and encrypt answers</Button>
                       </div>
                     </div>
@@ -299,7 +367,7 @@ export default function AddProfile() {
                     <div className="ap-card ap-publish">
                       <Switch label="Include in trusted network pool" checked={poolOn} onChange={() => setPoolOn((v) => !v)} />
                       <div className="ap-publish-note">Other verified ghotoks can be suggested this profile. Contact always routes back through you.</div>
-                      <Button variant="primary" style={{ width: '100%' }} onClick={() => say('Profile published. PRN-10512 issued — it enters matching from Monday’s run.')}>Publish profile</Button>
+                      <Button variant="primary" style={{ width: '100%' }} disabled={busy || !!publishedPrn} onClick={() => submit(true)}>{publishedPrn ? `Published · ${publishedPrn}` : busy ? 'Publishing…' : 'Publish profile'}</Button>
                     </div>
                   </div>
                 </div>
@@ -310,8 +378,8 @@ export default function AddProfile() {
               <Button variant="ghost" onClick={() => setStep((s) => Math.max(1, s - 1))}>Back</Button>
               <span className="ap-footer-note">{footerNote}</span>
               <div className="ap-footer-actions">
-                <Button variant="outline" onClick={() => say('Draft saved. You can return to this profile from the dashboard.')}>Save and exit</Button>
-                <Button variant="primary" onClick={() => step === 4 ? say('Profile published. PRN-10512 issued — it enters matching from Monday’s run.') : setStep((s) => Math.min(4, s + 1))}>{nextLabel}</Button>
+                <Button variant="outline" disabled={busy} onClick={() => submit(false)}>Save and exit</Button>
+                <Button variant="primary" disabled={busy || (step === 4 && !!publishedPrn)} onClick={() => (step === 4 ? submit(true) : setStep((s) => Math.min(4, s + 1)))}>{step === 4 && busy ? 'Publishing…' : nextLabel}</Button>
               </div>
             </div>
           </div>

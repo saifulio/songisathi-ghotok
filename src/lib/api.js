@@ -26,6 +26,10 @@ export const api = {
   signin: (payload) => request('/auth/signin', { method: 'POST', body: payload }),
   me: (token) => request('/auth/me', { token }),
 
+  // Profiles
+  screeningQuestions: (token) => request('/screening-questions', { token }),
+  createProfile: (token, payload) => request('/profiles', { method: 'POST', body: payload, token }),
+
   // Email verification
   verifyEmail: (token) => request('/auth/verify-email', { method: 'POST', body: { token } }),
   resendVerification: (email) => request('/auth/resend-verification', { method: 'POST', body: { email } }),
