@@ -42,6 +42,12 @@ export const api = {
   interests: (token) => request('/interests', { token }),
   updateInterest: (token, id, patch) => request(`/interests/${id}`, { method: 'PATCH', body: patch, token }),
 
+  // Commission
+  marriages: (token) => request('/marriages', { token }),
+  closablePairs: (token) => request('/marriages/closable-pairs', { token }),
+  recordMarriage: (token, payload) => request('/marriages', { method: 'POST', body: payload, token }),
+  testimonials: (token) => request('/testimonials', { token }),
+
   // Email verification
   verifyEmail: (token) => request('/auth/verify-email', { method: 'POST', body: { token } }),
   resendVerification: (email) => request('/auth/resend-verification', { method: 'POST', body: { email } }),

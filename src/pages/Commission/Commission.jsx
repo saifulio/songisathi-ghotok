@@ -1,48 +1,69 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Badge, Tabs, Input, Checkbox } from '../../components/ui/index.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { api } from '../../lib/api.js';
 import './Commission.css';
-
-const LEDGER = [
-  { id: 'l1', pair: 'Farhana Akter ↔ Sabbir Rahman', prns: 'PRN-31204 · PRN-10914', date: '5 Aug 2026', agreed: 40000, received: 40000 },
-  { id: 'l2', pair: 'Sumaiya Haque ↔ Arif Mahmud', prns: 'PRN-20881 · PRN-10662', date: '28 Jul 2026', agreed: 30000, received: 15000 },
-  { id: 'l3', pair: 'Rifat Jahan ↔ Nayeem Uddin', prns: 'PRN-24410 · PRN-10233', date: '19 Jul 2026', agreed: 25000, received: 0 },
-  { id: 'l4', pair: 'Ayesha Siddika ↔ Rezaul Karim', prns: 'PRN-19077 · PRN-10077', date: '2 Jul 2026', agreed: 35000, received: 35000 },
-  { id: 'l5', pair: 'Marium Khatun ↔ Jahid Hasan', prns: 'PRN-18220 · PRN-10488', date: '14 Jun 2026', agreed: 20000, received: 20000 },
-];
-
-const PAIRS = [
-  { id: 'c1', pair: 'Nusrat Jahan ↔ Tanvir Ahmed', prns: 'PRN-10245 · PRN-10188', since: '12 May', state: 'Families have met twice' },
-  { id: 'c2', pair: 'Sadia Islam ↔ Imran Chowdhury', prns: 'PRN-10302 · PRN-10233', since: '3 June', state: 'Guardians in discussion' },
-  { id: 'c3', pair: 'Mahmudul Hasan ↔ Rokeya Begum', prns: 'PRN-10015 · PRN-20114', since: '21 April', state: 'Engagement announced' },
-];
 
 const taka = (n) => '৳' + Number(n || 0).toLocaleString('en-US');
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+const fmtDate = (d) => { const dt = new Date(d); return isNaN(dt) ? '—' : `${dt.getDate()} ${MONTHS[dt.getMonth()]} ${dt.getFullYear()}`; };
+const fmtSince = (d) => { const dt = new Date(d); return isNaN(dt) ? '' : `${dt.getDate()} ${MONTHS[dt.getMonth()]}`; };
 
 export default function Commission() {
-  const [rows, setRows] = useState(LEDGER);
+  const { user, token } = useAuth();
+  const [rows, setRows] = useState([]);
+  const [pairs, setPairs] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [reminded, setReminded] = useState({});
   const [closeOpen, setCloseOpen] = useState(false);
   const [flowStep, setFlowStep] = useState(1);
-  const [pickedPair, setPickedPair] = useState('c1');
+  const [pickedPair, setPickedPair] = useState(null);
   const [feeBride, setFeeBride] = useState('25000');
   const [feeGroom, setFeeGroom] = useState('15000');
   const [weddingDate, setWeddingDate] = useState('2026-08-07');
   const [paidFull, setPaidFull] = useState(false);
-  const [closedCount, setClosedCount] = useState(27);
+  const [busy, setBusy] = useState(false);
+  const [justClosedLabel, setJustClosedLabel] = useState('');
+  const [closedCount, setClosedCount] = useState(0);
+  const [yearsActive, setYearsActive] = useState(null);
   const [toast, setToast] = useState(null);
   const timer = useRef(null);
 
   const say = useCallback((msg) => { clearTimeout(timer.current); setToast(msg); timer.current = setTimeout(() => setToast(null), 4400); }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
 
+  // Load the ledger, the pairs this ghotok could close, the family
+  // testimonials rail, and the lifetime stats.
+  useEffect(() => {
+    if (!token) return undefined;
+    let live = true;
+    Promise.all([api.marriages(token), api.closablePairs(token), api.testimonials(token), api.dashboardStats(token)])
+      .then(([m, p, t, s]) => {
+        if (!live) return;
+        setRows(m.marriages);
+        setPairs(p.pairs);
+        setTestimonials(t.testimonials);
+        setPickedPair((cur) => cur ?? p.pairs[0]?.id ?? null);
+        setClosedCount(s.stats.marriagesClosed);
+        setYearsActive(s.stats.yearsActive);
+      })
+      .catch((e) => say(e.message || 'Could not load the commission ledger.'))
+      .finally(() => { if (live) setLoading(false); });
+    return () => { live = false; };
+  }, [token, say]);
+
   const filtered = rows.filter((l) => filter === 'paid' ? l.received >= l.agreed : filter === 'owing' ? l.received < l.agreed : true);
   const outstanding = rows.reduce((n, l) => n + Math.max(0, l.agreed - l.received), 0);
-  const monthTotal = rows.filter((l) => l.date.includes('Aug')).reduce((n, l) => n + l.received, 0) + 23000;
+  const now = new Date();
+  const monthTotal = rows
+    .filter((l) => { const d = new Date(l.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); })
+    .reduce((n, l) => n + l.received, 0);
   const avg = rows.length ? Math.round(rows.reduce((n, l) => n + l.agreed, 0) / rows.length) : 0;
   const owingCount = rows.filter((l) => l.received < l.agreed).length;
-  const picked = PAIRS.find((p) => p.id === pickedPair);
+  const picked = pairs.find((p) => p.id === pickedPair);
   const feeTotal = Number(feeBride || 0) + Number(feeGroom || 0);
 
   const summary = [
@@ -58,16 +79,31 @@ export default function Commission() {
   ];
   const titles = { 1: { bn: 'কোন জোড়া?', en: 'Which pair are you closing?' }, 2: { bn: 'কমিশন ও তারিখ', en: 'Commission and wedding date' }, 3: { bn: 'অভিনন্দন', en: 'Recorded' } }[flowStep];
 
-  const flowNext = () => {
-    if (flowStep === 1) { setFlowStep(2); return; }
+  const flowNext = async () => {
+    if (flowStep === 1) {
+      if (!picked) return say('No pair is ready to close yet.');
+      setFlowStep(2);
+      return;
+    }
     if (flowStep === 2) {
-      const d = new Date(weddingDate);
-      const fmt = isNaN(d) ? 'Aug 2026' : `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-      const newRow = { id: 'l' + Date.now(), pair: picked ? picked.pair : 'New marriage', prns: picked ? picked.prns : '', date: fmt, agreed: feeTotal, received: paidFull ? feeTotal : 0 };
-      setRows((r) => [newRow, ...r]);
-      setClosedCount((c) => c + 1);
-      setFlowStep(3);
-      say(`Recorded. Both profiles are closed and out of matching — ${taka(feeTotal)} logged, none of it ours.`);
+      setBusy(true);
+      try {
+        const { marriage, marriagesClosed } = await api.recordMarriage(token, {
+          profileAId: picked.profileAId, profileBId: picked.profileBId,
+          brideFee: Number(feeBride) || 0, groomFee: Number(feeGroom) || 0,
+          weddingDate, paidFull,
+        });
+        setRows((r) => [marriage, ...r]);
+        setJustClosedLabel(picked.pair);
+        setPairs((list) => list.filter((x) => x.id !== picked.id));
+        setClosedCount(marriagesClosed);
+        setFlowStep(3);
+        say(`Recorded. Both profiles are closed and out of matching — ${taka(feeTotal)} logged, none of it ours.`);
+      } catch (e) {
+        say(e.message || 'Could not record this marriage.');
+      } finally {
+        setBusy(false);
+      }
       return;
     }
     setCloseOpen(false); setFlowStep(1);
@@ -80,7 +116,7 @@ export default function Commission() {
         <div className="cm-topbar">
           <div className="cm-topbar-brand"><div className="cm-logo">স</div><span>SongiSathi</span></div>
           <div className="cm-topbar-tabs"><span>ড্যাশবোর্ড</span><span>প্রোফাইল</span><span className="on">কমিশন</span></div>
-          <div className="cm-topbar-right"><span>SongiSathi takes 0% of your commission</span><Avatar initials="RA" size={28} /></div>
+          <div className="cm-topbar-right"><span>SongiSathi takes 0% of your commission</span><Avatar initials={initialsOf(user?.fullName)} size={28} /></div>
         </div>
 
         <div className="cm-summary">
@@ -108,12 +144,14 @@ export default function Commission() {
             <div className="cm-table-wrap">
               <div className="cm-table">
                 <div className="cm-thead"><span>Marriage</span><span>Date</span><span>Agreed</span><span>Received</span><span style={{ textAlign: 'right' }}>Status</span></div>
+                {loading && <div className="cm-row" style={{ color: 'var(--text-secondary)' }}>Loading…</div>}
+                {!loading && filtered.length === 0 && <div className="cm-row" style={{ color: 'var(--text-secondary)' }}>No marriages in this view yet.</div>}
                 {filtered.map((l) => {
                   const full = l.received >= l.agreed; const part = l.received > 0 && !full;
                   return (
                     <div key={l.id} className="cm-row">
                       <div className="cm-cell" data-label="Marriage"><div className="cm-pair">{l.pair}</div><div className="cm-prns">{l.prns}</div></div>
-                      <span className="cm-date" data-label="Date">{l.date}</span>
+                      <span className="cm-date" data-label="Date">{fmtDate(l.date)}</span>
                       <span className="cm-agreed" data-label="Agreed">{taka(l.agreed)}</span>
                       <span data-label="Received" style={{ fontSize: 12.5, fontVariantNumeric: 'tabular-nums', color: full ? 'var(--brand-primary)' : part ? 'var(--gold-700)' : 'var(--terracotta-600)' }}>{taka(l.received)}</span>
                       <div className="cm-status">
@@ -131,7 +169,7 @@ export default function Commission() {
           <div className="cm-rail">
             <div className="cm-record">
               <div className="cm-record-label">Your record</div>
-              <div className="cm-record-num"><span>{closedCount}</span><span className="cm-record-years">marriages, 22 years</span></div>
+              <div className="cm-record-num"><span>{closedCount}</span><span className="cm-record-years">marriages{yearsActive != null ? `, ${yearsActive} years` : ''}</span></div>
               <div className="cm-record-note">Families see this number and your district next to your name. It is the only ranking on SongiSathi — there are no stars and no paid placement.</div>
               <div className="cm-record-stats">
                 {[{ k: 'From the trusted pool', v: '6' }, { k: 'Longest search', v: '19 months' }, { k: 'Introductions per marriage', v: '4.2' }].map((rc) => (
@@ -143,8 +181,9 @@ export default function Commission() {
               <div className="cm-testi-t">Words from families</div>
               <div className="cm-testi-sub">Asked once, a month after the wedding. Never chased.</div>
               <div className="cm-testi-list">
-                {[{ quote: 'She did not push us once. When we said no to three proposals she simply said, then we wait.', by: 'Guardian of PRN-31204 · July 2026' }, { quote: 'The questions were asked before we ever met them. That saved my daughter a great deal.', by: 'Guardian of PRN-18220 · June 2026' }].map((ts, i) => (
-                  <div key={i} className="cm-testi"><div className="cm-testi-quote">{ts.quote}</div><div className="cm-testi-by">{ts.by}</div></div>
+                {testimonials.length === 0 && <div className="cm-testi-sub">No testimonials yet.</div>}
+                {testimonials.map((ts, i) => (
+                  <div key={i} className="cm-testi"><div className="cm-testi-quote">{ts.quote}</div><div className="cm-testi-by">{ts.byLabel} · {ts.monthLabel}</div></div>
                 ))}
               </div>
             </div>
@@ -168,10 +207,11 @@ export default function Commission() {
               {flowStep === 1 && (
                 <div className="cm-step">
                   <div className="cm-step-note">Both profiles close together and leave the matching pool. Their biodata stays in your book, marked married.</div>
-                  {PAIRS.map((p) => (
+                  {pairs.length === 0 && <div className="cm-step-note">No pair is ready to close yet — introduce or accept an interest first.</div>}
+                  {pairs.map((p) => (
                     <div key={p.id} className="cm-pair-opt" onClick={() => setPickedPair(p.id)} style={{ borderColor: pickedPair === p.id ? 'var(--brand-primary)' : 'var(--border-subtle)', background: pickedPair === p.id ? 'var(--green-100)' : 'var(--surface-page)' }}>
                       <span className="cm-radio" style={{ borderColor: pickedPair === p.id ? 'var(--brand-primary)' : 'var(--border-default)' }}>{pickedPair === p.id && <span className="cm-radio-dot" />}</span>
-                      <div className="cm-pair-opt-info"><div className="cm-pair-opt-name">{p.pair}</div><div className="cm-pair-opt-sub">{p.prns} · introduced {p.since}</div></div>
+                      <div className="cm-pair-opt-info"><div className="cm-pair-opt-name">{p.pair}</div><div className="cm-pair-opt-sub">{p.prns} · introduced {fmtSince(p.since)}</div></div>
                       <span className="cm-pair-opt-state">{p.state}</span>
                     </div>
                   ))}
@@ -198,8 +238,8 @@ export default function Commission() {
                     <div className="cm-done-star">
                       <svg width="28" height="28" viewBox="0 0 24 24"><path d="M12 2l2.6 6.8L22 10l-5.4 4.4L18 22l-6-3.8L6 22l1.4-7.6L2 10l7.4-1.2z" fill="var(--gold-400)" /></svg>
                     </div>
-                    <div className="cm-done-bn">অভিনন্দন, রাহিমা আপা</div>
-                    <div className="cm-done-body">{picked ? picked.pair : ''} — recorded. That is {closedCount} marriages in your career, and the second this year from the trusted network pool.</div>
+                    <div className="cm-done-bn">অভিনন্দন, {(user?.fullName || '').split(' ')[0] || 'আপা'}</div>
+                    <div className="cm-done-body">{justClosedLabel} — recorded. That is {closedCount} marriages in your career.</div>
                   </div>
                   <div className="cm-word">
                     <div className="cm-word-t">Ask the families for a word?</div>
@@ -216,7 +256,7 @@ export default function Commission() {
             {flowStep !== 3 && (
               <div className="cm-modal-foot">
                 <span className="cm-flow-back" onClick={flowBack}>{flowStep === 1 ? 'Cancel' : '← Back'}</span>
-                <Button variant="primary" onClick={flowNext}>{flowStep === 1 ? 'Continue' : 'বিবাহ নথিভুক্ত করুন'}</Button>
+                <Button variant="primary" disabled={busy || (flowStep === 1 && !picked)} onClick={flowNext}>{flowStep === 1 ? 'Continue' : busy ? 'Recording…' : 'বিবাহ নথিভুক্ত করুন'}</Button>
               </div>
             )}
           </div>
