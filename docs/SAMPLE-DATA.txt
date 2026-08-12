@@ -78,6 +78,36 @@ CANDIDATE (self-managed — signed up as a bride)
     PRN-20881  Sumaiya Haque      F   ACTIVE           (Kamrul Islam / GHT-0311)
     PRN-24410  Rifat Jahan        F   ACTIVE           (Kamrul Islam / GHT-0311)
     PRN-31204  Farhana Akter      F   ACTIVE           (Guardian — Shirin Akter, self-managed)
+    PRN-31206  Tasnim Rahman      F   ACTIVE           (self-managed)
+
+------------------------------------------------------------------------------
+  BULK POPULATION  (100 generated profiles — gives search/filters/matching
+  something to work on. Deterministic: a reseed reproduces them exactly.)
+------------------------------------------------------------------------------
+
+  5 GHOTOKS · 10 profiles each · password demo123
+    GHT-0501  Sultana Parvin   01720100001   Dhaka      · Agency · verified
+    GHT-0502  Abdul Mannan     01720100002   Chattogram · Bureau · verified
+    GHT-0503  Ruhul Amin       01720100003   Sylhet     · Solo   · verified
+    GHT-0504  Ferdousi Begum   01720100004   Rajshahi   · Bureau · verified
+    GHT-0505  Shamim Reza      01720100005   Khulna     · Solo   · UNVERIFIED
+      → 50 profiles, PRN-40001…40050. Mostly ACTIVE and in the pool; a few sit
+        in IN_DISCUSSION or PAUSED so the status column isn't uniform.
+
+  10 GUARDIANS · one managed profile each · password demo123
+    01820200001 … 01820200010   (guardian1@ … guardian10@songisathi.test)
+      → 10 profiles, PRN-50001…50010, all ACTIVE and in the pool.
+
+  40 SELF-MANAGED MEMBERS · password demo123
+    01920300001 … 01920300040   (member1@ … member40@songisathi.test)
+      → 40 profiles, PRN-60001…60040. Four are still unpublished DRAFTs with no
+        PRN (the state a fresh bride/groom signup lands in) — use one of those
+        to exercise "Publish · make searchable" in the Biodata studio.
+
+  Spread: ~50/50 male/female · districts Dhaka, Chattogram, Sylhet, Mymensingh,
+  Rajshahi, Khulna · degrees mixed so the Graduate/Postgraduate filter cuts ·
+  every 3rd has stated preferences · every 4th has completed sealed screening
+  (so the "Screening completed" filter matches something).
 
 ------------------------------------------------------------------------------
   WHAT ELSE IS SEEDED (map to app features)

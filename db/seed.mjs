@@ -74,6 +74,13 @@ async function main() {
       { code: 'GHT-0155', name: 'Shafiqul Alam', phone: '01712000155', pw: 'shafiq123', bureauName: 'Alam Agency', district: 'Dhaka', tier: 'AGENCY', verified: true, marriagesClosed: 41, yearsActive: 12, activeProfileLimit: 150, referralCode: 'SHAFIQ-DHK', memberSince: 2018 },
       { code: 'GHT-0287', name: 'Rokeya Sultana', phone: '01712000287', pw: 'rokeya123', bureauName: null, district: 'Khulna', tier: 'BUREAU', verified: true, marriagesClosed: 14, yearsActive: 5, activeProfileLimit: 50, referralCode: 'ROKEYA-KHL', memberSince: 2021 },
       { code: 'GHT-0361', name: 'Jashim Uddin', phone: '01712000361', pw: 'jashim123', bureauName: null, district: 'Chattogram', tier: 'SOLO', verified: true, marriagesClosed: 9, yearsActive: 4, activeProfileLimit: 20, referralCode: 'JASHIM-CTG', memberSince: 2022 },
+      // The five bulk ghotoks — each carries ten of the generated profiles
+      // further down, so the pool has more than one book behind it.
+      { code: 'GHT-0501', name: 'Sultana Parvin', phone: '01720100001', pw: 'demo123', bureauName: 'Parvin Matrimonial', district: 'Dhaka', tier: 'AGENCY', verified: true, marriagesClosed: 34, yearsActive: 9, activeProfileLimit: 150, referralCode: 'SULTANA-DHK', memberSince: 2017 },
+      { code: 'GHT-0502', name: 'Abdul Mannan', phone: '01720100002', pw: 'demo123', bureauName: 'Mannan Bibaho Bureau', district: 'Chattogram', tier: 'BUREAU', verified: true, marriagesClosed: 21, yearsActive: 6, activeProfileLimit: 50, referralCode: 'MANNAN-CTG', memberSince: 2020 },
+      { code: 'GHT-0503', name: 'Ruhul Amin', phone: '01720100003', pw: 'demo123', bureauName: null, district: 'Sylhet', tier: 'SOLO', verified: true, marriagesClosed: 12, yearsActive: 4, activeProfileLimit: 20, referralCode: 'RUHUL-SYL', memberSince: 2022 },
+      { code: 'GHT-0504', name: 'Ferdousi Begum', phone: '01720100004', pw: 'demo123', bureauName: 'Ferdousi Ghotokali', district: 'Rajshahi', tier: 'BUREAU', verified: true, marriagesClosed: 18, yearsActive: 7, activeProfileLimit: 50, referralCode: 'FERDOUSI-RAJ', memberSince: 2019 },
+      { code: 'GHT-0505', name: 'Shamim Reza', phone: '01720100005', pw: 'demo123', bureauName: null, district: 'Khulna', tier: 'SOLO', verified: false, marriagesClosed: 5, yearsActive: 2, activeProfileLimit: 20, referralCode: 'SHAMIM-KHL', memberSince: 2024 },
     ];
     const ghotokIdByCode = {};
     for (const g of ghotokDefs) {
@@ -112,6 +119,154 @@ async function main() {
     const tasnimUserId = await insert(tx, 'INSERT INTO users (role, fullName, phone, passwordHash, email) VALUES (?, ?, ?, ?, ?)',
       ['CANDIDATE', 'Tasnim Rahman', '01911222333', hash('selfmanaged123'), 'tasnim@songisathi.test']);
 
+    // ── bulk population ───────────────────────────────────────────────────
+    // Volume for the pool, the search filters, and matching to work on: 50
+    // profiles spread ten apiece across the five bulk ghotoks above, 10 a
+    // guardian runs for a relative, and 40 people who signed up for themselves.
+    // Every field is derived from the row index rather than randomised, so a
+    // reseed reproduces exactly the same population.
+    console.log('Seeding bulk population (50 ghotok · 10 guardian · 40 self)…');
+
+    // One bcrypt hash shared by all 50 generated logins — they use the same
+    // demo password, and hashing it 50 times costs seconds and buys nothing.
+    const bulkHash = hash('demo123');
+    const at = (arr, i) => arr[i % arr.length];
+
+    // Fields are drawn from a fixed-seed PRNG rather than from strides of the
+    // row index. Index strides look decorrelated but aren't: gender is i % 2
+    // below, and any odd stride into an even-length array preserves parity, so
+    // every man would end up drawing from one half of each list (no Dhaka men
+    // at all, for instance). Seeded and consumed in a fixed order, so a reseed
+    // still reproduces the same population.
+    let rngState = 0x5eed1234;
+    const rnd = () => {
+      rngState = (rngState + 0x6d2b79f5) | 0;
+      let t = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
+    const pickInt = (lo, hi) => lo + Math.floor(rnd() * (hi - lo + 1));
+
+    const MALE_FIRST = ['Arif', 'Nayeem', 'Sabbir', 'Rashed', 'Tanjil', 'Mahin', 'Fahim', 'Rakib', 'Shakil', 'Nabil', 'Zahid', 'Ridwan', 'Sajid', 'Tawhid', 'Iftekhar', 'Mizanur', 'Asif', 'Sohel', 'Nazmul', 'Tareq', 'Hasib', 'Jubayer', 'Mahfuz'];
+    const FEMALE_FIRST = ['Nadia', 'Sharmin', 'Tahmina', 'Rumana', 'Sabina', 'Jannatul', 'Sanjida', 'Israt', 'Farzana', 'Marufa', 'Sumona', 'Nusaiba', 'Lamia', 'Rubaiya', 'Tanzila', 'Afsana', 'Maliha', 'Nowrin', 'Rehnuma', 'Anika', 'Tasnia', 'Mehjabin', 'Shamima'];
+    const MALE_LAST = ['Rahman', 'Islam', 'Ahmed', 'Chowdhury', 'Hossain', 'Siddique', 'Karim', 'Mahmud', 'Bhuiyan', 'Sarker'];
+    const FEMALE_LAST = ['Akter', 'Khatun', 'Begum', 'Sultana', 'Chowdhury', 'Islam', 'Jahan', 'Haque', 'Nasrin', 'Parvin'];
+    // The first four districts are the ones the search filter offers, so they
+    // carry most of the population; the last two exercise "no filter match".
+    const PLACES = [
+      ['Dhaka', ['Dhanmondi', 'Uttara', 'Mirpur', 'Bashundhara', 'Mohammadpur']],
+      ['Sylhet', ['Zindabazar', 'Ambarkhana', 'Subid Bazar']],
+      ['Chattogram', ['Khulshi', 'Nasirabad', 'Agrabad']],
+      ['Mymensingh', ['Mymensingh Sadar', 'Trishal']],
+      ['Dhaka', ['Banani', 'Gulshan', 'Badda']],
+      ['Rajshahi', ['Boalia', 'Motihar']],
+      ['Chattogram', ['Halishahar', 'Pahartali']],
+      ['Khulna', ['Sonadanga', 'Khalishpur']],
+    ];
+    // Mixed deliberately so eduLevelOf() yields both Graduate and Postgraduate
+    // and the education filter has something to cut.
+    const EDU = [
+      ['MBA', 'IBA, University of Dhaka'], ['BSc Civil Engineering', 'CUET'],
+      ['MSc Computer Science', 'BUET'], ['BBA', 'North South University'],
+      ['MBBS', 'Dhaka Medical College'], ['LLB', 'University of Dhaka'],
+      ['BSc Pharmacy', 'SUST'], ['MA English', 'Jahangirnagar University'],
+      ['Honours in Bangla', 'Rajshahi University'], ['MSc Economics', 'University of Chittagong'],
+      ['BSc Textile Engineering', 'BUTEX'], ['MPhil Sociology', 'University of Dhaka'],
+    ];
+    const JOBS = ['Banker', 'Software engineer', 'Doctor', 'Lecturer', 'Advocate', 'Pharmacist', 'Civil engineer', 'NGO programme officer', 'Government service', 'Chartered accountant', 'Schoolteacher', 'Research associate'];
+    const FATHERS = ['Retired government service', 'Businessman', 'Retired teacher', 'Farmer, own land', 'Retired banker', 'Retired doctor'];
+    const MOTHERS = ['Homemaker', 'Schoolteacher', 'Retired headmistress', 'Homemaker, former nurse'];
+    const SIBLINGS = ['One younger brother, student', 'Two sisters, both married', 'One elder sister, married', 'No siblings', 'One brother, in service'];
+    const PRACTICE = ['Strictly practising', 'Moderately practising', 'Culturally observant'];
+    const HEIGHTS_M = ['5′6″', '5′7″', '5′8″', '5′9″', '5′10″', '5′11″', '6′0″'];
+    const HEIGHTS_F = ['4′11″', '5′0″', '5′1″', '5′2″', '5′3″', '5′4″', '5′5″'];
+
+    const bulkName = (male) => `${pick(male ? MALE_FIRST : FEMALE_FIRST)} ${pick(male ? MALE_LAST : FEMALE_LAST)}`;
+    function bulkProfile(male, rest) {
+      const [district, areas] = pick(PLACES);
+      const [degree, institution] = pick(EDU);
+      return {
+        name: bulkName(male),
+        gender: male ? 'MALE' : 'FEMALE',
+        age: pickInt(22, 38),
+        height: pick(male ? HEIGHTS_M : HEIGHTS_F),
+        degree,
+        institution,
+        profession: pick(JOBS),
+        district,
+        area: pick(areas),
+        familyType: pick(['NUCLEAR', 'JOINT']),
+        fatherInfo: pick(FATHERS),
+        motherInfo: pick(MOTHERS),
+        siblings: pick(SIBLINGS),
+        religion: 'Islam — Sunni',
+        practice: pick(PRACTICE),
+        completeness: pickInt(62, 95),
+        ...rest,
+      };
+    }
+    // A handful sit off ACTIVE so the status column isn't uniform. Only ACTIVE
+    // profiles reach /api/my-search, which is what keeps the counts honest.
+    const bulkStatus = (i) => (i % 11 === 9 ? 'IN_DISCUSSION' : i % 17 === 14 ? 'PAUSED' : 'ACTIVE');
+
+    const bulkDefs = [];
+
+    // 50 ghotok-managed, ten per bulk ghotok.
+    for (let i = 0; i < 50; i++) {
+      const status = bulkStatus(i);
+      bulkDefs.push(bulkProfile(i % 2 === 0, {
+        prn: `PRN-${40001 + i}`,
+        status,
+        verified: i % 4 !== 3,
+        locked: i % 3 === 0,
+        pool: status !== 'PAUSED',
+        ghotokId: ghotokIdByCode[`GHT-050${(i % 5) + 1}`],
+      }));
+    }
+
+    // 10 guardian-managed: each gets its own guardian login, named for the
+    // relative they are acting for.
+    for (let i = 0; i < 10; i++) {
+      const male = i % 2 === 1;
+      const name = bulkName(male);
+      const relation = at(['Mother', 'Father', 'Elder brother', 'Elder sister'], i);
+      const guardianUserId = await insert(tx, 'INSERT INTO users (role, fullName, phone, passwordHash, email) VALUES (?, ?, ?, ?, ?)',
+        ['GUARDIAN', bulkName(relation === 'Father' || relation === 'Elder brother'), `018202${String(i + 1).padStart(5, '0')}`, bulkHash, `guardian${i + 1}@songisathi.test`]);
+      const guardianId = await insert(tx, 'INSERT INTO guardians (userId, relation, district, selfManaged) VALUES (?, ?, ?, ?)',
+        [guardianUserId, `${relation} of ${name.split(' ')[0]}`, pick(PLACES)[0], true]);
+      bulkDefs.push(bulkProfile(male, {
+        prn: `PRN-${50001 + i}`,
+        name,
+        status: 'ACTIVE',
+        verified: i % 3 !== 2,
+        locked: i % 2 === 0,
+        pool: true,
+        guardianId,
+      }));
+    }
+
+    // 40 self-managed: a candidate login each, four of them still unpublished
+    // drafts (no PRN, out of the pool) so the publish flow has something to act
+    // on — the same state a fresh bride/groom signup lands in.
+    for (let i = 0; i < 40; i++) {
+      const male = i % 2 === 0;
+      const name = bulkName(male);
+      const draft = i % 10 === 7;
+      const candidateUserId = await insert(tx, 'INSERT INTO users (role, fullName, phone, passwordHash, email) VALUES (?, ?, ?, ?, ?)',
+        ['CANDIDATE', name, `019203${String(i + 1).padStart(5, '0')}`, bulkHash, `member${i + 1}@songisathi.test`]);
+      bulkDefs.push(bulkProfile(male, {
+        prn: draft ? null : `PRN-${60001 + i}`,
+        name,
+        status: draft ? 'DRAFT' : 'ACTIVE',
+        verified: i % 5 === 0,
+        locked: i % 3 !== 1,
+        pool: !draft,
+        self: true,
+        candidateUserId,
+      }));
+    }
+
     // ── profiles (biodata) ──
     console.log('Seeding profiles…');
     const R = ghotokIdByCode['GHT-0042']; // Rahima
@@ -130,6 +285,9 @@ async function main() {
       { prn: 'PRN-31204', name: 'Farhana Akter', gender: 'FEMALE', age: 27, height: '5′3″', degree: 'BBA', institution: 'North South University', profession: 'HR executive', district: 'Dhaka', area: 'Uttara', familyType: 'NUCLEAR', religion: 'Islam — Sunni', practice: 'Culturally observant', status: 'ACTIVE', verified: false, locked: true, pool: true, completeness: 70, guardianId: shirinId },
       { prn: 'PRN-31206', name: 'Tasnim Rahman', gender: 'FEMALE', age: 29, height: '5′4″', degree: 'Postgraduate', institution: 'Dhaka University', profession: 'Lecturer', district: 'Dhaka', area: 'Dhanmondi', familyType: 'NUCLEAR', fatherInfo: 'Retired banker', motherInfo: 'Homemaker', siblings: 'One brother, married', religion: 'Islam — Sunni', practice: 'Moderately practising', status: 'ACTIVE', verified: false, locked: true, pool: true, completeness: 80, self: true, candidateUserId: tasnimUserId },
     ];
+    // The generated population goes in through the same insert as the named
+    // profiles, so there is only ever one place that writes a profile row.
+    profileDefs.push(...bulkDefs);
     const profileIdByPrn = {};
     for (const p of profileDefs) {
       const profileId = await insert(
@@ -148,7 +306,8 @@ async function main() {
           p.self ? 'SELF' : p.guardianId ? 'GUARDIAN' : 'GHOTOK', p.ghotokId ?? null, p.guardianId ?? null, p.candidateUserId ?? null,
         ]
       );
-      profileIdByPrn[p.prn] = profileId;
+      if (p.prn) profileIdByPrn[p.prn] = profileId;
+      p.id = profileId;
     }
 
     // ── profile preferences (Nusrat) ──
@@ -165,6 +324,43 @@ async function main() {
     for (const [label, enabled] of [['Practising family', true], ['Dhaka based', true], ['Settled abroad', false]]) {
       await insert(tx, 'INSERT INTO profile_preferences (profileId, label, enabled) VALUES (?, ?, ?)',
         [profileIdByPrn['PRN-31206'], label, enabled]);
+    }
+
+    // ── profile preferences + sealed screening (bulk population) ──
+    // Without these two the "Family is looking for" line reads "—" on every
+    // generated profile and the "Screening completed" filter matches nothing.
+    const WANTS = [
+      ['Postgraduate degree', true], ['Within 5 years of age', true], ['Same district', true],
+      ['Settled abroad', false], ['Practising family', true], ['Government service', false],
+    ];
+    for (let i = 0; i < bulkDefs.length; i++) {
+      if (i % 3 !== 0) continue;
+      for (let k = 0; k < 3; k++) {
+        const [label, enabled] = at(WANTS, i + k * 2);
+        await insert(tx, 'INSERT INTO profile_preferences (profileId, label, enabled) VALUES (?, ?, ?)',
+          [bulkDefs[i].id, label, enabled]);
+      }
+    }
+    // Every fourth generated profile has completed the sealed layer. The answers
+    // themselves are never shown — only the fact that they exist is.
+    const SEALED_ANSWERS = [
+      { q1: 'Separate household', q2: 'We neither give nor accept dowry', q3: 'Should continue working', q4: 'Moderately practising', q5: 'Yes, without reservation', q6: '' },
+      { q1: 'With the groom’s family', q2: 'Gifts only, freely given', q3: 'The couple decides', q4: 'Strictly practising', q5: 'Yes, if there are no children', q6: '' },
+      { q1: 'Either, to be decided together', q2: 'We neither give nor accept dowry', q3: 'Should continue working', q4: 'Culturally observant', q5: 'No', q6: '' },
+    ];
+    const bulkSealedAt = new Date(Date.UTC(2026, 7, 2));
+    for (let i = 0; i < bulkDefs.length; i++) {
+      const p = bulkDefs[i];
+      if (i % 4 !== 0 || p.status === 'DRAFT') continue;
+      const answers = at(SEALED_ANSWERS, i);
+      const role = p.self ? 'CANDIDATE' : p.guardianId ? 'GUARDIAN' : 'GHOTOK';
+      for (const code of Object.keys(answers)) {
+        await insert(
+          tx,
+          'INSERT INTO screening_responses (profileId, questionId, answerValue, sealed, sealedAt, answeredByRole) VALUES (?, ?, ?, ?, ?, ?)',
+          [p.id, questionIdByCode[code], answers[code], true, bulkSealedAt, role]
+        );
+      }
     }
 
     // ── sealed screening responses (Nusrat + Tanvir) ──
