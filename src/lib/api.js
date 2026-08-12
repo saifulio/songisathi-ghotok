@@ -29,6 +29,13 @@ export const api = {
   // Profiles
   screeningQuestions: (token) => request('/screening-questions', { token }),
   createProfile: (token, payload) => request('/profiles', { method: 'POST', body: payload, token }),
+  profiles: (token) => request('/profiles', { token }),
+  updateProfile: (token, id, patch) => request(`/profiles/${id}`, { method: 'PATCH', body: patch, token }),
+
+  // Dashboard
+  dashboardStats: (token) => request('/dashboard/stats', { token }),
+  matchSuggestions: (token) => request('/match-suggestions', { token }),
+  updateSuggestion: (token, id, patch) => request(`/match-suggestions/${id}`, { method: 'PATCH', body: patch, token }),
 
   // Email verification
   verifyEmail: (token) => request('/auth/verify-email', { method: 'POST', body: { token } }),

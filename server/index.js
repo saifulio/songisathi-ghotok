@@ -58,6 +58,51 @@ function requireAuth(req, res, next) {
 const requireRole = (...roles) => (req, res, next) =>
   roles.includes(req.auth?.role) ? next() : bad(res, 'Not allowed for your role.', 403);
 
+// The ghotok row for the signed-in user (or null).
+const ghotokForReq = (req) =>
+  queryOne('SELECT * FROM ghotoks WHERE userId = ? LIMIT 1', [req.auth.sub]);
+
+// ── view mappers ──
+const STATUS_LABEL = {
+  DRAFT: 'Draft', ACTIVE: 'Active', IN_DISCUSSION: 'In discussion',
+  MATCH_IN_PROGRESS: 'Match in progress', MARRIED: 'Married',
+  AUTO_ARCHIVED: 'Auto-archived', PAUSED: 'Paused',
+};
+const initialsOf = (name) =>
+  String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+const yearsSince = (d) => (d ? Math.floor((Date.now() - new Date(d).getTime()) / 31557600000) : null);
+const daysSince = (d) => (d ? Math.floor((Date.now() - new Date(d).getTime()) / 86400000) : null);
+
+// A DB profile row → the shape the ghotok's book / dashboard table expects.
+function profileCard(p) {
+  return {
+    id: p.id,
+    prn: p.prn,
+    name: p.fullName,
+    init: initialsOf(p.fullName),
+    gender: p.gender,
+    age: yearsSince(p.dob),
+    height: p.heightLabel,
+    edu: [p.degree, p.institution].filter(Boolean).join(', '),
+    job: p.profession,
+    city: p.area || p.district,
+    region: p.district,
+    status: STATUS_LABEL[p.status] || p.status,
+    rawStatus: p.status,
+    verified: Boolean(p.verified),
+    locked: Boolean(p.photoLocked),
+    pool: Boolean(p.inNetworkPool),
+    days: daysSince(p.lastUpdatedAt),
+    completeness: p.completeness,
+  };
+}
+
+// A match-suggestion peer → a compact person summary for the suggestion card.
+const suggestionPerson = (p) => ({
+  init: initialsOf(p.fullName), name: p.fullName, age: yearsSince(p.dob),
+  job: p.profession, city: p.area || p.district,
+});
+
 // A one-time token: a raw random string (returned, goes in the email link) and
 // its SHA-256 hash (stored, so a DB leak never exposes a usable token).
 const makeToken = () => {
@@ -379,6 +424,137 @@ app.post('/api/profiles', requireAuth, requireRole('GHOTOK'), async (req, res) =
 
   const profile = await queryOne('SELECT * FROM profiles WHERE id = ?', [profileId]);
   return res.status(201).json({ profile });
+});
+
+// ── the ghotok's book ──
+// Every profile this ghotok manages, newest activity first.
+app.get('/api/profiles', requireAuth, requireRole('GHOTOK'), async (req, res) => {
+  const ghotok = await ghotokForReq(req);
+  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
+  const rows = await query(
+    'SELECT * FROM profiles WHERE managedByGhotokId = ? ORDER BY lastUpdatedAt DESC',
+    [ghotok.id]
+  );
+  return res.json({ profiles: rows.map(profileCard) });
+});
+
+// ── update a profile (dashboard actions) ──
+// body: { inNetworkPool?: bool, attest?: bool }
+//   inNetworkPool — toggle trusted-network visibility.
+//   attest — the ghotok confirms the profile is still active: reset the
+//            90-day archive clock, and un-archive it if it had lapsed.
+app.patch('/api/profiles/:id', requireAuth, requireRole('GHOTOK'), async (req, res) => {
+  const ghotok = await ghotokForReq(req);
+  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
+  const profile = await queryOne('SELECT * FROM profiles WHERE id = ? LIMIT 1', [req.params.id]);
+  if (!profile) return bad(res, 'Profile not found.', 404);
+  if (profile.managedByGhotokId !== ghotok.id) return bad(res, 'That profile is not in your book.', 403);
+
+  const b = req.body || {};
+  const sets = [];
+  const params = [];
+  if (typeof b.inNetworkPool === 'boolean') { sets.push('inNetworkPool = ?'); params.push(b.inNetworkPool ? 1 : 0); }
+  if (b.attest === true) {
+    sets.push('lastUpdatedAt = ?'); params.push(new Date());
+    if (profile.status === 'AUTO_ARCHIVED') { sets.push("status = 'ACTIVE'"); }
+  }
+  if (!sets.length) return bad(res, 'Nothing to update.');
+  await query(`UPDATE profiles SET ${sets.join(', ')} WHERE id = ?`, [...params, profile.id]);
+
+  const updated = await queryOne('SELECT * FROM profiles WHERE id = ?', [profile.id]);
+  return res.json({ profile: profileCard(updated) });
+});
+
+// ── dashboard stats ──
+app.get('/api/dashboard/stats', requireAuth, requireRole('GHOTOK'), async (req, res) => {
+  const ghotok = await ghotokForReq(req);
+  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
+
+  const countOne = async (sql, params) => (await queryOne(sql, params))?.n ?? 0;
+  // "Active" = counts against the plan limit (anything not a draft, married, or archived).
+  const activeProfiles = await countOne(
+    "SELECT COUNT(*) AS n FROM profiles WHERE managedByGhotokId = ? AND status NOT IN ('DRAFT','MARRIED','AUTO_ARCHIVED')",
+    [ghotok.id]
+  );
+  const matchesSuggested = await countOne(
+    "SELECT COUNT(*) AS n FROM match_suggestions WHERE ghotokId = ? AND status = 'OPEN'",
+    [ghotok.id]
+  );
+  const introductionsInProgress = await countOne(
+    "SELECT COUNT(*) AS n FROM profiles WHERE managedByGhotokId = ? AND status IN ('IN_DISCUSSION','MATCH_IN_PROGRESS')",
+    [ghotok.id]
+  );
+  const payments = await queryOne(
+    "SELECT COUNT(*) AS total, SUM(status = 'PAID') AS paid, SUM(receivedAmount) AS received FROM marriages WHERE ghotokId = ?",
+    [ghotok.id]
+  );
+
+  return res.json({
+    stats: {
+      activeProfiles,
+      profileLimit: ghotok.activeProfileLimit,
+      matchesSuggested,
+      introductionsInProgress,
+      marriagesClosed: ghotok.marriagesClosed,
+      commissionReceived: Number(payments?.received || 0),
+      paymentsReceived: Number(payments?.paid || 0),
+      paymentsTotal: Number(payments?.total || 0),
+      tier: ghotok.tier,
+      code: ghotok.code,
+      referralCode: ghotok.referralCode,
+    },
+  });
+});
+
+// ── AI match suggestions (this ghotok's open suggestions) ──
+app.get('/api/match-suggestions', requireAuth, requireRole('GHOTOK'), async (req, res) => {
+  const ghotok = await ghotokForReq(req);
+  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
+  const sugs = await query(
+    "SELECT * FROM match_suggestions WHERE ghotokId = ? AND status = 'OPEN' ORDER BY score DESC",
+    [ghotok.id]
+  );
+  const out = [];
+  for (const s of sugs) {
+    const [a, b, factors] = await Promise.all([
+      queryOne('SELECT fullName, dob, profession, area, district FROM profiles WHERE id = ?', [s.profileAId]),
+      queryOne('SELECT fullName, dob, profession, area, district FROM profiles WHERE id = ?', [s.profileBId]),
+      query('SELECT label, percentage, note FROM match_factors WHERE suggestionId = ? ORDER BY id', [s.id]),
+    ]);
+    out.push({
+      id: s.id,
+      score: s.score,
+      screeningPassed: Boolean(s.screeningPassed),
+      a: a ? suggestionPerson(a) : null,
+      b: b ? suggestionPerson(b) : null,
+      factors: factors.map((f) => ({ label: f.label, pct: f.percentage, note: f.note })),
+    });
+  }
+  return res.json({ suggestions: out });
+});
+
+// ── act on a suggestion ──
+// body: { status: 'ACCEPTED' | 'DISMISSED' }
+// Accepting nudges both profiles into "in discussion".
+app.patch('/api/match-suggestions/:id', requireAuth, requireRole('GHOTOK'), async (req, res) => {
+  const ghotok = await ghotokForReq(req);
+  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
+  const status = req.body?.status;
+  if (!['ACCEPTED', 'DISMISSED'].includes(status)) return bad(res, 'status must be ACCEPTED or DISMISSED.');
+  const sug = await queryOne('SELECT * FROM match_suggestions WHERE id = ? LIMIT 1', [req.params.id]);
+  if (!sug) return bad(res, 'Suggestion not found.', 404);
+  if (sug.ghotokId !== ghotok.id) return bad(res, 'That suggestion is not yours.', 403);
+
+  await withTransaction(async (tx) => {
+    await tx.execute('UPDATE match_suggestions SET status = ? WHERE id = ?', [status, sug.id]);
+    if (status === 'ACCEPTED') {
+      await tx.execute(
+        "UPDATE profiles SET status = 'IN_DISCUSSION' WHERE id IN (?, ?) AND status = 'ACTIVE'",
+        [sug.profileAId, sug.profileBId]
+      );
+    }
+  });
+  return res.json({ ok: true, status });
 });
 
 // ── verify email ──

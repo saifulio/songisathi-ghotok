@@ -1,66 +1,46 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Badge, Avatar, Switch, Tabs } from '../../components/ui/index.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { api } from '../../lib/api.js';
 import './GhotokDashboard.css';
 
-const P = [
-  { id: 'p1', init: 'NJ', name: 'Nusrat Jahan', prn: 'PRN-10245', age: 26, height: '5′4″', edu: 'MBA, IBA Dhaka', job: 'Banker', city: 'Dhanmondi', region: 'Dhaka', status: 'Active', upd: 'Updated 12 days ago', verified: true, locked: false, days: 12 },
-  { id: 'p2', init: 'TA', name: 'Tanvir Ahmed', prn: 'PRN-10188', age: 31, height: '5′9″', edu: 'MSc CSE, BUET', job: 'Software engineer', city: 'Auckland', region: 'New Zealand', status: 'In discussion', upd: 'Updated 4 days ago', verified: true, locked: false, days: 4 },
-  { id: 'p3', init: 'SI', name: 'Sadia Islam', prn: 'PRN-10302', age: 24, height: '5′2″', edu: 'BSc Pharmacy, SUST', job: 'Pharmacist', city: 'Zindabazar', region: 'Sylhet', status: 'Match in progress', upd: 'Updated 78 days ago', verified: false, locked: true, days: 78 },
-  { id: 'p4', init: 'RK', name: 'Rezaul Karim', prn: 'PRN-10077', age: 29, height: '5′11″', edu: 'LLB, Chittagong Univ.', job: 'Advocate', city: 'Khulshi', region: 'Chattogram', status: 'Active', upd: 'Updated 33 days ago', verified: true, locked: false, days: 33 },
-  { id: 'p5', init: 'FA', name: 'Farhana Akter', prn: 'PRN-10411', age: 27, height: '5′3″', edu: 'BBA, North South', job: 'HR executive', city: 'Uttara', region: 'Dhaka', status: 'Married', upd: 'Closed 2 days ago', verified: true, locked: false, days: 2 },
-  { id: 'p6', init: 'MH', name: 'Mahmudul Hasan', prn: 'PRN-10015', age: 34, height: '5′8″', edu: 'MBBS, Rajshahi Med.', job: 'Doctor', city: 'Boalia', region: 'Rajshahi', status: 'Active', upd: 'Updated 86 days ago', verified: true, locked: false, days: 86 },
-  { id: 'p7', init: 'AS', name: 'Ayesha Siddika', prn: 'PRN-10466', age: 23, height: '5′1″', edu: 'Honours in Bangla', job: 'Student', city: 'Mymensingh', region: 'Mymensingh', status: 'Auto-archived', upd: 'Archived at 90 days', verified: false, locked: true, days: 91 },
-  { id: 'p8', init: 'IC', name: 'Imran Chowdhury', prn: 'PRN-10233', age: 30, height: '5′10″', edu: 'MEng, Univ. of Toronto', job: 'Civil engineer', city: 'Toronto', region: 'Canada', status: 'In discussion', upd: 'Updated 9 days ago', verified: true, locked: false, days: 9 },
-];
-
+// Status label → Badge tone.
 const ST = {
   Active: 'success',
   'In discussion': 'pending',
   'Match in progress': 'warning',
   Married: 'gold',
   'Auto-archived': 'neutral',
+  Draft: 'neutral',
+  Paused: 'warning',
 };
 
-const SUGS = [
-  { id: 's1', aId: 'p1', bId: 'p2', score: 87, factors: [
-    { label: 'Education', pct: 94, note: 'Both postgraduate, business + technical' },
-    { label: 'Family type', pct: 88, note: 'Nuclear, both fathers retired service' },
-    { label: 'Location', pct: 79, note: 'Dhaka family, Auckland-settled groom' },
-    { label: 'Lifestyle', pct: 85, note: 'Similar practice level, both non-smoking' }] },
-  { id: 's2', aId: 'p3', bId: 'p4', score: 81, factors: [
-    { label: 'Education', pct: 83, note: 'Professional degrees on both sides' },
-    { label: 'Family type', pct: 90, note: 'Joint family, both Sylhet-rooted' },
-    { label: 'Location', pct: 72, note: 'Sylhet and Chattogram — travel expected' },
-    { label: 'Lifestyle', pct: 80, note: 'Age gap of five years, both agreed' }] },
-  { id: 's3', aId: 'p7', bId: 'p8', score: 74, factors: [
-    { label: 'Education', pct: 68, note: 'Honours vs. postgraduate' },
-    { label: 'Family type', pct: 82, note: 'Both nuclear, elder-led decisions' },
-    { label: 'Location', pct: 64, note: 'Mymensingh family, Toronto-settled groom' },
-    { label: 'Lifestyle', pct: 81, note: 'Both open to settling abroad' }] },
-];
-
 const NAV = [
-  { bn: 'ড্যাশবোর্ড', en: 'Dashboard', count: '', to: '/dashboard' },
-  { bn: 'প্রোফাইল', en: 'Profiles', count: '42', to: '/search' },
-  { bn: 'অনুসন্ধান', en: 'Search', count: '', to: '/search' },
-  { bn: 'এআই ম্যাচিং', en: 'AI matching', count: '9', to: '/ai-matching' },
-  { bn: 'বায়োডাটা', en: 'Biodata studio', count: '', to: '/biodata-studio' },
-  { bn: 'কমিশন', en: 'Commission', count: '4', to: '/commission' },
-  { bn: 'নেটওয়ার্ক পুল', en: 'Network pool', count: '', to: '/search' },
+  { bn: 'ড্যাশবোর্ড', en: 'Dashboard', to: '/dashboard' },
+  { bn: 'প্রোফাইল', en: 'Profiles', to: '/search' },
+  { bn: 'অনুসন্ধান', en: 'Search', to: '/search' },
+  { bn: 'এআই ম্যাচিং', en: 'AI matching', to: '/ai-matching' },
+  { bn: 'বায়োডাটা', en: 'Biodata studio', to: '/biodata-studio' },
+  { bn: 'কমিশন', en: 'Commission', to: '/commission' },
+  { bn: 'নেটওয়ার্ক পুল', en: 'Network pool', to: '/search' },
 ];
 
-const find = (id) => P.find((p) => p.id === id);
+const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+const cap = (x) => (x ? x[0] + x.slice(1).toLowerCase() : x);
 
 export default function GhotokDashboard() {
   const navigate = useNavigate();
+  const { user, token } = useAuth();
   const [langBn, setLangBn] = useState(true);
+  const [profiles, setProfiles] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [sugState, setSugState] = useState({});
   const [whyOpen, setWhyOpen] = useState(null);
-  const [pool, setPool] = useState({ p1: true, p2: true, p3: false, p4: true, p5: false, p6: true, p7: false, p8: false });
   const [attested, setAttested] = useState({});
   const [filter, setFilter] = useState('all');
-  const [closed, setClosed] = useState(27);
   const [toast, setToast] = useState(null);
   const timer = useRef(null);
 
@@ -71,36 +51,110 @@ export default function GhotokDashboard() {
   }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  const pairLabel = (s) => `${find(s.aId).name} ↔ ${find(s.bId).name}`;
+  // Load the ghotok's book, this week's suggestions, and the headline stats.
+  useEffect(() => {
+    if (!token) return undefined;
+    let live = true;
+    Promise.all([api.profiles(token), api.matchSuggestions(token), api.dashboardStats(token)])
+      .then(([p, s, st]) => {
+        if (!live) return;
+        setProfiles(p.profiles);
+        setSuggestions(s.suggestions);
+        setStats(st.stats);
+      })
+      .catch((e) => say(e.message || 'Could not load your workspace.'))
+      .finally(() => { if (live) setLoading(false); });
+    return () => { live = false; };
+  }, [token, say]);
+
+  const displayName = user?.fullName || 'Ghotok';
+  const code = user?.code || stats?.code || '';
+  const tier = user?.tier || stats?.tier || '';
+  const referralCode = user?.referralCode || stats?.referralCode || '';
+  const initials = initialsOf(displayName);
+
+  const needsRefresh = (p) => p.days >= 75 && p.status !== 'Auto-archived' && p.status !== 'Married';
 
   const filtered =
-    filter === 'discussion' ? P.filter((p) => p.status === 'In discussion')
-      : filter === 'refresh' ? P.filter((p) => p.days >= 75 && p.status !== 'Auto-archived')
-        : filter === 'married' ? P.filter((p) => p.status === 'Married')
-          : P;
-  const profiles = filtered.slice(0, 6);
-
-  const stats = [
-    { bn: 'সক্রিয় প্রোফাইল', en: 'Active profiles', val: '42', sub: '/ 50', meter: 84, foot: '8 slots left on Bureau', footColor: '#8C6318' },
-    { bn: 'এ সপ্তাহের প্রস্তাব', en: 'Matches suggested', val: '9', foot: '3 awaiting your review', footColor: '#3D6B44' },
-    { bn: 'চলমান পরিচয়', en: 'Introductions in progress', val: '5', foot: '2 need a follow-up call', footColor: '#BD572F' },
-    { bn: 'সম্পন্ন বিবাহ', en: 'Marriages closed · lifetime', val: String(closed), dark: true, foot: 'Record a marriage' },
-    { bn: 'এ মাসের কমিশন', en: 'Commission earned', val: '৳48,000', foot: '3 of 4 payments received', footColor: '#3D6B44' },
-  ];
-
-  const attestQueue = [
-    { id: 'p3', name: 'Sadia Islam', prn: 'PRN-10302', days: 78, left: 12 },
-    { id: 'p6', name: 'Mahmudul Hasan', prn: 'PRN-10015', days: 86, left: 4 },
-  ];
+    filter === 'discussion' ? profiles.filter((p) => p.status === 'In discussion')
+      : filter === 'refresh' ? profiles.filter(needsRefresh)
+        : filter === 'married' ? profiles.filter((p) => p.status === 'Married')
+          : profiles;
+  const shown = filtered.slice(0, 6);
 
   const filterTabs = [
-    { value: 'all', label: 'All', count: 42 },
-    { value: 'discussion', label: 'In discussion', count: 2 },
-    { value: 'refresh', label: 'Needs refresh', count: 2 },
-    { value: 'married', label: 'Married', count: 1 },
+    { value: 'all', label: 'All', count: profiles.length },
+    { value: 'discussion', label: 'In discussion', count: profiles.filter((p) => p.status === 'In discussion').length },
+    { value: 'refresh', label: 'Needs refresh', count: profiles.filter(needsRefresh).length },
+    { value: 'married', label: 'Married', count: profiles.filter((p) => p.status === 'Married').length },
   ];
 
-  const markMarried = () => { setClosed((c) => c + 1); say('Congratulations — marriage closed. That is 28 in your career.'); };
+  const attestQueue = profiles
+    .filter((p) => needsRefresh(p) && !attested[p.id])
+    .slice(0, 2)
+    .map((p) => ({ id: p.id, name: p.name, prn: p.prn, days: p.days, left: Math.max(0, 90 - p.days) }));
+
+  const meter = stats && stats.profileLimit ? Math.round((stats.activeProfiles / stats.profileLimit) * 100) : 0;
+  const statCards = [
+    { bn: 'সক্রিয় প্রোফাইল', en: 'Active profiles', val: stats ? String(stats.activeProfiles) : '—', sub: stats ? `/ ${stats.profileLimit}` : '', meter, foot: stats ? `${Math.max(0, stats.profileLimit - stats.activeProfiles)} slots left on ${cap(stats.tier)}` : '', footColor: '#8C6318' },
+    { bn: 'এ সপ্তাহের প্রস্তাব', en: 'Matches suggested', val: stats ? String(stats.matchesSuggested) : '—', foot: stats ? `${stats.matchesSuggested} awaiting your review` : '', footColor: '#3D6B44' },
+    { bn: 'চলমান পরিচয়', en: 'Introductions in progress', val: stats ? String(stats.introductionsInProgress) : '—', foot: 'In discussion or match in progress', footColor: '#BD572F' },
+    { bn: 'সম্পন্ন বিবাহ', en: 'Marriages closed · lifetime', val: stats ? String(stats.marriagesClosed) : '—', dark: true, foot: 'Record a marriage' },
+    { bn: 'কমিশন প্রাপ্ত', en: 'Commission received', val: stats ? `৳${stats.commissionReceived.toLocaleString('en-IN')}` : '—', foot: stats ? `${stats.paymentsReceived} of ${stats.paymentsTotal} payments received` : '', footColor: '#3D6B44' },
+  ];
+
+  const navCountFor = (en) =>
+    en === 'Profiles' ? (profiles.length ? String(profiles.length) : '')
+      : en === 'AI matching' ? (suggestions.length ? String(suggestions.length) : '')
+        : en === 'Commission' && stats ? (stats.paymentsTotal - stats.paymentsReceived > 0 ? String(stats.paymentsTotal - stats.paymentsReceived) : '')
+          : '';
+
+  const updLabel = (p) =>
+    attested[p.id] ? 'Confirmed today'
+      : p.status === 'Married' ? `Closed ${p.days}d ago`
+        : p.status === 'Auto-archived' ? 'Archived at 90 days'
+          : `Updated ${p.days} day${p.days === 1 ? '' : 's'} ago`;
+
+  // ── actions (optimistic, reverting on error) ──
+  const togglePool = async (p) => {
+    const next = !p.pool;
+    setProfiles((list) => list.map((x) => (x.id === p.id ? { ...x, pool: next } : x)));
+    try {
+      await api.updateProfile(token, p.id, { inNetworkPool: next });
+      say(next
+        ? `${p.name} is now visible to trusted-network matching. Contact still routes through you.`
+        : `${p.name} removed from the trusted network pool. Only you can see this profile now.`);
+    } catch (e) {
+      setProfiles((list) => list.map((x) => (x.id === p.id ? { ...x, pool: !next } : x)));
+      say(e.message || 'Could not update the pool setting.');
+    }
+  };
+
+  const attest = async (p) => {
+    setAttested((s) => ({ ...s, [p.id]: true }));
+    setProfiles((list) => list.map((x) => (x.id === p.id ? { ...x, days: 0, status: x.status === 'Auto-archived' ? 'Active' : x.status } : x)));
+    try {
+      await api.updateProfile(token, p.id, { attest: true });
+      say(`${p.name} confirmed as active. The 90-day archive clock has reset.`);
+    } catch (e) {
+      setAttested((s) => { const n = { ...s }; delete n[p.id]; return n; });
+      say(e.message || 'Could not confirm the profile.');
+    }
+  };
+
+  const actSuggestion = async (s, status) => {
+    setSugState((p) => ({ ...p, [s.id]: status === 'ACCEPTED' ? 'accepted' : 'dismissed' }));
+    setWhyOpen(null);
+    try {
+      await api.updateSuggestion(token, s.id, { status });
+      say(status === 'ACCEPTED'
+        ? `Introduction sent to both guardians on WhatsApp. ${s.a?.name} ↔ ${s.b?.name} is now in progress.`
+        : 'Dismissed. The system will not suggest this pair again this quarter.');
+    } catch (e) {
+      setSugState((p) => { const n = { ...p }; delete n[s.id]; return n; });
+      say(e.message || 'Could not update the suggestion.');
+    }
+  };
 
   return (
     <div className="gd">
@@ -117,37 +171,40 @@ export default function GhotokDashboard() {
 
           <div className="gd-tier">
             <div className="gd-tier-top">
-              <Badge tone="gold">BUREAU</Badge>
+              <Badge tone="gold">{tier || '—'}</Badge>
               <span className="gd-tier-verified">Verified</span>
             </div>
             <div className="gd-tier-count">
-              <span className="gd-tier-num">42<span>/50</span></span>
+              <span className="gd-tier-num">{stats ? stats.activeProfiles : '—'}<span>/{stats ? stats.profileLimit : '—'}</span></span>
               <span className="gd-tier-label">সক্রিয় প্রোফাইল</span>
             </div>
-            <div className="gd-tier-bar"><div style={{ width: '84%' }} /></div>
+            <div className="gd-tier-bar"><div style={{ width: `${meter}%` }} /></div>
             <div className="gd-tier-upgrade" onClick={() => say('Upgrade to the 150-profile plan — ৳5,000/mo, or ৳4,000 on annual billing.')}>
-              84% used · Upgrade for 150 →
+              {meter}% used · Upgrade for 150 →
             </div>
           </div>
 
           <nav className="gd-nav">
-            {NAV.map((n, i) => (
-              <div key={n.en + i} className={`gd-nav-item ${i === 0 ? 'is-active' : ''}`} onClick={() => n.to && navigate(n.to)}>
-                <span className="gd-nav-dot" />
-                <span className="gd-nav-labels">
-                  <span className="gd-nav-bn">{n.bn}</span>
-                  <span className="gd-nav-en">{n.en}</span>
-                </span>
-                {n.count && <span className="gd-nav-count">{n.count}</span>}
-              </div>
-            ))}
+            {NAV.map((n, i) => {
+              const count = navCountFor(n.en);
+              return (
+                <div key={n.en + i} className={`gd-nav-item ${i === 0 ? 'is-active' : ''}`} onClick={() => n.to && navigate(n.to)}>
+                  <span className="gd-nav-dot" />
+                  <span className="gd-nav-labels">
+                    <span className="gd-nav-bn">{n.bn}</span>
+                    <span className="gd-nav-en">{n.en}</span>
+                  </span>
+                  {count && <span className="gd-nav-count">{count}</span>}
+                </div>
+              );
+            })}
           </nav>
 
           <div className="gd-referral">
             <div className="gd-referral-title">সহকর্মী ঘটককে আমন্ত্রণ করুন</div>
             <div className="gd-referral-body">Invite a fellow ghotok — you both get one month free.</div>
             <div className="gd-referral-code" onClick={() => say('Invite link copied. When your colleague activates, you both get one month free.')}>
-              <span>RAHIMA-SYL</span>
+              <span>{referralCode || '—'}</span>
               <span className="gd-referral-copy">Copy</span>
             </div>
           </div>
@@ -157,10 +214,10 @@ export default function GhotokDashboard() {
         <div className="gd-main">
           <header className="gd-header">
             <div className="gd-header-greet">
-              <div className="gd-header-bn">শুভ সকাল, রাহিমা আপা</div>
-              <div className="gd-header-en">Good morning · Sylhet bureau · 22 years of matchmaking</div>
+              <div className="gd-header-bn">শুভ সকাল, {displayName}</div>
+              <div className="gd-header-en">Good morning · {cap(tier)} plan{code ? ` · ${code}` : ''}</div>
             </div>
-            <div className="gd-search">
+            <div className="gd-search" onClick={() => navigate('/search')}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#AA9683" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
               <span>প্রোফাইল খুঁজুন · Search profiles</span>
             </div>
@@ -169,10 +226,10 @@ export default function GhotokDashboard() {
               <span className={!langBn ? 'on' : ''}>EN</span>
             </button>
             <div className="gd-user">
-              <Avatar initials="RA" size={32} />
+              <Avatar initials={initials} size={32} />
               <div>
-                <div className="gd-user-name">Rahima Akter</div>
-                <div className="gd-user-id">GHT-0042</div>
+                <div className="gd-user-name">{displayName}</div>
+                <div className="gd-user-id">{code}</div>
               </div>
             </div>
           </header>
@@ -180,7 +237,7 @@ export default function GhotokDashboard() {
           <div className="gd-body">
             {/* stats */}
             <div className="gd-stats">
-              {stats.map((s, i) => (
+              {statCards.map((s, i) => (
                 <div key={i} className={`gd-stat ${s.dark ? 'dark' : ''}`}>
                   <div className="gd-stat-bn">{s.bn}</div>
                   <div className="gd-stat-en">{s.en}</div>
@@ -193,7 +250,7 @@ export default function GhotokDashboard() {
                   </div>
                   {s.meter != null && <div className="gd-stat-meter"><div style={{ width: `${s.meter}%` }} /></div>}
                   {s.dark ? (
-                    <button className="gd-stat-record" onClick={markMarried}>Record a marriage</button>
+                    <button className="gd-stat-record" onClick={() => navigate('/commission')}>Record a marriage</button>
                   ) : (
                     <div className="gd-stat-foot" style={{ color: s.footColor }}>{s.foot}</div>
                   )}
@@ -207,7 +264,7 @@ export default function GhotokDashboard() {
                 <div className="gd-panel-head">
                   <div className="gd-panel-title-wrap">
                     <div className="gd-panel-bn">এই সপ্তাহের ম্যাচ প্রস্তাব</div>
-                    <div className="gd-panel-en">AI match suggestions · refreshed Monday, 4 August</div>
+                    <div className="gd-panel-en">AI match suggestions · {suggestions.length} open{loading ? ' · loading…' : ''}</div>
                   </div>
                   <span className="gd-screen-pill">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2F5233" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg>
@@ -216,9 +273,12 @@ export default function GhotokDashboard() {
                 </div>
 
                 <div className="gd-sugs">
-                  {SUGS.map((s) => {
+                  {!loading && suggestions.length === 0 && (
+                    <div className="gd-sug" style={{ padding: 20, color: 'var(--text-secondary)' }}>No open suggestions this week.</div>
+                  )}
+                  {suggestions.map((s) => {
                     const st = sugState[s.id];
-                    const a = find(s.aId), b = find(s.bId);
+                    const a = s.a, b = s.b;
                     const isWhy = whyOpen === s.id;
                     return (
                       <div key={s.id} className={`gd-sug ${st === 'accepted' ? 'accepted' : ''}`}>
@@ -235,10 +295,10 @@ export default function GhotokDashboard() {
                                   </div>
                                 )}
                                 <div className="gd-sug-person">
-                                  <div className="gd-sug-thumb">{person.init}</div>
+                                  <div className="gd-sug-thumb">{person?.init}</div>
                                   <div className="gd-sug-person-info">
-                                    <div className="gd-sug-name">{person.name}</div>
-                                    <div className="gd-sug-meta">{person.age} · {person.job} · {person.city}</div>
+                                    <div className="gd-sug-name">{person?.name}</div>
+                                    <div className="gd-sug-meta">{person?.age} · {person?.job} · {person?.city}</div>
                                   </div>
                                 </div>
                               </div>
@@ -252,8 +312,8 @@ export default function GhotokDashboard() {
                             {!st ? (
                               <>
                                 <Button variant="outline" size="sm" onClick={() => setWhyOpen(isWhy ? null : s.id)}>Why?</Button>
-                                <Button variant="ghost" size="sm" onClick={() => { setSugState((p) => ({ ...p, [s.id]: 'dismissed' })); setWhyOpen(null); say('Dismissed. The system will not suggest this pair again this quarter.'); }}>Dismiss</Button>
-                                <Button variant="primary" size="sm" onClick={() => { setSugState((p) => ({ ...p, [s.id]: 'accepted' })); setWhyOpen(null); say(`Introduction sent to both guardians on WhatsApp. ${pairLabel(s)} is now in progress.`); }}>Introduce · পরিচয় করান</Button>
+                                <Button variant="ghost" size="sm" onClick={() => actSuggestion(s, 'DISMISSED')}>Dismiss</Button>
+                                <Button variant="primary" size="sm" onClick={() => actSuggestion(s, 'ACCEPTED')}>Introduce · পরিচয় করান</Button>
                               </>
                             ) : (
                               <span className={`gd-sug-resolved ${st}`}>{st === 'accepted' ? 'Introduction sent' : 'Dismissed'}</span>
@@ -279,7 +339,7 @@ export default function GhotokDashboard() {
                             <div className="gd-why-sealed">
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DBB863" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                               <div>
-                                <div className="gd-why-sealed-t">Private screening: compatible</div>
+                                <div className="gd-why-sealed-t">Private screening: {s.screeningPassed ? 'compatible' : 'not compared'}</div>
                                 <div className="gd-why-sealed-b">The confidential answers of both families were checked by the system alone. No reason is shown — to you, or to anyone.</div>
                               </div>
                             </div>
@@ -324,22 +384,16 @@ export default function GhotokDashboard() {
                   </div>
                   <div className="gd-attest-note">Profiles auto-archive at 90 days. One tap keeps them in the matching pool.</div>
                   <div className="gd-attest-list">
-                    {attestQueue.map((a) => {
-                      const done = !!attested[a.id];
-                      return (
-                        <div key={a.id} className="gd-attest-item">
-                          <div className="gd-attest-item-top"><span>{a.name}</span><span className="gd-attest-days">{a.days}d</span></div>
-                          <div className="gd-attest-item-sub">{a.prn} · archives in {a.left} days</div>
-                          {done ? (
-                            <div className="gd-attest-done">Confirmed · 90 days reset</div>
-                          ) : (
-                            <Button variant="primary" size="sm" style={{ width: '100%', marginTop: 9 }} onClick={() => { setAttested((p) => ({ ...p, [a.id]: true })); say(`${a.name} confirmed as active and accurate. Archive clock reset to 90 days.`); }}>
-                              I confirm this profile is still active
-                            </Button>
-                          )}
-                        </div>
-                      );
-                    })}
+                    {attestQueue.length === 0 && <div className="gd-attest-note" style={{ marginTop: 4 }}>Nothing needs confirming right now.</div>}
+                    {attestQueue.map((a) => (
+                      <div key={a.id} className="gd-attest-item">
+                        <div className="gd-attest-item-top"><span>{a.name}</span><span className="gd-attest-days">{a.days}d</span></div>
+                        <div className="gd-attest-item-sub">{a.prn} · archives in {a.left} days</div>
+                        <Button variant="primary" size="sm" style={{ width: '100%', marginTop: 9 }} onClick={() => attest(a)}>
+                          I confirm this profile is still active
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </aside>
@@ -350,7 +404,7 @@ export default function GhotokDashboard() {
               <div className="gd-panel-head">
                 <div className="gd-panel-title-wrap">
                   <div className="gd-panel-bn">আমার প্রোফাইল তালিকা</div>
-                  <div className="gd-panel-en">My profiles · 42 active · {profiles.length} shown</div>
+                  <div className="gd-panel-en">My profiles · {profiles.length} total · {shown.length} shown</div>
                 </div>
                 <Tabs items={filterTabs} active={filter} onChange={setFilter} style={{ border: 'none' }} />
               </div>
@@ -359,10 +413,12 @@ export default function GhotokDashboard() {
                   <div className="gd-thead">
                     <span>Profile</span><span>Education · profession</span><span>Location</span><span>Status</span><span>Network pool · updated</span>
                   </div>
-                  {profiles.map((p) => {
-                    const on = !!pool[p.id];
-                    const isAtt = !!attested[p.id];
-                    const warn = !isAtt && p.days >= 75 && p.status !== 'Auto-archived';
+                  {!loading && shown.length === 0 && (
+                    <div className="gd-trow" style={{ color: 'var(--text-secondary)' }}>No profiles in this view yet.</div>
+                  )}
+                  {shown.map((p) => {
+                    const on = p.pool;
+                    const warn = !attested[p.id] && needsRefresh(p);
                     return (
                       <div key={p.id} className="gd-trow">
                         <div className="gd-cell-profile">
@@ -376,7 +432,7 @@ export default function GhotokDashboard() {
                               {p.name}
                               {p.verified && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B08628" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" /><path d="m9 12 2 2 4-4" /></svg>}
                             </div>
-                            <div className="gd-cell-prn">{p.prn} · {p.age} · {p.height}</div>
+                            <div className="gd-cell-prn">{p.prn || 'Draft'} · {p.age} · {p.height}</div>
                           </div>
                         </div>
                         <div className="gd-cell-min" data-label="Education">
@@ -387,12 +443,12 @@ export default function GhotokDashboard() {
                           <div className="gd-cell-strong">{p.city}</div>
                           <div className="gd-cell-sub">{p.region}</div>
                         </div>
-                        <div data-label="Status"><Badge tone={ST[p.status]}>{p.status}</Badge></div>
+                        <div data-label="Status"><Badge tone={ST[p.status] || 'neutral'}>{p.status}</Badge></div>
                         <div className="gd-cell-pool" data-label="Pool">
-                          <Switch checked={on} onChange={() => { setPool((s) => ({ ...s, [p.id]: !s[p.id] })); say(on ? `${p.name} removed from the trusted network pool. Only you can see this profile now.` : `${p.name} is now visible to trusted-network matching. Contact still routes through you.`); }} />
+                          <Switch checked={on} onChange={() => togglePool(p)} />
                           <div className="gd-cell-min">
-                            <div className="gd-cell-sub" style={{ color: warn ? '#8C6318' : undefined }}>{isAtt ? 'Confirmed today' : p.upd}</div>
-                            {warn && <div className="gd-cell-refresh" onClick={() => { setAttested((s) => ({ ...s, [p.id]: true })); say(`${p.name} confirmed as active. The 90-day archive clock has reset.`); }}>Tap to refresh</div>}
+                            <div className="gd-cell-sub" style={{ color: warn ? '#8C6318' : undefined }}>{updLabel(p)}</div>
+                            {warn && <div className="gd-cell-refresh" onClick={() => attest(p)}>Tap to refresh</div>}
                           </div>
                         </div>
                       </div>
@@ -401,7 +457,7 @@ export default function GhotokDashboard() {
                 </div>
               </div>
               <div className="gd-table-foot">
-                <span>Showing {profiles.length} of 42</span>
+                <span>Showing {shown.length} of {profiles.length}</span>
                 <span className="gd-view-all" onClick={() => navigate('/search')}>View all profiles →</span>
               </div>
             </section>
