@@ -2,6 +2,11 @@
   background: var(--surface-page);
   min-height: 100vh;
   color: var(--text-primary);
+  /* The whole page is set in Tiro Bangla — the face the hero headline uses.
+     Lora follows it only as a fallback for glyphs Tiro Bangla lacks. Every
+     descendant inherits this, so nothing below re-declares a font-family. */
+  --lp-font: 'Tiro Bangla', 'Lora', Georgia, serif;
+  font-family: var(--lp-font);
   /* Content sits in the same 1360px column the dashboard frames use; the
      section backgrounds still run edge to edge. */
   --lp-max: 1360px;
@@ -34,13 +39,11 @@
   background: var(--green-900);
   display: grid;
   place-items: center;
-  font-family: var(--font-serif-display);
   font-size: 16px;
   font-weight: 600;
   color: var(--surface-card);
 }
 .lp-wordmark {
-  font-family: var(--font-serif-display);
   font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);
@@ -61,7 +64,8 @@
   color: var(--brand-primary);
 }
 .lp-nav-actions {
-  margin-left: auto;
+  /* No auto margin here: .lp-lang carries it and takes the whole gap. Two auto
+     margins would split the free space and strand the language switch mid-nav. */
   display: flex;
   align-items: center;
   gap: 14px;
@@ -85,6 +89,21 @@
 .lp-toggle-btn.is-active {
   background: var(--brand-primary);
   color: var(--text-on-brand);
+}
+/* The language switch is a secondary choice next to the audience switch, so
+   it gets a quieter active state rather than a second block of brand green. */
+.lp-lang {
+  /* Takes the free space so it lands beside the auth controls on a wide nav,
+     and stays on the brand's row once the nav wraps. */
+  margin-left: auto;
+}
+.lp-lang .lp-toggle-btn {
+  padding: 9px 13px;
+  font-size: 13.5px;
+}
+.lp-lang .lp-toggle-btn.is-active {
+  background: var(--surface-card-alt);
+  color: var(--text-primary);
 }
 .lp-login {
   font-size: 15px;
@@ -122,8 +141,7 @@
   font-weight: 600;
   color: var(--gold-700);
 }
-.lp-hero-bn {
-  font-family: 'Tiro Bangla', serif;
+.lp-hero-title {
   font-size: clamp(34px, 4.8vw, 50px);
   line-height: 1.32;
   color: var(--text-primary);
@@ -131,8 +149,7 @@
   font-weight: 400;
   text-wrap: pretty;
 }
-.lp-hero-en {
-  font-family: var(--font-serif-display);
+.lp-hero-lead {
   font-size: clamp(21px, 2.6vw, 27px);
   font-weight: 500;
   line-height: 1.35;
@@ -283,12 +300,11 @@
   gap: 12px;
   flex-wrap: wrap;
 }
-.lp-section-title-bn {
-  font-family: 'Tiro Bangla', serif;
+.lp-section-title {
   font-size: 31px;
   color: var(--text-primary);
 }
-.lp-section-title-en {
+.lp-section-sub {
   font-size: 15px;
   color: var(--text-secondary);
 }
@@ -326,27 +342,19 @@
   color: var(--gold-400);
   display: grid;
   place-items: center;
-  font-family: var(--font-serif-display);
   font-size: 16px;
   font-weight: 600;
 }
 .lp-step-title {
-  font-family: var(--font-serif-display);
   font-size: 19px;
   font-weight: 600;
   color: var(--text-primary);
-}
-.lp-step-bn {
-  font-family: 'Hind Siliguri', sans-serif;
-  font-size: 14.5px;
-  color: var(--brand-primary);
-  margin-top: 9px;
 }
 .lp-step-body {
   font-size: 14.5px;
   line-height: 1.65;
   color: var(--text-secondary);
-  margin-top: 7px;
+  margin-top: 12px;
   text-wrap: pretty;
 }
 
@@ -398,8 +406,7 @@
   text-transform: uppercase;
   color: rgba(253, 251, 246, 0.55);
 }
-.lp-founding-bn {
-  font-family: 'Tiro Bangla', serif;
+.lp-founding-title {
   font-size: 25px;
   line-height: 1.4;
   color: var(--surface-card);
@@ -450,7 +457,6 @@
   padding: 22px;
 }
 .lp-quote-name {
-  font-family: var(--font-serif-display);
   font-size: 17.5px;
   font-weight: 600;
   color: var(--text-primary);
@@ -545,7 +551,30 @@
   color: var(--surface-card);
 }
 
+/* --- bangla --- */
+/* Bangla sets taller than Latin at the same size: the matra sits above the
+   x-height and the descenders hang lower, so headlines need more leading. */
+.lp.lang-bn .lp-hero-title {
+  line-height: 1.42;
+}
+.lp.lang-bn .lp-hero-lead,
+.lp.lang-bn .lp-section-title,
+.lp.lang-bn .lp-founding-title {
+  line-height: 1.5;
+}
+.lp.lang-bn .lp-step-title,
+.lp.lang-bn .lp-promise-title,
+.lp.lang-bn .lp-quote-name {
+  line-height: 1.45;
+}
+
 /* --- responsive --- */
+/* Two toggles in the nav leave no room for the section links much below this. */
+@media (max-width: 1180px) {
+  .lp-nav-links {
+    display: none;
+  }
+}
 @media (max-width: 1040px) {
   .lp-hero {
     grid-template-columns: 1fr;
@@ -558,9 +587,6 @@
   }
 }
 @media (max-width: 760px) {
-  .lp-nav-links {
-    display: none;
-  }
   .lp-nav {
     flex-wrap: wrap;
     height: auto;
@@ -571,6 +597,17 @@
   .lp-nav-actions {
     width: 100%;
     flex-wrap: wrap;
+    gap: 10px;
+  }
+  /* Both toggles have to share one row on a phone, or the sticky header eats
+     the top of the viewport. */
+  .lp-toggle-btn {
+    padding: 8px 11px;
+    font-size: 13px;
+  }
+  .lp-lang .lp-toggle-btn {
+    padding: 8px 9px;
+    font-size: 12.5px;
   }
   .lp-promises-grid {
     grid-template-columns: 1fr;
