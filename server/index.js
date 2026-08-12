@@ -169,9 +169,11 @@ function relativeTime(d) {
 // single-row refetch after a PATCH.
 const INTEREST_SELECT = `
   SELECT i.id, i.kind, i.status, i.message, i.compatibilityScore, i.screeningResult, i.declineReason, i.createdAt,
-         i.fromGhotokId, i.fromGuardianId, i.fromLabel,
+         i.fromGhotokId, i.fromGuardianId, i.fromLabel, i.theirProfileId, i.yourProfileId,
          tp.prn AS theirPrn, tp.fullName AS theirName, tp.dob AS theirDob, tp.degree AS theirDegree,
          tp.institution AS theirInstitution, tp.area AS theirArea, tp.district AS theirDistrict,
+         tp.familyType AS theirFamilyType, tp.fatherInfo AS theirFatherInfo, tp.siblings AS theirSiblings,
+         tp.religiousPractice AS theirReligiousPractice,
          yp.prn AS yourPrn, yp.fullName AS yourName, yp.dob AS yourDob, yp.degree AS yourDegree,
          yp.institution AS yourInstitution, yp.area AS yourArea, yp.district AS yourDistrict,
          fg.code AS fromGhotokCode, fg.district AS fromGhotokDistrict, fg.marriagesClosed AS fromGhotokMarriages,
@@ -235,7 +237,14 @@ function interestItem(r) {
     fromMeta,
     when: relativeTime(r.createdAt),
     score: r.compatibilityScore,
+    theirProfileId: r.theirProfileId,
     theirName: r.theirName, theirPrn: r.theirPrn, theirMeta: `${yearsSince(r.theirDob) ?? '—'} · ${theirEdu} · ${theirLoc}`,
+    theirFacts: [
+      { k: 'Family', v: [capWord(r.theirFamilyType), r.theirFatherInfo].filter(Boolean).join(', ') || '—' },
+      { k: 'Siblings', v: r.theirSiblings || '—' },
+      { k: 'Practice', v: r.theirReligiousPractice || '—' },
+    ],
+    yourProfileId: r.yourProfileId,
     yourName: r.yourName, yourPrn: r.yourPrn, yourMeta: `${yearsSince(r.yourDob) ?? '—'} · ${yourEdu} · ${yourLoc}`,
     summary,
     message: r.message || '',
@@ -1097,6 +1106,80 @@ app.patch('/api/admin/payments/:id', requireAuth, requireRole('ADMIN'), async (r
     }
   });
   return res.json({ ok: true, status: decision });
+});
+
+// ── my profile (guardian / candidate self-view) ──
+// Resolves the single profile this account has standing over: the one a
+// guardian manages, or the candidate's own biodata. selfManaged mirrors
+// profiles.managerType === 'SELF' — a self-signed-up bride/groom decides for
+// themselves; a candidate whose profile a ghotok or guardian manages does not.
+async function myProfileForReq(req) {
+  if (req.auth.role === 'GUARDIAN') {
+    const guardian = await queryOne('SELECT * FROM guardians WHERE userId = ? LIMIT 1', [req.auth.sub]);
+    if (!guardian) return null;
+    const profile = await queryOne('SELECT * FROM profiles WHERE managedByGuardianId = ? LIMIT 1', [guardian.id]);
+    if (!profile) return null;
+    return { profile, selfManaged: false };
+  }
+  if (req.auth.role === 'CANDIDATE') {
+    const profile = await queryOne('SELECT * FROM profiles WHERE candidateUserId = ? LIMIT 1', [req.auth.sub]);
+    if (!profile) return null;
+    return { profile, selfManaged: profile.managerType === 'SELF' };
+  }
+  return null;
+}
+
+app.get('/api/my-profile', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
+  const me = await myProfileForReq(req);
+  if (!me) return res.json({ profile: null, selfManaged: false });
+  return res.json({
+    profile: { id: me.profile.id, name: me.profile.fullName, init: initialsOf(me.profile.fullName), prn: me.profile.prn },
+    selfManaged: me.selfManaged,
+  });
+});
+
+app.get('/api/my-profile/proposals', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
+  const me = await myProfileForReq(req);
+  if (!me) return res.json({ proposals: [] });
+  const rows = await query(`${INTEREST_SELECT} WHERE i.yourProfileId = ? ORDER BY i.createdAt DESC`, [me.profile.id]);
+  return res.json({ proposals: rows.map(interestItem) });
+});
+
+app.get('/api/my-profile/activity', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
+  const me = await myProfileForReq(req);
+  if (!me) return res.json({ activity: [] });
+  const rows = await query('SELECT text, occurredAt FROM activity_log WHERE profileId = ? ORDER BY occurredAt DESC LIMIT 10', [me.profile.id]);
+  return res.json({ activity: rows.map((a) => ({ text: a.text, when: relativeTime(a.occurredAt) })) });
+});
+
+// body: { decision: 'ACCEPT' | 'DECLINE' }
+// A candidate may only decide when their profile is self-managed — otherwise
+// their manager (ghotok or guardian) is the one who decides, elsewhere.
+app.patch('/api/my-profile/proposals/:id', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
+  const me = await myProfileForReq(req);
+  if (!me) return bad(res, 'No profile is linked to this account.', 403);
+  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, 'Your manager decides this for you.', 403);
+
+  const decision = req.body?.decision;
+  if (!['ACCEPT', 'DECLINE'].includes(decision)) return bad(res, 'decision must be ACCEPT or DECLINE.');
+  const interest = await queryOne('SELECT * FROM interests WHERE id = ? AND yourProfileId = ? LIMIT 1', [req.params.id, me.profile.id]);
+  if (!interest) return bad(res, 'Proposal not found.', 404);
+
+  const status = decision === 'ACCEPT' ? 'ACCEPTED' : 'DECLINED';
+  const declineReason = decision === 'DECLINE' ? 'Not the right fit at this time.' : null;
+
+  await withTransaction(async (tx) => {
+    await tx.execute('UPDATE interests SET status = ?, declineReason = ? WHERE id = ?', [status, declineReason, interest.id]);
+    if (status === 'ACCEPTED' && interest.kind === 'INTEREST') {
+      await tx.execute(
+        "UPDATE profiles SET status = 'IN_DISCUSSION' WHERE id IN (?, ?) AND status = 'ACTIVE'",
+        [interest.theirProfileId, interest.yourProfileId]
+      );
+    }
+  });
+
+  const [row] = await query(`${INTEREST_SELECT} WHERE i.id = ?`, [interest.id]);
+  return res.json({ proposal: interestItem(row) });
 });
 
 // ── verify email ──

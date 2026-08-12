@@ -56,6 +56,12 @@ export const api = {
   adminPayments: (token) => request('/admin/payments', { token }),
   updatePayment: (token, id, patch) => request(`/admin/payments/${id}`, { method: 'PATCH', body: patch, token }),
 
+  // Guardian / candidate self-view
+  myProfile: (token) => request('/my-profile', { token }),
+  myProposals: (token) => request('/my-profile/proposals', { token }),
+  myActivity: (token) => request('/my-profile/activity', { token }),
+  decideProposal: (token, id, patch) => request(`/my-profile/proposals/${id}`, { method: 'PATCH', body: patch, token }),
+
   // Email verification
   verifyEmail: (token) => request('/auth/verify-email', { method: 'POST', body: { token } }),
   resendVerification: (email) => request('/auth/resend-verification', { method: 'POST', body: { email } }),
