@@ -2,6 +2,11 @@
   background: var(--surface-page);
   min-height: 100vh;
   color: var(--text-primary);
+  /* Content sits in the same 1360px column the dashboard frames use; the
+     section backgrounds still run edge to edge. */
+  --lp-max: 1360px;
+  --lp-gutter: clamp(16px, 4vw, 48px);
+  --lp-pad-x: max(var(--lp-gutter), calc((100% - var(--lp-max)) / 2));
 }
 
 /* --- nav --- */
@@ -11,7 +16,7 @@
   z-index: 20;
   background: var(--surface-page);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 0 clamp(16px, 4vw, 48px);
+  padding: 0 var(--lp-pad-x);
   height: 64px;
   display: flex;
   align-items: center;
@@ -89,7 +94,7 @@
 
 /* --- hero --- */
 .lp-hero {
-  padding: clamp(32px, 5vw, 56px) clamp(16px, 4vw, 48px) 48px;
+  padding: clamp(32px, 5vw, 56px) var(--lp-pad-x) 48px;
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
   gap: 44px;
@@ -292,7 +297,7 @@
   background: var(--surface-card);
   border-top: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 44px clamp(16px, 4vw, 48px);
+  padding: 44px var(--lp-pad-x);
 }
 .lp-steps-grid {
   display: grid;
@@ -346,7 +351,7 @@
 
 /* --- promises --- */
 .lp-promises {
-  padding: 44px clamp(16px, 4vw, 48px);
+  padding: 44px var(--lp-pad-x);
   display: grid;
   grid-template-columns: 1fr 380px;
   gap: 36px;
@@ -465,7 +470,7 @@
 /* --- footer --- */
 .lp-footer {
   background: var(--green-900);
-  padding: 32px clamp(16px, 4vw, 48px);
+  padding: 32px var(--lp-pad-x);
   display: flex;
   align-items: center;
   gap: 24px;
