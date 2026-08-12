@@ -1,29 +1,27 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Dialog } from '../../components/ui/index.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { api } from '../../lib/api.js';
 import './SearchProfile.css';
-
-const R = [
-  { id: 'r1', prn: 'PRN-10245', name: 'Nusrat Jahan', age: 26, height: '5′4″', edu: 'MBA, IBA Dhaka', job: 'Banker', district: 'Dhanmondi, Dhaka', dcode: 'Dhaka', eduLevel: 'Postgraduate', managedBy: 'Rahima Akter (ghotok)', mgrMeta: 'GHT-0042 · Sylhet · 27 marriages', verified: true, screened: true, mine: true, family: 'Nuclear · father retired, BCS', siblings: 'One younger brother, student', religion: 'Sunni · moderately practising', looking: 'Postgraduate, within 4 years of age' },
-  { id: 'r2', prn: 'PRN-20881', name: 'Sumaiya Haque', age: 24, height: '5′2″', edu: 'BSc Pharmacy, SUST', job: 'Pharmacist', district: 'Zindabazar, Sylhet', dcode: 'Sylhet', eduLevel: 'Graduate', managedBy: 'Kamrul Islam (ghotok)', mgrMeta: 'GHT-0311 · Sylhet · pool member', verified: true, screened: true, mine: false, family: 'Joint · family business', siblings: 'Two elder sisters, both married', religion: 'Sunni · strictly practising', looking: 'Settled in Sylhet or abroad' },
-  { id: 'r3', prn: 'PRN-31204', name: 'Farhana Akter', age: 27, height: '5′3″', edu: 'BBA, North South', job: 'HR executive', district: 'Uttara, Dhaka', dcode: 'Dhaka', eduLevel: 'Graduate', managedBy: 'Guardian — Shirin Akter', mgrMeta: 'Mother · self-managed family', verified: false, screened: false, mine: false, family: 'Nuclear · father in service', siblings: 'One elder brother, engineer', religion: 'Sunni · culturally observant', looking: 'Dhaka-based, service holder' },
-  { id: 'r4', prn: 'PRN-19077', name: 'Ayesha Siddika', age: 23, height: '5′1″', edu: 'Honours in Bangla', job: 'Student', district: 'Mymensingh Sadar', dcode: 'Mymensingh', eduLevel: 'Graduate', managedBy: 'Nazma Begum (ghotok)', mgrMeta: 'GHT-0198 · Mymensingh · pool member', verified: true, screened: false, mine: false, family: 'Joint · agricultural land', siblings: 'Three siblings, she is eldest', religion: 'Sunni · moderately practising', looking: 'Family known to ours preferred' },
-  { id: 'r5', prn: 'PRN-24410', name: 'Rifat Jahan', age: 29, height: '5′5″', edu: 'MSc Economics, DU', job: 'Research associate', district: 'Khulshi, Chattogram', dcode: 'Chattogram', eduLevel: 'Postgraduate', managedBy: 'Rahima Akter (ghotok)', mgrMeta: 'GHT-0042 · Sylhet · 27 marriages', verified: true, screened: true, mine: true, family: 'Nuclear · both parents teachers', siblings: 'One younger sister, doctor', religion: 'Sunni · moderately practising', looking: 'Postgraduate, open to relocating' },
-];
 
 const opts = (a) => a.map((v) => ({ value: v, label: v }));
 const SCOPES = [
-  { value: 'mine', label: 'My profiles', count: '42', note: 'Profiles you manage yourself' },
-  { value: 'pool', label: 'Trusted network pool', count: '1,240', note: 'Shared by verified ghotoks' },
-  { value: 'all', label: 'Everything I can see', count: '1,282', note: 'Your book plus the pool' },
+  { value: 'mine', label: 'My profiles', note: 'Profiles you manage yourself' },
+  { value: 'pool', label: 'Trusted network pool', note: 'Shared by verified ghotoks' },
+  { value: 'all', label: 'Everything I can see', note: 'Your book plus the pool' },
 ];
 const SCOPE_NOTE = { mine: 'your own book', pool: 'trusted network pool', all: 'your book and the pool' };
 const DEFAULT_FF = { gender: 'Bride', ageMin: 22, ageMax: 32, district: 'Any district', edu: 'Any level', verified: true, screened: false };
+const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
 export default function SearchProfile() {
+  const { user, token } = useAuth();
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [scope, setScope] = useState('all');
   const [q, setQ] = useState('');
   const [sort, setSort] = useState('Recently updated');
-  const [selected, setSelected] = useState('r2');
+  const [selected, setSelected] = useState(null);
   const [ff, setFf] = useState(DEFAULT_FF);
   const [interest, setInterest] = useState({});
   const [photoReq, setPhotoReq] = useState({});
@@ -36,9 +34,31 @@ export default function SearchProfile() {
   useEffect(() => () => { clearTimeout(timer.current); clearTimeout(iTimer.current); clearTimeout(pTimer.current); }, []);
   const setFF = (k, v) => setFf((s) => ({ ...s, [k]: v }));
 
+  // Load the ghotok's book + the trusted-network pool once; all filtering
+  // below happens client-side over this set.
+  useEffect(() => {
+    if (!token) return undefined;
+    let live = true;
+    api.searchProfiles(token)
+      .then((data) => {
+        if (!live) return;
+        setResults(data.profiles);
+        // Open the first profile that's visible under the default filters.
+        const wantGender = DEFAULT_FF.gender === 'Bride' ? 'FEMALE' : 'MALE';
+        const firstVisible = data.profiles.find((r) =>
+          r.gender === wantGender && r.age >= DEFAULT_FF.ageMin && r.age <= DEFAULT_FF.ageMax && (!DEFAULT_FF.verified || r.verified));
+        setSelected((cur) => cur ?? firstVisible?.id ?? null);
+      })
+      .catch((e) => say(e.message || 'Could not load profiles.'))
+      .finally(() => { if (live) setLoading(false); });
+    return () => { live = false; };
+  }, [token, say]);
+
   const matches = (r) => {
     if (scope === 'mine' && !r.mine) return false;
     if (scope === 'pool' && r.mine) return false;
+    if (ff.gender === 'Bride' && r.gender !== 'FEMALE') return false;
+    if (ff.gender === 'Groom' && r.gender !== 'MALE') return false;
     if (ff.verified && !r.verified) return false;
     if (ff.screened && !r.screened) return false;
     if (ff.district !== 'Any district' && r.dcode !== ff.district) return false;
@@ -49,8 +69,9 @@ export default function SearchProfile() {
     return true;
   };
 
-  const list = R.filter(matches);
-  const selRaw = R.find((r) => r.id === selected) || null;
+  const scopeCount = (v) => (v === 'mine' ? results.filter((r) => r.mine).length : v === 'pool' ? results.filter((r) => !r.mine).length : results.length);
+  const list = results.filter(matches);
+  const selRaw = results.find((r) => r.id === selected) || null;
   const sel = selRaw && list.some((r) => r.id === selRaw.id) ? selRaw : null;
   const iState = sel ? interest[sel.id] : null;
   const pState = sel ? photoReq[sel.id] : null;
@@ -98,7 +119,7 @@ export default function SearchProfile() {
         <div className="sp-topbar">
           <div className="sp-topbar-brand"><div className="sp-logo">স</div><span>SongiSathi</span></div>
           <div className="sp-topbar-tabs"><span>ড্যাশবোর্ড</span><span>প্রোফাইল</span><span className="on">অনুসন্ধান</span><span>এআই ম্যাচিং</span></div>
-          <div className="sp-topbar-right"><Badge tone="gold">BUREAU</Badge><Avatar initials="RA" size={28} /></div>
+          <div className="sp-topbar-right"><Badge tone="gold">{user?.tier || '—'}</Badge><Avatar initials={initialsOf(user?.fullName)} size={28} /></div>
         </div>
 
         <div className={`sp-grid ${sel ? 'has-panel' : ''}`}>
@@ -111,7 +132,7 @@ export default function SearchProfile() {
             <div className="sp-scopes">
               {SCOPES.map((sc) => (
                 <div key={sc.value} className={`sp-scope ${scope === sc.value ? 'is-active' : ''}`} onClick={() => setScope(sc.value)}>
-                  <div className="sp-scope-top"><span>{sc.label}</span><span className="sp-scope-count">{sc.count}</span></div>
+                  <div className="sp-scope-top"><span>{sc.label}</span><span className="sp-scope-count">{scopeCount(sc.value)}</span></div>
                   <div className="sp-scope-note">{sc.note}</div>
                 </div>
               ))}
@@ -157,13 +178,14 @@ export default function SearchProfile() {
                   <ProfileCard profileId={r.prn} name={r.name} age={r.age} height={r.height} education={r.edu} district={r.district} managedBy={r.managedBy.split(' ')[0]} verified={r.verified} photoLocked={photoReq[r.id] !== 'granted'} onClick={() => setSelected(r.id)} />
                 </div>
               ))}
-              {list.length === 0 && (
+              {loading && <div className="sp-empty"><div className="sp-empty-t">Loading profiles…</div></div>}
+              {!loading && list.length === 0 && (
                 <div className="sp-empty">
                   <div className="sp-empty-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="1.8" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
                   </div>
                   <div className="sp-empty-t">No profiles match these filters</div>
-                  <div className="sp-empty-b">Widen the age range, or search the trusted network pool — 1,240 profiles from verified ghotoks sit outside your own book.</div>
+                  <div className="sp-empty-b">Widen the age range, or search the trusted network pool — {scopeCount('pool')} profiles from verified ghotoks sit outside your own book.</div>
                   <div className="sp-empty-actions">
                     <Button variant="outline" size="sm" onClick={() => { setFf({ ...DEFAULT_FF, verified: false }); setQ(''); }}>Clear filters</Button>
                     <Button variant="primary" size="sm" onClick={() => setScope('pool')}>Search the pool</Button>

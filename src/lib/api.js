@@ -30,6 +30,7 @@ export const api = {
   screeningQuestions: (token) => request('/screening-questions', { token }),
   createProfile: (token, payload) => request('/profiles', { method: 'POST', body: payload, token }),
   profiles: (token) => request('/profiles', { token }),
+  searchProfiles: (token) => request('/profiles/search', { token }),
   updateProfile: (token, id, patch) => request(`/profiles/${id}`, { method: 'PATCH', body: patch, token }),
 
   // Dashboard

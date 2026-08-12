@@ -103,6 +103,52 @@ const suggestionPerson = (p) => ({
   job: p.profession, city: p.area || p.district,
 });
 
+const capWord = (x) => (x ? x[0] + x.slice(1).toLowerCase() : x);
+// Rough education level from the free-text degree (no dedicated column).
+const eduLevelOf = (degree) =>
+  /\b(m\.?a|m\.?sc|m\.?eng|mba|mbbs|mphil|ph\.?d|llm|masters|postgrad)/i.test(degree || '')
+    ? 'Postgraduate' : 'Graduate';
+
+// A DB profile row (joined with its manager) → the shape the search UI expects.
+function searchProfile(r, myGhotokId, prefLabels) {
+  const mine = r.managedByGhotokId === myGhotokId;
+  let managedBy;
+  let mgrMeta;
+  if (r.managerType === 'GHOTOK') {
+    managedBy = `${r.ghotokName || 'Ghotok'} (ghotok)`;
+    mgrMeta = [r.ghotokCode, r.ghotokDistrict].filter(Boolean).join(' · ')
+      + (mine ? ` · ${r.ghotokMarriages} marriages` : ' · pool member');
+  } else if (r.managerType === 'GUARDIAN') {
+    managedBy = `Guardian — ${r.guardianName || ''}`.trim();
+    mgrMeta = [r.guardianRelation, 'self-managed family'].filter(Boolean).join(' · ');
+  } else {
+    managedBy = `${r.candidateName || r.fullName} (self)`;
+    mgrMeta = 'Self-managed';
+  }
+  return {
+    id: r.id,
+    prn: r.prn,
+    name: r.fullName,
+    gender: r.gender,
+    age: yearsSince(r.dob),
+    height: r.heightLabel,
+    edu: [r.degree, r.institution].filter(Boolean).join(', '),
+    eduLevel: eduLevelOf(r.degree),
+    job: r.profession,
+    district: [r.area, r.district].filter(Boolean).join(', '),
+    dcode: r.district,
+    verified: Boolean(r.verified),
+    screened: Number(r.sealedCount) > 0,
+    mine,
+    managedBy,
+    mgrMeta,
+    family: [capWord(r.familyType), r.fatherInfo].filter(Boolean).join(' · '),
+    siblings: r.siblings || '—',
+    religion: [r.religion, r.religiousPractice].filter(Boolean).join(' · ') || '—',
+    looking: prefLabels.length ? prefLabels.join(', ') : '—',
+  };
+}
+
 // A one-time token: a raw random string (returned, goes in the email link) and
 // its SHA-256 hash (stored, so a DB leak never exposes a usable token).
 const makeToken = () => {
@@ -504,6 +550,45 @@ app.get('/api/dashboard/stats', requireAuth, requireRole('GHOTOK'), async (req, 
       referralCode: ghotok.referralCode,
     },
   });
+});
+
+// ── search: the ghotok's book + the trusted-network pool ──
+// Returns every profile this ghotok may see (their own, plus any pooled
+// profile from another manager), as rich objects the search UI filters
+// client-side. Drafts and auto-archived profiles are left out.
+app.get('/api/profiles/search', requireAuth, requireRole('GHOTOK'), async (req, res) => {
+  const ghotok = await ghotokForReq(req);
+  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
+
+  const rows = await query(
+    `SELECT p.*,
+        gu.fullName AS ghotokName, g.code AS ghotokCode, g.district AS ghotokDistrict, g.marriagesClosed AS ghotokMarriages,
+        gdu.fullName AS guardianName, gd.relation AS guardianRelation,
+        cu.fullName AS candidateName,
+        (SELECT COUNT(*) FROM screening_responses sr WHERE sr.profileId = p.id AND sr.sealed = 1) AS sealedCount
+       FROM profiles p
+       LEFT JOIN ghotoks g   ON p.managedByGhotokId = g.id
+       LEFT JOIN users gu    ON g.userId = gu.id
+       LEFT JOIN guardians gd ON p.managedByGuardianId = gd.id
+       LEFT JOIN users gdu   ON gd.userId = gdu.id
+       LEFT JOIN users cu    ON p.candidateUserId = cu.id
+      WHERE (p.managedByGhotokId = ? OR p.inNetworkPool = 1)
+        AND p.status NOT IN ('DRAFT', 'AUTO_ARCHIVED')
+      ORDER BY p.lastUpdatedAt DESC`,
+    [ghotok.id]
+  );
+
+  const ids = rows.map((r) => r.id);
+  const prefsByProfile = {};
+  if (ids.length) {
+    const prefs = await query(
+      `SELECT profileId, label FROM profile_preferences WHERE enabled = 1 AND profileId IN (${ids.map(() => '?').join(',')})`,
+      ids
+    );
+    for (const pr of prefs) (prefsByProfile[pr.profileId] ||= []).push(pr.label);
+  }
+
+  return res.json({ profiles: rows.map((r) => searchProfile(r, ghotok.id, prefsByProfile[r.id] || [])) });
 });
 
 // ── AI match suggestions (this ghotok's open suggestions) ──
