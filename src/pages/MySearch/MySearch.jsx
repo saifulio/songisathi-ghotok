@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard } from '../../components/ui/index.jsx';
+import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Pagination } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
 import './MySearch.css';
 
 const opts = (a) => a.map((v) => ({ value: v, label: v }));
+const PAGE_SIZE = 10;
 const DEFAULT_FF = { gender: 'Any', ageMin: 20, ageMax: 40, district: 'Any district', edu: 'Any level', verified: false, screened: false };
 const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
@@ -21,8 +22,10 @@ export default function MySearch() {
   const [selected, setSelected] = useState(null);
   const [ff, setFf] = useState(DEFAULT_FF);
   const [sent, setSent] = useState({});
+  const [page, setPage] = useState(1);
   const [toast, setToast] = useState(null);
   const timer = useRef(null);
+  const cardsRef = useRef(null);
   const say = useCallback((msg) => { clearTimeout(timer.current); setToast(msg); timer.current = setTimeout(() => setToast(null), 4400); }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
   const setFF = (k, v) => setFf((s) => ({ ...s, [k]: v }));
@@ -56,6 +59,19 @@ export default function MySearch() {
   };
   const list = results.filter(matches);
   const sel = list.find((r) => r.id === selected) || null;
+
+  // Ten to a page. Changing a filter shrinks the list under you, so the page
+  // is clamped on render (page 9 of a 3-page result would otherwise go blank)
+  // and reset whenever the filters or the query change.
+  const pageCount = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const pageStart = (safePage - 1) * PAGE_SIZE;
+  const pageItems = list.slice(pageStart, pageStart + PAGE_SIZE);
+  useEffect(() => { setPage(1); }, [q, ff]);
+  const goToPage = (p) => {
+    setPage(p);
+    cardsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const chips = [];
   if (ff.verified) chips.push({ label: 'Verified only', k: 'verified' });
@@ -130,11 +146,15 @@ export default function MySearch() {
               </div>
             </div>
             <div className="ms-results-meta">
-              <span>{list.length} profiles in the network pool</span>
+              <span>
+                {list.length === 0
+                  ? '0 profiles in the network pool'
+                  : `Showing ${pageStart + 1}–${pageStart + pageItems.length} of ${list.length} profiles in the network pool`}
+              </span>
               <div className="ms-chips">{chips.map((c) => (<Tag key={c.k} onRemove={() => removeChip(c.k)}>{c.label}</Tag>))}</div>
             </div>
-            <div className="ms-cards">
-              {list.map((r) => (
+            <div className="ms-cards" ref={cardsRef}>
+              {pageItems.map((r) => (
                 <div key={r.id} style={{ borderRadius: 14, outline: selected === r.id ? '2px solid var(--brand-primary)' : '2px solid transparent', outlineOffset: 2 }}>
                   <ProfileCard profileId={r.prn} name={r.name} age={r.age} height={r.height} education={r.edu} district={r.district} managedBy={r.managedBy.split(' ')[0]} verified={r.verified} photoLocked onClick={() => setSelected(r.id)} />
                 </div>
@@ -148,6 +168,7 @@ export default function MySearch() {
                 </div>
               )}
             </div>
+            <Pagination page={safePage} pageCount={pageCount} onChange={goToPage} />
           </div>
 
           {sel && (

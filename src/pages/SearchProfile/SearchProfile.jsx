@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Dialog } from '../../components/ui/index.jsx';
+import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Dialog, Pagination } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
 import './SearchProfile.css';
@@ -11,6 +11,7 @@ const SCOPES = [
   { value: 'all', label: 'Everything I can see', note: 'Your book plus the pool' },
 ];
 const SCOPE_NOTE = { mine: 'your own book', pool: 'trusted network pool', all: 'your book and the pool' };
+const PAGE_SIZE = 10;
 const DEFAULT_FF = { gender: 'Bride', ageMin: 22, ageMax: 32, district: 'Any district', edu: 'Any level', verified: true, screened: false };
 const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
@@ -27,8 +28,10 @@ export default function SearchProfile() {
   const [photoReq, setPhotoReq] = useState({});
   const [released, setReleased] = useState({});
   const [dialog, setDialog] = useState(null);
+  const [page, setPage] = useState(1);
   const [toast, setToast] = useState(null);
   const timer = useRef(null), iTimer = useRef(null), pTimer = useRef(null);
+  const cardsRef = useRef(null);
 
   const say = useCallback((msg) => { clearTimeout(timer.current); setToast(msg); timer.current = setTimeout(() => setToast(null), 4400); }, []);
   useEffect(() => () => { clearTimeout(timer.current); clearTimeout(iTimer.current); clearTimeout(pTimer.current); }, []);
@@ -73,6 +76,18 @@ export default function SearchProfile() {
   const list = results.filter(matches);
   const selRaw = results.find((r) => r.id === selected) || null;
   const sel = selRaw && list.some((r) => r.id === selRaw.id) ? selRaw : null;
+  // Ten to a page. Changing a filter or scope shrinks the list under you, so
+  // the page is clamped on render and reset when the criteria change.
+  const pageCount = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const pageStart = (safePage - 1) * PAGE_SIZE;
+  const pageItems = list.slice(pageStart, pageStart + PAGE_SIZE);
+  useEffect(() => { setPage(1); }, [q, ff, scope]);
+  const goToPage = (p) => {
+    setPage(p);
+    cardsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const iState = sel ? interest[sel.id] : null;
   const pState = sel ? photoReq[sel.id] : null;
   const isReleased = sel ? !!released[sel.id] : false;
@@ -167,13 +182,17 @@ export default function SearchProfile() {
               <Select value={sort} onChange={(e) => setSort(e.target.value)} options={opts(['Recently updated', 'Compatibility', 'Newest first'])} />
             </div>
             <div className="sp-results-meta">
-              <span>{list.length} profiles · {SCOPE_NOTE[scope]}</span>
+              <span>
+                {list.length === 0
+                  ? `0 profiles · ${SCOPE_NOTE[scope]}`
+                  : `Showing ${pageStart + 1}–${pageStart + pageItems.length} of ${list.length} profiles · ${SCOPE_NOTE[scope]}`}
+              </span>
               <div className="sp-chips">
                 {chips.map((c) => (<Tag key={c.k} onRemove={() => removeChip(c.k)}>{c.label}</Tag>))}
               </div>
             </div>
-            <div className="sp-cards">
-              {list.map((r) => (
+            <div className="sp-cards" ref={cardsRef}>
+              {pageItems.map((r) => (
                 <div key={r.id} style={{ borderRadius: 14, outline: selected === r.id ? '2px solid var(--brand-primary)' : '2px solid transparent', outlineOffset: 2 }}>
                   <ProfileCard profileId={r.prn} name={r.name} age={r.age} height={r.height} education={r.edu} district={r.district} managedBy={r.managedBy.split(' ')[0]} verified={r.verified} photoLocked={photoReq[r.id] !== 'granted'} onClick={() => setSelected(r.id)} />
                 </div>
@@ -193,6 +212,7 @@ export default function SearchProfile() {
                 </div>
               )}
             </div>
+            <Pagination page={safePage} pageCount={pageCount} onChange={goToPage} />
           </div>
 
           {/* detail panel */}

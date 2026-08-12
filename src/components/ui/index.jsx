@@ -505,6 +505,76 @@ export function Tabs({ items, active, onChange, style }) {
   );
 }
 
+/* --- Pagination --- */
+// Page numbers with the first and last always reachable and a window of one
+// either side of the current page; anything skipped collapses to an ellipsis.
+// Renders nothing for a single page, so callers can drop it in unconditionally.
+export function Pagination({ page, pageCount, onChange }) {
+  if (!pageCount || pageCount <= 1) return null;
+
+  const nums = [];
+  for (let p = 1; p <= pageCount; p++) {
+    if (p === 1 || p === pageCount || (p >= page - 1 && p <= page + 1)) nums.push(p);
+  }
+  const items = [];
+  nums.forEach((p, i) => {
+    if (i > 0 && p - nums[i - 1] > 1) items.push({ gap: true, key: `gap-${p}` });
+    items.push({ page: p, key: p });
+  });
+
+  const base = {
+    minWidth: 32,
+    height: 32,
+    padding: '0 9px',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--border-default)',
+    background: 'var(--surface-card)',
+    color: 'var(--text-secondary)',
+    fontFamily: 'var(--font-sans-body)',
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+    fontVariantNumeric: 'tabular-nums',
+  };
+  const step = (to, label, disabled) => (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => onChange(to)}
+      style={{ ...base, opacity: disabled ? 0.4 : 1, cursor: disabled ? 'not-allowed' : 'pointer' }}
+    >
+      {label}
+    </button>
+  );
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', paddingTop: 4 }}>
+      {step(page - 1, '‹', page <= 1)}
+      {items.map((it) =>
+        it.gap ? (
+          <span key={it.key} style={{ color: 'var(--text-tertiary)', fontSize: 13, padding: '0 2px' }}>…</span>
+        ) : (
+          <button
+            key={it.key}
+            type="button"
+            onClick={() => onChange(it.page)}
+            aria-current={it.page === page ? 'page' : undefined}
+            style={{
+              ...base,
+              borderColor: it.page === page ? 'var(--brand-primary)' : 'var(--border-default)',
+              background: it.page === page ? 'var(--green-100)' : 'var(--surface-card)',
+              color: it.page === page ? 'var(--brand-primary)' : 'var(--text-secondary)',
+            }}
+          >
+            {it.page}
+          </button>
+        )
+      )}
+      {step(page + 1, '›', page >= pageCount)}
+    </div>
+  );
+}
+
 /* --- Dialog --- */
 export function Dialog({ open, title, children, actions, position = 'fixed' }) {
   if (!open) return null;
