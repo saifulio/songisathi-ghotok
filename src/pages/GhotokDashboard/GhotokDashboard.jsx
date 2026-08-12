@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Badge, Avatar, Switch, Tabs } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import { NAV_GROUPS } from '../../nav.js';
 import './GhotokDashboard.css';
 
 // Status label → Badge tone.
@@ -16,21 +17,25 @@ const ST = {
   Paused: 'warning',
 };
 
-const NAV = [
-  { bn: 'ড্যাশবোর্ড', en: 'Dashboard', to: '/dashboard' },
-  { bn: 'প্রোফাইল', en: 'Profiles', to: '/search' },
-  { bn: 'অনুসন্ধান', en: 'Search', to: '/search' },
-  { bn: 'এআই ম্যাচিং', en: 'AI matching', to: '/ai-matching' },
-  { bn: 'বায়োডাটা', en: 'Biodata studio', to: '/biodata-studio' },
-  { bn: 'কমিশন', en: 'Commission', to: '/commission' },
-  { bn: 'নেটওয়ার্ক পুল', en: 'Network pool', to: '/search' },
-];
+// Sidebar items come from the central nav registry so this never drifts out
+// of sync with what a ghotok can actually reach (see pages/index.jsx).
+const WORKSPACE_NAV = NAV_GROUPS.find((g) => g.label === 'Ghotok workspace').items;
+const BN_LABEL = {
+  '/dashboard': 'ড্যাশবোর্ড',
+  '/interest-inbox': 'ইন্টারেস্ট ইনবক্স',
+  '/search': 'অনুসন্ধান',
+  '/add-profile': 'প্রোফাইল যোগ করুন',
+  '/biodata-studio': 'বায়োডাটা',
+  '/ai-matching': 'এআই ম্যাচিং',
+  '/commission': 'কমিশন',
+};
 
 const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 const cap = (x) => (x ? x[0] + x.slice(1).toLowerCase() : x);
 
 export default function GhotokDashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, token } = useAuth();
   const [langBn, setLangBn] = useState(true);
   const [profiles, setProfiles] = useState([]);
@@ -103,10 +108,10 @@ export default function GhotokDashboard() {
     { bn: 'কমিশন প্রাপ্ত', en: 'Commission received', val: stats ? `৳${stats.commissionReceived.toLocaleString('en-IN')}` : '—', foot: stats ? `${stats.paymentsReceived} of ${stats.paymentsTotal} payments received` : '', footColor: '#3D6B44' },
   ];
 
-  const navCountFor = (en) =>
-    en === 'Profiles' ? (profiles.length ? String(profiles.length) : '')
-      : en === 'AI matching' ? (suggestions.length ? String(suggestions.length) : '')
-        : en === 'Commission' && stats ? (stats.paymentsTotal - stats.paymentsReceived > 0 ? String(stats.paymentsTotal - stats.paymentsReceived) : '')
+  const navCountFor = (path) =>
+    path === '/search' ? (profiles.length ? String(profiles.length) : '')
+      : path === '/ai-matching' ? (suggestions.length ? String(suggestions.length) : '')
+        : path === '/commission' && stats ? (stats.paymentsTotal - stats.paymentsReceived > 0 ? String(stats.paymentsTotal - stats.paymentsReceived) : '')
           : '';
 
   const updLabel = (p) =>
@@ -185,14 +190,15 @@ export default function GhotokDashboard() {
           </div>
 
           <nav className="gd-nav">
-            {NAV.map((n, i) => {
-              const count = navCountFor(n.en);
+            {WORKSPACE_NAV.map((n) => {
+              const count = navCountFor(n.path);
+              const active = location.pathname === n.path;
               return (
-                <div key={n.en + i} className={`gd-nav-item ${i === 0 ? 'is-active' : ''}`} onClick={() => n.to && navigate(n.to)}>
+                <div key={n.path} className={`gd-nav-item ${active ? 'is-active' : ''}`} onClick={() => navigate(n.path)}>
                   <span className="gd-nav-dot" />
                   <span className="gd-nav-labels">
-                    <span className="gd-nav-bn">{n.bn}</span>
-                    <span className="gd-nav-en">{n.en}</span>
+                    <span className="gd-nav-bn">{BN_LABEL[n.path] || ''}</span>
+                    <span className="gd-nav-en">{n.label}</span>
                   </span>
                   {count && <span className="gd-nav-count">{count}</span>}
                 </div>

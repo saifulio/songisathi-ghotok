@@ -1,0 +1,36 @@
+// Pure nav/route metadata — path, label, and access rules only, no component
+// references. Kept separate from pages/index.jsx (which wires in the actual
+// page components) so pages can read the nav registry without creating a
+// circular import back through pages/index.jsx.
+//
+// Access per item:
+//   public: true  → anyone, signed in or not (marketing pages).
+//   roles: [...]  → must be signed in AND hold one of these roles.
+//   (neither)     → must be signed in, any role.
+// The router enforces this via ProtectedRoute; the nav hides what a user
+// can't reach (see Layout).
+export const NAV_GROUPS = [
+  {
+    label: 'Ghotok workspace',
+    items: [
+      { path: '/dashboard', label: 'Dashboard', roles: ['GHOTOK'] },
+      { path: '/interest-inbox', label: 'Interest inbox', roles: ['GHOTOK'] },
+      { path: '/search', label: 'Search & profiles', roles: ['GHOTOK'] },
+      { path: '/add-profile', label: 'Add profile · vault', roles: ['GHOTOK'] },
+      { path: '/biodata-studio', label: 'Biodata studio', roles: ['GHOTOK'] },
+      { path: '/ai-matching', label: 'AI matching', roles: ['GHOTOK'] },
+      { path: '/commission', label: 'Commission & closing', roles: ['GHOTOK'] },
+    ],
+  },
+  {
+    label: 'Onboarding & family',
+    items: [
+      { path: '/onboarding', label: 'Onboarding & pricing', public: true },
+      { path: '/guardian', label: 'Guardian & candidate', roles: ['GUARDIAN', 'CANDIDATE'] },
+    ],
+  },
+  {
+    label: 'Admin',
+    items: [{ path: '/admin', label: 'Moderation queue', roles: ['ADMIN'] }],
+  },
+];

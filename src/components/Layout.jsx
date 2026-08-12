@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { NAV_GROUPS } from '../pages/index.jsx';
+import { NAV_GROUPS } from '../nav.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import './Layout.css';
 

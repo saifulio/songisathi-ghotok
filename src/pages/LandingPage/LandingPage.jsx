@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button.jsx';
+import { useAuth, homeForRole } from '../../context/AuthContext.jsx';
 import './LandingPage.css';
 
 const LockIcon = ({ size = 16, stroke = 'var(--brand-primary)' }) => (
@@ -85,6 +86,7 @@ export default function LandingPage() {
   const [toast, setToast] = useState(null);
   const timer = useRef(null);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const c = COPY[audience];
   const forGhotok = audience === 'ghotok';
   // A ghotok signs up as a matchmaker; a family signs up as a guardian.
@@ -100,6 +102,8 @@ export default function LandingPage() {
 
   // "Start free" — go to sign up with the right account type preselected.
   const goSignup = () => navigate(`/signup?as=${signupRole}`);
+
+  const scrollToId = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 
   const cta = () =>
     say(
@@ -123,9 +127,15 @@ export default function LandingPage() {
           <span className="lp-wordmark">SongiSathi</span>
         </div>
         <nav className="lp-nav-links">
-          <span>How it works</span>
-          <span>Privacy</span>
-          <span>Pricing</span>
+          <span role="button" tabIndex={0} onClick={() => scrollToId('how-it-works')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && scrollToId('how-it-works')}>
+            How it works
+          </span>
+          <span role="button" tabIndex={0} onClick={() => scrollToId('privacy')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && scrollToId('privacy')}>
+            Privacy
+          </span>
+          <span role="button" tabIndex={0} onClick={() => navigate('/onboarding')} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/onboarding')}>
+            Pricing
+          </span>
         </nav>
         <div className="lp-nav-actions">
           <div className="lp-toggle">
@@ -142,18 +152,30 @@ export default function LandingPage() {
               </button>
             ))}
           </div>
-          <span
-            className="lp-login"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/signin')}
-            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/signin')}
-          >
-            Log in
-          </span>
-          <Button variant="primary" size="sm" onClick={goSignup}>
-            {c.ctaLabel}
-          </Button>
+          {user ? (
+            <>
+              <span className="lp-login">{user.fullName}</span>
+              <Button variant="outline" size="sm" onClick={logout}>Log out</Button>
+              <Button variant="primary" size="sm" onClick={() => navigate(homeForRole(user))}>
+                Go to dashboard
+              </Button>
+            </>
+          ) : (
+            <>
+              <span
+                className="lp-login"
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate('/signin')}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/signin')}
+              >
+                Log in
+              </span>
+              <Button variant="primary" size="sm" onClick={goSignup}>
+                {c.ctaLabel}
+              </Button>
+            </>
+          )}
         </div>
       </header>
 
@@ -213,7 +235,7 @@ export default function LandingPage() {
       </section>
 
       {/* steps */}
-      <section className="lp-steps">
+      <section className="lp-steps" id="how-it-works">
         <div className="lp-section-head">
           <div className="lp-section-title-bn">{c.stepsTitleBn}</div>
           <div className="lp-section-title-en">{c.stepsTitleEn}</div>
@@ -233,7 +255,7 @@ export default function LandingPage() {
       </section>
 
       {/* promises + founding */}
-      <section className="lp-promises">
+      <section className="lp-promises" id="privacy">
         <div className="lp-promises-main">
           <div className="lp-section-title-bn">{c.promiseTitleBn}</div>
           <div className="lp-section-title-en">{c.promiseTitleEn}</div>
