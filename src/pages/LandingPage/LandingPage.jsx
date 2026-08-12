@@ -74,6 +74,11 @@ const COPY = {
   },
 };
 
+// Button sizes its own text inline, so the shared sm/lg steps can't be reached
+// from LandingPage.css — nudge them up here to sit with the larger page copy.
+const NAV_BTN = { fontSize: 15 };
+const HERO_BTN = { fontSize: 17 };
+
 const HERO_ROWS = [
   { label: 'Education, profession, family', who: 'both families', ok: true },
   { label: 'District — never the address', who: 'both families', ok: true },
@@ -155,8 +160,8 @@ export default function LandingPage() {
           {user ? (
             <>
               <span className="lp-login">{user.fullName}</span>
-              <Button variant="outline" size="sm" onClick={logout}>Log out</Button>
-              <Button variant="primary" size="sm" onClick={() => navigate(homeForRole(user))}>
+              <Button variant="outline" size="sm" style={NAV_BTN} onClick={logout}>Log out</Button>
+              <Button variant="primary" size="sm" style={NAV_BTN} onClick={() => navigate(homeForRole(user))}>
                 Go to dashboard
               </Button>
             </>
@@ -171,7 +176,7 @@ export default function LandingPage() {
               >
                 Log in
               </span>
-              <Button variant="primary" size="sm" onClick={goSignup}>
+              <Button variant="primary" size="sm" style={NAV_BTN} onClick={goSignup}>
                 {c.ctaLabel}
               </Button>
             </>
@@ -190,10 +195,10 @@ export default function LandingPage() {
           <div className="lp-hero-en">{c.heroEn}</div>
           <p className="lp-hero-body">{c.heroBody}</p>
           <div className="lp-hero-actions">
-            <Button variant="primary" size="lg" onClick={goSignup}>
+            <Button variant="primary" size="lg" style={HERO_BTN} onClick={goSignup}>
               {c.heroCta}
             </Button>
-            <Button variant="outline" size="lg" onClick={secondary}>
+            <Button variant="outline" size="lg" style={HERO_BTN} onClick={secondary}>
               {c.heroCta2}
             </Button>
           </div>
@@ -281,7 +286,7 @@ export default function LandingPage() {
               </span>
               <span className="lp-bar-label">5 of 10 left</span>
             </div>
-            <Button variant="primary" size="md" onClick={cta} style={{ width: '100%', background: 'var(--gold-400)', color: 'var(--brown-900)', border: '1px solid var(--gold-400)' }}>
+            <Button variant="primary" size="md" onClick={cta} style={{ width: '100%', fontSize: 16, background: 'var(--gold-400)', color: 'var(--brown-900)', border: '1px solid var(--gold-400)' }}>
               ফাউন্ডিং স্লট নিন
             </Button>
           </div>
