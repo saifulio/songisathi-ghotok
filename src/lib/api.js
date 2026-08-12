@@ -38,6 +38,10 @@ export const api = {
   matchSuggestions: (token) => request('/match-suggestions', { token }),
   updateSuggestion: (token, id, patch) => request(`/match-suggestions/${id}`, { method: 'PATCH', body: patch, token }),
 
+  // Interest inbox
+  interests: (token) => request('/interests', { token }),
+  updateInterest: (token, id, patch) => request(`/interests/${id}`, { method: 'PATCH', body: patch, token }),
+
   // Email verification
   verifyEmail: (token) => request('/auth/verify-email', { method: 'POST', body: { token } }),
   resendVerification: (email) => request('/auth/resend-verification', { method: 'POST', body: { email } }),

@@ -1,33 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Tabs, StatusPill, Badge, Dialog, Radio } from '../../components/ui/index.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { api } from '../../lib/api.js';
 import './InterestInbox.css';
 
-const ITEMS = [
-  { id: 'i1', kind: 'interest', init: 'KI', fromName: 'Kamrul Islam', fromMeta: 'GHT-0311 · Sylhet bureau', when: '2 hours ago', score: 84,
-    theirName: 'Sumaiya Haque', theirPrn: 'PRN-20881', theirMeta: '24 · BSc Pharmacy, SUST · Zindabazar, Sylhet',
-    yourName: 'Tanvir Ahmed', yourPrn: 'PRN-10188', yourMeta: '31 · MSc CSE, BUET · settled in Auckland',
-    summary: 'Interest in Tanvir Ahmed on behalf of Sumaiya Haque’s family.',
-    message: 'Assalamu alaikum, Rahima apa. Sumaiya’s family has read Tanvir’s biodata carefully and would like to proceed. They are open to their daughter settling abroad, and her father would like to speak with the guardian first, before anything is shown to the young people. Please let me know what suits your side.',
-    mgrStats: [{ k: 'Marriages closed', v: '19' }, { k: 'Profiles managed', v: '31' }, { k: 'Member since', v: '2024' }] },
-  { id: 'i2', kind: 'photo', init: 'NB', fromName: 'Nazma Begum', fromMeta: 'GHT-0198 · Mymensingh', when: 'Yesterday', score: 71,
-    theirName: 'Ayesha Siddika', theirPrn: 'PRN-19077', theirMeta: '23 · Honours in Bangla · Mymensingh Sadar',
-    yourName: 'Rezaul Karim', yourPrn: 'PRN-10077', yourMeta: '29 · LLB, Chittagong University · Khulshi',
-    summary: 'Photo access request for Rezaul Karim, for one specific proposal.',
-    message: 'Apa, the family has asked to see a photograph before taking this further. Only the guardian will see it, and only for this proposal. Please release it if your side is comfortable.',
-    mgrStats: [{ k: 'Marriages closed', v: '8' }, { k: 'Profiles managed', v: '17' }, { k: 'Member since', v: '2025' }] },
-  { id: 'i3', kind: 'interest', init: 'SA', fromName: 'Guardian — Shirin Akter', fromMeta: 'Self-managed family · Uttara', when: '3 days ago', score: 66,
-    theirName: 'Farhana Akter', theirPrn: 'PRN-31204', theirMeta: '27 · BBA, North South · Uttara, Dhaka',
-    yourName: 'Imran Chowdhury', yourPrn: 'PRN-10233', yourMeta: '30 · MEng, Toronto · civil engineer',
-    summary: 'Interest in Imran Chowdhury, sent directly by the guardian.',
-    message: 'We came across Imran’s biodata through the network. Our daughter is in service and intends to continue after marriage — we wanted to say so plainly at the start rather than later.',
-    mgrStats: [{ k: 'Profiles managed', v: '1' }, { k: 'Verification', v: 'Pending' }, { k: 'Member since', v: '2026' }] },
-  { id: 'i4', kind: 'release', init: 'KI', fromName: 'Kamrul Islam', fromMeta: 'GHT-0311 · Sylhet bureau', when: 'Last week', score: 88,
-    theirName: 'Rifat Jahan', theirPrn: 'PRN-24410', theirMeta: '29 · MSc Economics, DU · Chattogram',
-    yourName: 'Mahmudul Hasan', yourPrn: 'PRN-10015', yourMeta: '34 · MBBS, Rajshahi Medical · Boalia',
-    summary: 'Contact release agreed — both guardians spoke on Friday.',
-    message: 'Both families have met once. They would like to exchange numbers now and continue on their own. I have released our side; awaiting yours.',
-    mgrStats: [{ k: 'Marriages closed', v: '19' }, { k: 'Profiles managed', v: '31' }, { k: 'Member since', v: '2024' }] },
-];
+const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
 const REASONS = [
   'Not the right fit at this time',
@@ -40,10 +17,11 @@ const KIND = { interest: 'Interest', photo: 'Photo access request', release: 'Co
 const TITLE = { interest: 'Interest received', photo: 'Photo access requested', release: 'Contact release requested' };
 
 export default function InterestInbox() {
+  const { user, token } = useAuth();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('pending');
-  const [selected, setSelected] = useState('i1');
-  const [status, setStatus] = useState({ i1: 'pending', i2: 'pending', i3: 'pending', i4: 'accepted' });
-  const [declineReason, setDeclineReason] = useState({});
+  const [selected, setSelected] = useState(null);
   const [pickedReason, setPickedReason] = useState(REASONS[0]);
   const [dialog, setDialog] = useState(null);
   const [toast, setToast] = useState(null);
@@ -56,32 +34,60 @@ export default function InterestInbox() {
   }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  const setSt = (id, st, msg) => { setStatus((s) => ({ ...s, [id]: st })); setDialog(null); if (msg) say(msg); };
+  // Load every request routed to a profile this ghotok manages.
+  useEffect(() => {
+    if (!token) return undefined;
+    let live = true;
+    api.interests(token)
+      .then((data) => {
+        if (!live) return;
+        setItems(data.interests);
+        setSelected((cur) => cur ?? (data.interests.find((i) => i.status === 'pending') || data.interests[0])?.id ?? null);
+      })
+      .catch((e) => say(e.message || 'Could not load the interest inbox.'))
+      .finally(() => { if (live) setLoading(false); });
+    return () => { live = false; };
+  }, [token, say]);
 
-  const filtered = ITEMS.filter((it) => {
-    const st = status[it.id];
-    if (tab === 'pending') return st === 'pending';
-    if (tab === 'accepted') return st === 'accepted';
-    if (tab === 'declined') return st === 'declined' || st === 'expired';
+  // Optimistic status change, reverted on error. successMsg stays local —
+  // it narrates what the other manager now sees, which the API doesn't echo back.
+  const updateStatus = async (id, apiStatus, extra, successMsg) => {
+    const prev = items;
+    setItems((list) => list.map((it) => (it.id === id ? { ...it, status: apiStatus.toLowerCase(), ...extra } : it)));
+    setDialog(null);
+    try {
+      await api.updateInterest(token, id, { status: apiStatus, ...(extra?.declineReason ? { declineReason: extra.declineReason } : {}) });
+      if (successMsg) say(successMsg);
+    } catch (e) {
+      setItems(prev);
+      say(e.message || 'Could not update this request.');
+    }
+  };
+
+  const filtered = items.filter((it) => {
+    if (tab === 'pending') return it.status === 'pending';
+    if (tab === 'accepted') return it.status === 'accepted';
+    if (tab === 'declined') return it.status === 'declined' || it.status === 'expired';
     return true;
   });
-  const selRaw = ITEMS.find((it) => it.id === selected) || null;
+  const selRaw = items.find((it) => it.id === selected) || null;
   const sel = selRaw && filtered.some((i) => i.id === selRaw.id) ? selRaw : filtered[0] || null;
-  const st = sel ? status[sel.id] : null;
-  const pendingCount = ITEMS.filter((i) => status[i.id] === 'pending').length;
+  const st = sel ? sel.status : null;
+  const pendingCount = items.filter((i) => i.status === 'pending').length;
 
   const tabs = [
     { value: 'pending', label: 'Awaiting you', count: pendingCount },
-    { value: 'accepted', label: 'Accepted', count: ITEMS.filter((i) => status[i.id] === 'accepted').length },
-    { value: 'declined', label: 'Closed', count: ITEMS.filter((i) => ['declined', 'expired'].includes(status[i.id])).length },
-    { value: 'all', label: 'All', count: ITEMS.length },
+    { value: 'accepted', label: 'Accepted', count: items.filter((i) => i.status === 'accepted').length },
+    { value: 'declined', label: 'Closed', count: items.filter((i) => ['declined', 'expired'].includes(i.status)).length },
+    { value: 'all', label: 'All', count: items.length },
   ];
 
   const log = sel ? [
     { text: `Interest sent by ${sel.fromName}`, when: sel.when, dot: 'var(--brand-primary)' },
-    { text: 'Screening comparison run — result: compatible', when: 'automatic, same minute', dot: 'var(--gold-600)' },
-    { text: 'Biodata viewed by you', when: '1 hour ago', dot: 'var(--border-default)' },
-    { text: st === 'pending' ? 'Awaiting your decision' : 'Decision recorded', when: st === 'pending' ? 'expires in 14 days' : 'just now', dot: 'var(--terracotta-600)' },
+    { text: `Screening comparison run — result: ${sel.screeningResult.toLowerCase()}`, when: 'automatic, same minute', dot: 'var(--gold-600)' },
+    st === 'pending'
+      ? { text: 'Awaiting your decision', when: 'expires in 14 days', dot: 'var(--terracotta-600)' }
+      : { text: 'Decision recorded', when: 'recorded', dot: 'var(--terracotta-600)' },
   ] : [];
 
   const dlg = dialog === 'decline'
@@ -89,7 +95,7 @@ export default function InterestInbox() {
         actions: (
           <>
             <Button variant="ghost" onClick={() => setDialog(null)}>Cancel</Button>
-            <Button variant="primary" onClick={() => { setDeclineReason((p) => ({ ...p, [sel.id]: pickedReason })); setSt(sel.id, 'declined', `Declined with “${pickedReason.toLowerCase()}”. Nothing else was shared.`); }}>Send decline</Button>
+            <Button variant="primary" onClick={() => updateStatus(sel.id, 'DECLINED', { declineReason: pickedReason }, `Declined with “${pickedReason.toLowerCase()}”. Nothing else was shared.`)}>Send decline</Button>
           </>
         ) }
     : dialog === 'release'
@@ -118,7 +124,7 @@ export default function InterestInbox() {
           </div>
           <div className="ib-topbar-right">
             <span className="ib-pending-pill">{pendingCount} awaiting you</span>
-            <Avatar initials="RA" size={28} />
+            <Avatar initials={initialsOf(user?.fullName)} size={28} />
           </div>
         </div>
 
@@ -131,7 +137,8 @@ export default function InterestInbox() {
               <Tabs items={tabs} active={tab} onChange={setTab} style={{ marginTop: 12 }} />
             </div>
             <div className="ib-list-scroll">
-              {filtered.length === 0 && (
+              {loading && <div className="ib-empty"><div className="ib-empty-t">Loading…</div></div>}
+              {!loading && filtered.length === 0 && (
                 <div className="ib-empty">
                   <div className="ib-empty-t">Nothing in this view</div>
                   <div className="ib-empty-b">When a manager sends interest in one of your profiles, it will appear here.</div>
@@ -149,7 +156,7 @@ export default function InterestInbox() {
                     <div className="ib-item-meta">{it.fromMeta}</div>
                     <div className="ib-item-summary">{it.summary}</div>
                     <div className="ib-item-foot">
-                      <StatusPill status={status[it.id]} />
+                      <StatusPill status={it.status} />
                       <span className="ib-item-kind">{KIND[it.kind]}</span>
                     </div>
                   </div>
@@ -202,7 +209,7 @@ export default function InterestInbox() {
                         <div>
                           <div className="ib-screen-label">Screening result — the only thing that crosses the wall</div>
                           <div className="ib-screen-row">
-                            <Badge tone="success">Compatible</Badge>
+                            <Badge tone={sel.screeningResult === 'Compatible' ? 'success' : 'neutral'}>{sel.screeningResult}</Badge>
                             <span>No reason is given, to you or to anyone.</span>
                           </div>
                         </div>
@@ -226,9 +233,9 @@ export default function InterestInbox() {
                         <div className="ib-decision-t">Your decision</div>
                         <div className="ib-decision-b">Take it to the family first if you need to — nothing expires for 14 days, and the other manager sees only “under consideration”.</div>
                         <div className="ib-decision-actions">
-                          <Button variant="primary" onClick={() => setSt(sel.id, 'accepted', `Accepted. ${sel.fromName} has been told the family will see the proposal.`)}>পরিবারকে দেখান · Accept and show the family</Button>
+                          <Button variant="primary" onClick={() => updateStatus(sel.id, 'ACCEPTED', {}, `Accepted. ${sel.fromName} has been told the family will see the proposal.`)}>পরিবারকে দেখান · Accept and show the family</Button>
                           <Button variant="outline" onClick={() => setDialog('decline')}>Decline politely</Button>
-                          <Button variant="ghost" onClick={() => setSt(sel.id, 'expired', 'Held for a week. The other manager sees only “under consideration”.')}>Hold for a week</Button>
+                          <Button variant="ghost" onClick={() => updateStatus(sel.id, 'EXPIRED', {}, 'Held for a week. The other manager sees only “under consideration”.')}>Hold for a week</Button>
                         </div>
                       </div>
                     )}
@@ -245,7 +252,7 @@ export default function InterestInbox() {
                     {(st === 'declined' || st === 'expired') && (
                       <div className="ib-card">
                         <div className="ib-decision-t">{st === 'declined' ? 'Declined' : 'Held for a week'}</div>
-                        <div className="ib-decision-b">{declineReason[sel.id] ? `The other manager was told: “${declineReason[sel.id]}”. Nothing else was shared.` : 'Held for a week — the other manager sees only that it is under consideration.'}</div>
+                        <div className="ib-decision-b">{sel.declineReason ? `The other manager was told: “${sel.declineReason}”. Nothing else was shared.` : 'Held for a week — the other manager sees only that it is under consideration.'}</div>
                       </div>
                     )}
                   </div>

@@ -149,6 +149,101 @@ function searchProfile(r, myGhotokId, prefLabels) {
   };
 }
 
+// Coarse "2 hours ago" / "Yesterday" / "Last week" phrasing for interest timestamps.
+function relativeTime(d) {
+  if (!d) return '';
+  const min = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
+  if (min < 1) return 'Just now';
+  if (min < 60) return `${min} minute${min === 1 ? '' : 's'} ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} hour${hr === 1 ? '' : 's'} ago`;
+  const day = Math.floor(hr / 24);
+  if (day === 1) return 'Yesterday';
+  if (day < 7) return `${day} days ago`;
+  if (day < 14) return 'Last week';
+  return `${Math.floor(day / 7)} weeks ago`;
+}
+
+// The joined columns interestItem() expects — shared by the list and the
+// single-row refetch after a PATCH.
+const INTEREST_SELECT = `
+  SELECT i.id, i.kind, i.status, i.message, i.compatibilityScore, i.screeningResult, i.declineReason, i.createdAt,
+         i.fromGhotokId, i.fromGuardianId, i.fromLabel,
+         tp.prn AS theirPrn, tp.fullName AS theirName, tp.dob AS theirDob, tp.degree AS theirDegree,
+         tp.institution AS theirInstitution, tp.area AS theirArea, tp.district AS theirDistrict,
+         yp.prn AS yourPrn, yp.fullName AS yourName, yp.dob AS yourDob, yp.degree AS yourDegree,
+         yp.institution AS yourInstitution, yp.area AS yourArea, yp.district AS yourDistrict,
+         fg.code AS fromGhotokCode, fg.district AS fromGhotokDistrict, fg.marriagesClosed AS fromGhotokMarriages,
+         fg.memberSince AS fromGhotokMemberSince, fgu.fullName AS fromGhotokName,
+         (SELECT COUNT(*) FROM profiles WHERE managedByGhotokId = fg.id) AS fromGhotokProfileCount,
+         fgd.relation AS fromGuardianRelation, fgd.createdAt AS fromGuardianCreatedAt, fgdu.fullName AS fromGuardianName,
+         (SELECT COUNT(*) FROM profiles WHERE managedByGuardianId = fgd.id) AS fromGuardianProfileCount
+    FROM interests i
+    JOIN profiles tp ON i.theirProfileId = tp.id
+    JOIN profiles yp ON i.yourProfileId = yp.id
+    LEFT JOIN ghotoks fg ON i.fromGhotokId = fg.id
+    LEFT JOIN users fgu ON fg.userId = fgu.id
+    LEFT JOIN guardians fgd ON i.fromGuardianId = fgd.id
+    LEFT JOIN users fgdu ON fgd.userId = fgdu.id
+`;
+
+// A joined interest row → the shape the inbox UI expects.
+function interestItem(r) {
+  const kind = { INTEREST: 'interest', PHOTO_REQUEST: 'photo', CONTACT_RELEASE: 'release' }[r.kind] || 'interest';
+  const isGhotok = r.fromGhotokId != null;
+  const isGuardian = !isGhotok && r.fromGuardianId != null;
+  const fromName = isGhotok ? (r.fromGhotokName || 'Ghotok')
+    : isGuardian ? `Guardian — ${r.fromGuardianName || ''}`.trim()
+      : r.fromLabel;
+  const fromMeta = isGhotok
+    ? [r.fromGhotokCode, r.fromGhotokDistrict].filter(Boolean).join(' · ')
+    : isGuardian
+      ? [r.fromGuardianRelation, 'self-managed family'].filter(Boolean).join(' · ')
+      : '';
+  const mgrStats = isGhotok
+    ? [
+        { k: 'Marriages closed', v: String(r.fromGhotokMarriages ?? 0) },
+        { k: 'Profiles managed', v: String(r.fromGhotokProfileCount ?? 0) },
+        { k: 'Member since', v: String(r.fromGhotokMemberSince ?? '—') },
+      ]
+    : isGuardian
+      ? [
+          { k: 'Profiles managed', v: String(r.fromGuardianProfileCount ?? 0) },
+          { k: 'Relation', v: r.fromGuardianRelation || '—' },
+          { k: 'Member since', v: r.fromGuardianCreatedAt ? String(new Date(r.fromGuardianCreatedAt).getFullYear()) : '—' },
+        ]
+      : [];
+
+  const theirEdu = [r.theirDegree, r.theirInstitution].filter(Boolean).join(', ');
+  const yourEdu = [r.yourDegree, r.yourInstitution].filter(Boolean).join(', ');
+  const theirLoc = [r.theirArea, r.theirDistrict].filter(Boolean).join(', ');
+  const yourLoc = [r.yourArea, r.yourDistrict].filter(Boolean).join(', ');
+
+  const summary = kind === 'photo'
+    ? `Photo access request for ${r.yourName}, for one specific proposal.`
+    : kind === 'release'
+      ? `Contact release for ${r.yourName} ↔ ${r.theirName}.`
+      : `Interest in ${r.yourName} on behalf of ${r.theirName}’s family.`;
+
+  return {
+    id: r.id,
+    kind,
+    status: String(r.status).toLowerCase(),
+    init: initialsOf(fromName),
+    fromName,
+    fromMeta,
+    when: relativeTime(r.createdAt),
+    score: r.compatibilityScore,
+    theirName: r.theirName, theirPrn: r.theirPrn, theirMeta: `${yearsSince(r.theirDob) ?? '—'} · ${theirEdu} · ${theirLoc}`,
+    yourName: r.yourName, yourPrn: r.yourPrn, yourMeta: `${yearsSince(r.yourDob) ?? '—'} · ${yourEdu} · ${yourLoc}`,
+    summary,
+    message: r.message || '',
+    declineReason: r.declineReason || null,
+    screeningResult: r.screeningResult || 'Compatible',
+    mgrStats,
+  };
+}
+
 // A one-time token: a raw random string (returned, goes in the email link) and
 // its SHA-256 hash (stored, so a DB leak never exposes a usable token).
 const makeToken = () => {
@@ -640,6 +735,49 @@ app.patch('/api/match-suggestions/:id', requireAuth, requireRole('GHOTOK'), asyn
     }
   });
   return res.json({ ok: true, status });
+});
+
+// ── interest inbox (requests on this ghotok's profiles) ──
+app.get('/api/interests', requireAuth, requireRole('GHOTOK'), async (req, res) => {
+  const ghotok = await ghotokForReq(req);
+  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
+  const rows = await query(`${INTEREST_SELECT} WHERE yp.managedByGhotokId = ? ORDER BY i.createdAt DESC`, [ghotok.id]);
+  return res.json({ interests: rows.map(interestItem) });
+});
+
+// ── decide on an interest ──
+// body: { status: 'ACCEPTED' | 'DECLINED' | 'EXPIRED', declineReason? }
+//   ACCEPTED — nudges both candidates into "in discussion" (interest requests only).
+//   DECLINED — requires declineReason; the other manager only sees the reason, never your candidate's name.
+//   EXPIRED  — "hold for a week"; the other manager sees "under consideration".
+app.patch('/api/interests/:id', requireAuth, requireRole('GHOTOK'), async (req, res) => {
+  const ghotok = await ghotokForReq(req);
+  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
+  const status = req.body?.status;
+  if (!['ACCEPTED', 'DECLINED', 'EXPIRED'].includes(status)) return bad(res, 'status must be ACCEPTED, DECLINED, or EXPIRED.');
+  const declineReason = status === 'DECLINED' ? String(req.body?.declineReason || '').trim() : null;
+  if (status === 'DECLINED' && !declineReason) return bad(res, 'A decline reason is required.');
+
+  const owned = await queryOne(
+    `SELECT i.id, i.kind, i.theirProfileId, i.yourProfileId
+       FROM interests i JOIN profiles yp ON i.yourProfileId = yp.id
+      WHERE i.id = ? AND yp.managedByGhotokId = ? LIMIT 1`,
+    [req.params.id, ghotok.id]
+  );
+  if (!owned) return bad(res, 'Request not found.', 404);
+
+  await withTransaction(async (tx) => {
+    await tx.execute('UPDATE interests SET status = ?, declineReason = ? WHERE id = ?', [status, declineReason, owned.id]);
+    if (status === 'ACCEPTED' && owned.kind === 'INTEREST') {
+      await tx.execute(
+        "UPDATE profiles SET status = 'IN_DISCUSSION' WHERE id IN (?, ?) AND status = 'ACTIVE'",
+        [owned.theirProfileId, owned.yourProfileId]
+      );
+    }
+  });
+
+  const [row] = await query(`${INTEREST_SELECT} WHERE i.id = ?`, [owned.id]);
+  return res.json({ interest: interestItem(row) });
 });
 
 // ── verify email ──
