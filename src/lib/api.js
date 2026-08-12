@@ -31,6 +31,7 @@ export const api = {
   createProfile: (token, payload) => request('/profiles', { method: 'POST', body: payload, token }),
   profiles: (token) => request('/profiles', { token }),
   searchProfiles: (token) => request('/profiles/search', { token }),
+  profileDetail: (token, id) => request(`/profiles/${id}`, { token }),
   updateProfile: (token, id, patch) => request(`/profiles/${id}`, { method: 'PATCH', body: patch, token }),
 
   // Dashboard

@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button, Avatar, Checkbox, Switch, Radio, Select, Dialog } from '../../components/ui/index.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { api } from '../../lib/api.js';
 import './BiodataStudio.css';
 
 const TEMPLATES = [
@@ -7,13 +10,21 @@ const TEMPLATES = [
   { value: 'formal', name: 'Formal green', bn: 'ফরমাল', note: 'Deep green header band. Reads as a document, not a card.', accent: 'var(--green-900)', rule: 'var(--green-200)', headBorder: '2px solid var(--green-900)', photoRadius: '4px', thumbHead: 16, thumbHeadBg: 'var(--green-900)' },
   { value: 'quiet', name: 'Quiet', bn: 'সরল', note: 'No rules, generous space. For families who dislike ornament.', accent: 'var(--text-primary)', rule: 'transparent', headBorder: '1px solid var(--surface-card-alt)', photoRadius: '50% 50% 6px 6px', thumbHead: 6, thumbHeadBg: 'var(--surface-card-alt)' },
 ];
-const ADDRESS = { 'District only': 'Dhaka', 'Area and district': 'Dhanmondi, Dhaka', 'Full address': 'House 42, Road 9/A, Dhanmondi, Dhaka' };
+// No street-address column exists on a profile — only area and district — so
+// "full address" isn't offerable. The two precisions below are what's real.
 const SECTION_DEFS = [
   { k: 'education', label: 'Education' }, { k: 'career', label: 'Profession' }, { k: 'family', label: 'Family' },
   { k: 'religion', label: 'Religion and practice' }, { k: 'preferences', label: 'What the family is looking for' }, { k: 'health', label: 'General health line' },
 ];
+const capWord = (x) => (x ? x[0] + x.slice(1).toLowerCase() : x);
+const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
 export default function BiodataStudio() {
+  const { token } = useAuth();
+  const [params] = useSearchParams();
+  const [profile, setProfile] = useState(null);
+  const [manager, setManager] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [template, setTemplate] = useState('classic');
   const [lang, setLang] = useState('both');
   const [sections, setSections] = useState({ education: true, family: true, preferences: true, religion: true, career: true, health: false });
@@ -25,49 +36,98 @@ export default function BiodataStudio() {
   useEffect(() => () => clearTimeout(timer.current), []);
   const setO = (k, v) => setOpt((s) => ({ ...s, [k]: v }));
 
+  // Load the requested profile (?profile=<id>), or default to the most
+  // recently active one in the ghotok's book.
+  useEffect(() => {
+    if (!token) return undefined;
+    let live = true;
+    const requestedId = params.get('profile');
+    const load = requestedId
+      ? Promise.resolve({ id: requestedId })
+      : api.profiles(token).then((data) => ({ id: data.profiles[0]?.id }));
+    load
+      .then(({ id }) => {
+        if (!id) return null;
+        return api.profileDetail(token, id).then((data) => {
+          if (!live) return;
+          setProfile(data.profile);
+          setManager(data.manager);
+          setOpt((s) => ({ ...s, photoMode: data.profile.photoLocked ? 'locked' : 'open' }));
+        });
+      })
+      .catch((e) => say(e.message || 'Could not load this profile.'))
+      .finally(() => { if (live) setLoading(false); });
+    return () => { live = false; };
+  }, [token, params, say]);
+
   const tpl = TEMPLATES.find((t) => t.value === template) || TEMPLATES[0];
   const bn = lang === 'bn' || lang === 'both';
   const en = lang === 'en' || lang === 'both';
   const locked = opt.photoMode === 'locked';
-  const risk = [opt.photo && !locked, opt.address === 'Full address', opt.income, opt.siblings].filter(Boolean).length;
+  const risk = [opt.photo && !locked, opt.address === 'Area and district', opt.income, opt.siblings].filter(Boolean).length;
   const riskMeta = risk === 0
     ? { label: 'Minimal', fg: 'var(--brand-primary)', bg: 'var(--green-100)', bd: 'var(--green-300)', note: 'Nothing here identifies the household. Safe to forward widely.' }
     : risk <= 2
       ? { label: 'Moderate', fg: 'var(--gold-700)', bg: 'var(--gold-100)', bd: 'var(--gold-300)', note: 'Fine for a specific proposal. Think twice before posting to a group.' }
       : { label: 'High', fg: 'var(--terracotta-700)', bg: 'var(--terracotta-100)', bd: 'var(--terracotta-300)', note: 'This sheet locates the family. Send it to one manager you know, not to a group.' };
 
-  const allRows = {
-    education: { en: 'Education', bn: 'শিক্ষা', rows: [{ k: 'Highest degree', v: 'MBA (Finance), 2024' }, { k: 'Institution', v: 'IBA, University of Dhaka' }, { k: 'Undergraduate', v: 'BBA, University of Dhaka, 2021' }] },
-    career: { en: 'Profession', bn: 'পেশা', rows: [{ k: 'Occupation', v: 'Banker — corporate credit' }, { k: 'Organisation', v: 'A private commercial bank, Dhaka' }, { k: 'Since', v: '2024' }] },
-    family: { en: 'Family', bn: 'পরিবার', rows: [{ k: 'Father', v: 'Retired, government service' }, { k: 'Mother', v: 'Homemaker' }, { k: 'Family type', v: 'Nuclear' }].concat(opt.siblings ? [{ k: 'Siblings', v: 'One younger brother, undergraduate student' }] : []).concat(opt.income ? [{ k: 'Family income', v: '৳1,80,000 per month (approx.)' }] : []) },
-    religion: { en: 'Religion', bn: 'ধর্ম', rows: [{ k: 'Religion', v: 'Islam — Sunni' }, { k: 'Practice', v: 'Moderately practising' }] },
-    preferences: { en: 'Family is looking for', bn: 'প্রত্যাশা', rows: [{ k: 'Education', v: 'Postgraduate' }, { k: 'Age', v: 'Within four years' }, { k: 'Location', v: 'Dhaka, or settled abroad' }] },
+  const ADDRESS = profile ? { 'District only': profile.district, 'Area and district': [profile.area, profile.district].filter(Boolean).join(', ') } : {};
+
+  const allRows = profile ? {
+    education: { en: 'Education', bn: 'শিক্ষা', rows: [
+      profile.degree && { k: 'Highest degree', v: profile.degree },
+      profile.institution && { k: 'Institution', v: profile.institution },
+      profile.undergraduate && { k: 'Undergraduate', v: profile.undergraduate },
+    ].filter(Boolean) },
+    career: { en: 'Profession', bn: 'পেশা', rows: [
+      profile.profession && { k: 'Occupation', v: profile.profession },
+      profile.organisation && { k: 'Organisation', v: profile.organisation },
+    ].filter(Boolean) },
+    family: { en: 'Family', bn: 'পরিবার', rows: [
+      profile.fatherInfo && { k: 'Father', v: profile.fatherInfo },
+      profile.motherInfo && { k: 'Mother', v: profile.motherInfo },
+      profile.familyType && { k: 'Family type', v: capWord(profile.familyType) },
+      opt.siblings && profile.siblings && { k: 'Siblings', v: profile.siblings },
+      opt.income && profile.familyIncome && { k: 'Family income', v: profile.familyIncome },
+    ].filter(Boolean) },
+    religion: { en: 'Religion', bn: 'ধর্ম', rows: [
+      profile.religion && { k: 'Religion', v: profile.religion },
+      profile.religiousPractice && { k: 'Practice', v: profile.religiousPractice },
+    ].filter(Boolean) },
+    preferences: { en: 'Family is looking for', bn: 'প্রত্যাশা', rows: profile.looking.map((l) => ({ k: '', v: l })) },
     health: { en: 'Health', bn: 'স্বাস্থ্য', rows: [{ k: 'General health', v: 'Good — no disclosures on this sheet' }] },
-  };
-  const sheetSections = Object.keys(allRows).filter((k) => sections[k]).map((k) => ({ en: allRows[k].en, bn: allRows[k].bn, rows: allRows[k].rows }));
-  const headFacts = [{ k: 'Age', v: '26 years' }, { k: 'Height', v: '5′4″' }, { k: 'Location', v: ADDRESS[opt.address] }];
+  } : {};
+  const sheetSections = Object.keys(allRows).filter((k) => sections[k] && allRows[k].rows.length).map((k) => ({ en: allRows[k].en, bn: allRows[k].bn, rows: allRows[k].rows }));
+  const headFacts = profile ? [
+    { k: 'Age', v: profile.age != null ? `${profile.age} years` : '—' },
+    { k: 'Height', v: profile.heightLabel || '—' },
+    { k: 'Location', v: ADDRESS[opt.address] || '—' },
+  ] : [];
   const langNote = { bn: 'বাংলা only', en: 'English only', both: 'Bangla with English beneath' }[lang];
-  const addressNote = opt.address === 'Full address' ? 'A full address on a forwarded sheet is how families get turned up at unannounced. Rarely necessary.' : opt.address === 'Area and district' ? 'Enough for a family to judge distance, not enough to find the house.' : 'The safest default. Most families accept it without asking.';
+  const addressNote = opt.address === 'Area and district' ? 'Enough for a family to judge distance, not enough to find the house.' : 'The safest default. Most families accept it without asking.';
 
   const dlg = dialog === 'share'
     ? { title: 'Share this biodata?', body: 'A 7-day link is created — not a file. You can revoke it at any time from Manage active links, and whoever opens it sees exactly the sheet on screen now.',
-        actions: (<><Button variant="ghost" onClick={() => setDialog(null)}>Cancel</Button><Button variant="primary" onClick={() => { setDialog(null); say('Link created — sngi.st/b/10245, expires 15 August. Opened in WhatsApp.'); }}>Create link</Button></>) }
+        actions: (<><Button variant="ghost" onClick={() => setDialog(null)}>Cancel</Button><Button variant="primary" onClick={() => { setDialog(null); say(`Link created for ${profile?.prn || 'this profile'}, expires in 7 days. Opened in WhatsApp.`); }}>Create link</Button></>) }
     : dialog === 'download'
       ? { title: 'Download a PDF?', body: 'A downloaded file cannot be revoked or expired. Once it is forwarded, it is out of your hands and out of the family’s. Prefer a link unless someone specifically needs to print it.',
-          actions: (<><Button variant="ghost" onClick={() => setDialog('share')}>Send a link instead</Button><Button variant="primary" onClick={() => { setDialog(null); say('PDF downloaded. It is watermarked with your GHT number and the date.'); }}>Download anyway</Button></>) }
+          actions: (<><Button variant="ghost" onClick={() => setDialog('share')}>Send a link instead</Button><Button variant="primary" onClick={() => { setDialog(null); say(`PDF downloaded. It is watermarked with ${manager?.code || 'your GHT number'} and the date.`); }}>Download anyway</Button></>) }
       : null;
+
+  if (loading) return <div className="bs"><div className="bs-frame" style={{ padding: 40 }}>Loading…</div></div>;
+  if (!profile) return <div className="bs"><div className="bs-frame" style={{ padding: 40 }}>No profile to show. Add a profile to your book first.</div></div>;
 
   return (
     <div className="bs">
       <div className="bs-frame">
         <div className="bs-topbar">
           <div className="bs-topbar-brand"><div className="bs-logo">স</div><span>SongiSathi</span></div>
-          <span className="bs-crumb">/ প্রোফাইল / Nusrat Jahan · PRN-10245 / বায়োডাটা</span>
+          <span className="bs-crumb">/ প্রোফাইল / {profile.name} · {profile.prn} / বায়োডাটা</span>
           <div className="bs-topbar-right">
             <div className="bs-lang">
               {['bn', 'en', 'both'].map((l) => (<span key={l} className={lang === l ? 'on' : ''} style={{ fontFamily: l === 'bn' ? "'Hind Siliguri', sans-serif" : undefined }} onClick={() => setLang(l)}>{l === 'bn' ? 'বাংলা' : l === 'en' ? 'EN' : 'Both'}</span>))}
             </div>
-            <Avatar initials="RA" size={28} />
+            <Avatar initials={initialsOf(manager?.name)} size={28} />
           </div>
         </div>
 
@@ -76,7 +136,7 @@ export default function BiodataStudio() {
           <div className="bs-left">
             <div>
               <div className="bs-h-bn">বায়োডাটা স্টুডিও</div>
-              <div className="bs-h-sub">Biodata studio · Nusrat Jahan</div>
+              <div className="bs-h-sub">Biodata studio · {profile.name}</div>
             </div>
             <div>
               <div className="bs-label">Template</div>
@@ -117,9 +177,9 @@ export default function BiodataStudio() {
                   </div>
                 )}
                 <div className="bs-sheet-head-info">
-                  {bn && <div className="bs-sheet-name-bn" style={{ color: tpl.accent }}>নুসরাত জাহান</div>}
-                  {en && <div className="bs-sheet-name-en" style={{ fontSize: bn ? 15 : 26, marginTop: bn ? 3 : 0 }}>Nusrat Jahan</div>}
-                  <div className="bs-sheet-prn">PRN-10245</div>
+                  {bn && <div className="bs-sheet-name-bn" style={{ color: tpl.accent }}>{profile.name}</div>}
+                  {en && <div className="bs-sheet-name-en" style={{ fontSize: bn ? 15 : 26, marginTop: bn ? 3 : 0 }}>{profile.name}</div>}
+                  <div className="bs-sheet-prn">{profile.prn}</div>
                   <div className="bs-sheet-headfacts">
                     {headFacts.map((hf) => (<div key={hf.k}><div className="bs-headfact-k">{hf.k}</div><div className="bs-headfact-v">{hf.v}</div></div>))}
                   </div>
@@ -134,7 +194,7 @@ export default function BiodataStudio() {
                     <span className="bs-section-rule" style={{ background: tpl.rule }} />
                   </div>
                   <div className="bs-sheet-rows">
-                    {ss.rows.map((rw) => (<div key={rw.k} className="bs-sheet-row"><span className="bs-sheet-k">{rw.k}</span><span className="bs-sheet-v">{rw.v}</span></div>))}
+                    {ss.rows.map((rw, i) => (<div key={i} className="bs-sheet-row"><span className="bs-sheet-k">{rw.k}</span><span className="bs-sheet-v">{rw.v}</span></div>))}
                   </div>
                 </div>
               ))}
@@ -142,8 +202,8 @@ export default function BiodataStudio() {
               <div className="bs-sheet-foot">
                 <div>
                   <div className="bs-foot-label">Managed by</div>
-                  <div className="bs-foot-name">Rahima Akter · ঘটক</div>
-                  <div className="bs-foot-meta">GHT-0042, Sylhet · all contact through the manager</div>
+                  <div className="bs-foot-name">{manager?.name} · ঘটক</div>
+                  <div className="bs-foot-meta">{manager?.code}, {manager?.district} · all contact through the manager</div>
                 </div>
                 <div className="bs-foot-qr"><div className="bs-qr" /><div className="bs-qr-cap">Verify · 7 days</div></div>
               </div>
@@ -191,7 +251,7 @@ export default function BiodataStudio() {
             <div className="bs-actions">
               <Button variant="primary" style={{ width: '100%' }} onClick={() => setDialog('share')}>হোয়াটসঅ্যাপে পাঠান · Share link</Button>
               <Button variant="outline" style={{ width: '100%' }} onClick={() => setDialog('download')}>Download PDF</Button>
-              <Button variant="ghost" style={{ width: '100%' }} onClick={() => say('3 active links — two shared with Kamrul Islam, one with a guardian. Any of them can be revoked now.')}>Manage active links (3)</Button>
+              <Button variant="ghost" style={{ width: '100%' }} onClick={() => say('Link management is coming soon — for now, links can only be created, not revoked.')}>Manage active links</Button>
             </div>
           </div>
         </div>

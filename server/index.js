@@ -589,6 +589,45 @@ app.get('/api/profiles', requireAuth, requireRole('GHOTOK'), async (req, res) =>
   return res.json({ profiles: rows.map(profileCard) });
 });
 
+// ── full detail for one profile (biodata studio) ──
+app.get('/api/profiles/:id', requireAuth, requireRole('GHOTOK'), async (req, res) => {
+  const ghotok = await ghotokForReq(req);
+  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
+  const p = await queryOne('SELECT * FROM profiles WHERE id = ? LIMIT 1', [req.params.id]);
+  if (!p) return bad(res, 'Profile not found.', 404);
+  if (p.managedByGhotokId !== ghotok.id) return bad(res, 'That profile is not in your book.', 403);
+
+  const prefs = await query('SELECT label FROM profile_preferences WHERE profileId = ? AND enabled = 1 ORDER BY id', [p.id]);
+  const managerUser = await queryOne('SELECT fullName FROM users WHERE id = ?', [ghotok.userId]);
+
+  return res.json({
+    profile: {
+      id: p.id,
+      prn: p.prn,
+      name: p.fullName,
+      age: yearsSince(p.dob),
+      heightLabel: p.heightLabel,
+      district: p.district,
+      area: p.area,
+      degree: p.degree,
+      institution: p.institution,
+      undergraduate: p.undergraduate,
+      profession: p.profession,
+      organisation: p.organisation,
+      familyType: p.familyType,
+      fatherInfo: p.fatherInfo,
+      motherInfo: p.motherInfo,
+      siblings: p.siblings,
+      familyIncome: p.familyIncome,
+      religion: p.religion,
+      religiousPractice: p.religiousPractice,
+      photoLocked: Boolean(p.photoLocked),
+      looking: prefs.map((r) => r.label),
+    },
+    manager: { name: managerUser?.fullName || '', code: ghotok.code, district: ghotok.district },
+  });
+});
+
 // ── update a profile (dashboard actions) ──
 // body: { inNetworkPool?: bool, attest?: bool }
 //   inNetworkPool — toggle trusted-network visibility.
