@@ -47,9 +47,19 @@ GUARDIAN (family side)
     → Use for: Guardian & Candidate page (/guardian).
       Self-manages profile PRN-31204; also sends an interest to Rahima's book.
 
-CANDIDATE
+CANDIDATE (managed by a ghotok)
   Nusrat Jahan       01911111111   candidate123    linked to profile PRN-10245
-    → Use for: the candidate view on /guardian (narrower, on purpose).
+    → Use for: the candidate view on /guardian (narrower, on purpose), plus
+      read-only Search (/my-search) and read-only Biodata studio (/my-biodata).
+      She can browse the pool and read her own sheet; Rahima (her matchmaker)
+      is the one who edits it and sends interest. AI matching stays hidden.
+
+CANDIDATE (self-managed — signed up as a bride)
+  Tasnim Rahman      01911222333   selfmanaged123  PRN-31206 · Dhaka · ACTIVE
+    → Use for: the full self-managed flow — Search (/my-search) with a working
+      Send interest, editable Biodata studio (/my-biodata), AI matching
+      (/my-matches). Published and in the network pool, so ghotoks and
+      guardians can find her too.
 
 ------------------------------------------------------------------------------
   SAMPLE PROFILES (biodata)      PRN · name · gender · status · manager

@@ -45,6 +45,8 @@
 
 .mb-never { display: flex; gap: 9px; align-items: flex-start; background: var(--gold-100); border: 1px solid var(--gold-300); border-radius: 12px; padding: 12px 14px; font-size: 11px; line-height: 1.6; color: var(--gold-700); }
 .mb-actions { display: flex; flex-direction: column; gap: 9px; margin-top: auto; }
+/* Stands in for the save/publish buttons when a manager owns the edits. */
+.mb-readonly-note { background: var(--surface-card-alt); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px 14px; font-size: 12px; line-height: 1.6; color: var(--text-secondary); }
 
 .mb-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 90; display: flex; align-items: center; gap: 11px; padding: 13px 18px; border-radius: 12px; background: var(--text-primary); box-shadow: var(--shadow-3); max-width: min(560px, calc(100vw - 32px)); }
 .mb-toast-check { width: 24px; height: 24px; flex: none; border-radius: 50%; background: rgba(253, 251, 246, 0.14); display: grid; place-items: center; color: var(--gold-400); font-size: 12px; font-weight: 700; }

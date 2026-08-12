@@ -1154,6 +1154,12 @@ app.patch('/api/admin/payments/:id', requireAuth, requireRole('ADMIN'), async (r
 // guardian manages, or the candidate's own biodata. selfManaged mirrors
 // profiles.managerType === 'SELF' — a self-signed-up bride/groom decides for
 // themselves; a candidate whose profile a ghotok or guardian manages does not.
+// How to name whoever holds the decisions for a managed candidate, so the
+// refusals below don't tell a ghotok-managed candidate to ask their guardian.
+// (capWord only lowercases the tail, so it can't start these sentences.)
+const managerLabel = (profile) => (profile.managerType === 'GHOTOK' ? 'your matchmaker' : 'your guardian');
+const capFirst = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+
 async function myProfileForReq(req) {
   if (req.auth.role === 'GUARDIAN') {
     const guardian = await queryOne('SELECT * FROM guardians WHERE userId = ? LIMIT 1', [req.auth.sub]);
@@ -1199,7 +1205,7 @@ app.get('/api/my-profile/activity', requireAuth, requireRole('GUARDIAN', 'CANDID
 app.patch('/api/my-profile/proposals/:id', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
   const me = await myProfileForReq(req);
   if (!me) return bad(res, 'No profile is linked to this account.', 403);
-  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, 'Your manager decides this for you.', 403);
+  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, `${capFirst(managerLabel(me.profile))} decides this for you.`, 403);
 
   const decision = req.body?.decision;
   if (!['ACCEPT', 'DECLINE'].includes(decision)) return bad(res, 'decision must be ACCEPT or DECLINE.');
@@ -1230,7 +1236,7 @@ app.patch('/api/my-profile/proposals/:id', requireAuth, requireRole('GUARDIAN', 
 app.post('/api/interests', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
   const me = await myProfileForReq(req);
   if (!me) return bad(res, 'No profile is linked to this account.', 403);
-  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, 'Your guardian sends interest on your behalf.', 403);
+  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, `${capFirst(managerLabel(me.profile))} sends interest on your behalf.`, 403);
 
   const targetProfileId = Number(req.body?.targetProfileId);
   if (!targetProfileId) return bad(res, 'targetProfileId is required.');
@@ -1267,14 +1273,17 @@ app.post('/api/interests', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), as
   return res.status(201).json({ interest: interestItem(row) });
 });
 
-// ── search: the pool visible to a guardian / self-managed candidate ──
+// ── search: the pool visible to a guardian / candidate ──
 // Same visibility rule as the ghotok's search (inNetworkPool = 1), minus the
 // "your own book" concept — a guardian/candidate has exactly one profile,
 // which is excluded from its own results.
+// Every candidate may browse, including one whose profile a ghotok or guardian
+// manages. Sending interest is the part that needs standing, so the response
+// carries canSendInterest — the same rule POST /api/interests enforces — and
+// the search UI renders the button or a note from it.
 app.get('/api/my-search', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
   const me = await myProfileForReq(req);
-  if (!me) return res.json({ profiles: [] });
-  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, 'Your guardian searches on your behalf.', 403);
+  if (!me) return res.json({ profiles: [], canSendInterest: false });
 
   const rows = await query(
     `SELECT p.*,
@@ -1303,13 +1312,20 @@ app.get('/api/my-search', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), asy
     for (const pr of prefs) (prefsByProfile[pr.profileId] ||= []).push(pr.label);
   }
 
-  return res.json({ profiles: rows.map((r) => searchProfile(r, null, prefsByProfile[r.id] || [])), myGender: me.profile.gender });
+  return res.json({
+    profiles: rows.map((r) => searchProfile(r, null, prefsByProfile[r.id] || [])),
+    myGender: me.profile.gender,
+    canSendInterest: req.auth.role !== 'CANDIDATE' || me.selfManaged,
+  });
 });
 
 // ── full biodata detail for a guardian / candidate's own profile ──
+// Readable by any candidate — seeing your own biodata needs no standing.
+// canEdit mirrors what PATCH below allows, so the studio can render itself
+// read-only for a candidate whose ghotok or guardian owns the edits.
 app.get('/api/my-profile/biodata', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
   const me = await myProfileForReq(req);
-  if (!me) return res.json({ profile: null });
+  if (!me) return res.json({ profile: null, canEdit: false });
   const p = me.profile;
   const prefs = await query('SELECT label, enabled FROM profile_preferences WHERE profileId = ? ORDER BY id', [p.id]);
 
@@ -1344,6 +1360,8 @@ app.get('/api/my-profile/biodata', requireAuth, requireRole('GUARDIAN', 'CANDIDA
       preferences: prefs.map((r) => ({ label: r.label, enabled: Boolean(r.enabled) })),
     },
     selfManaged: me.selfManaged,
+    canEdit: req.auth.role !== 'CANDIDATE' || me.selfManaged,
+    managedBy: me.profile.managerType === 'GHOTOK' ? 'your matchmaker' : me.profile.managerType === 'GUARDIAN' ? 'your guardian' : null,
   });
 });
 
@@ -1365,7 +1383,7 @@ const completenessOf = (row) => Math.round(
 app.patch('/api/my-profile/biodata', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
   const me = await myProfileForReq(req);
   if (!me) return bad(res, 'No profile is linked to this account.', 403);
-  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, 'Your guardian edits your biodata for you.', 403);
+  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, `${capFirst(managerLabel(me.profile))} edits your biodata for you.`, 403);
 
   const b = req.body || {};
   const merged = { ...me.profile };
@@ -1457,7 +1475,7 @@ function scoreMatch(mine, cand) {
 app.get('/api/my-matches', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
   const me = await myProfileForReq(req);
   if (!me) return res.json({ matches: [] });
-  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, 'Your guardian reviews matches on your behalf.', 403);
+  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, `${capFirst(managerLabel(me.profile))} reviews matches on your behalf.`, 403);
 
   const mine = me.profile;
   const opposite = mine.gender === 'MALE' ? 'FEMALE' : 'MALE';

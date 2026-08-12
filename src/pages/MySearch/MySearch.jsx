@@ -13,6 +13,10 @@ export default function MySearch() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [blocked, setBlocked] = useState(null);
+  // Whether this account may act on what it finds. A candidate whose profile a
+  // ghotok or guardian manages browses the same pool, but their manager is the
+  // one who sends interest — the server is the source of truth (see my-search).
+  const [canSendInterest, setCanSendInterest] = useState(true);
   const [q, setQ] = useState('');
   const [selected, setSelected] = useState(null);
   const [ff, setFf] = useState(DEFAULT_FF);
@@ -30,6 +34,7 @@ export default function MySearch() {
       .then((data) => {
         if (!live) return;
         setResults(data.profiles);
+        setCanSendInterest(data.canSendInterest !== false);
         if (data.myGender) setFf((s) => ({ ...s, gender: data.myGender === 'MALE' ? 'FEMALE' : 'MALE' }));
         setSelected((cur) => cur ?? data.profiles.find((r) => !data.myGender || r.gender !== data.myGender)?.id ?? data.profiles[0]?.id ?? null);
       })
@@ -188,9 +193,11 @@ export default function MySearch() {
               </div>
 
               <div className="ms-panel-actions">
-                {!sent[sel.id]
-                  ? <Button variant="primary" style={{ width: '100%' }} onClick={sendInterest}>আগ্রহ পাঠান · Send interest</Button>
-                  : <div className="ms-interest-sent">Interest sent — awaiting their reply</div>}
+                {!canSendInterest
+                  ? <div className="ms-interest-sent">Your manager sends interest on your behalf — show them this profile.</div>
+                  : !sent[sel.id]
+                    ? <Button variant="primary" style={{ width: '100%' }} onClick={sendInterest}>আগ্রহ পাঠান · Send interest</Button>
+                    : <div className="ms-interest-sent">Interest sent — awaiting their reply</div>}
               </div>
             </div>
           )}

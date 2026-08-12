@@ -101,9 +101,16 @@ async function main() {
     const shirinId = await insert(tx, 'INSERT INTO guardians (userId, relation, district, selfManaged) VALUES (?, ?, ?, ?)',
       [shirinUserId, 'Mother of Nusrat Jahan', 'Dhaka', true]);
 
-    // candidate login (Nusrat Jahan)
+    // candidate login (Nusrat Jahan) — her profile is managed by a ghotok, so
+    // she can browse the pool and read her own sheet but not edit or act on it
     const nusratUserId = await insert(tx, 'INSERT INTO users (role, fullName, phone, passwordHash, email) VALUES (?, ?, ?, ?, ?)',
       ['CANDIDATE', 'Nusrat Jahan', '01911111111', hash('candidate123'), 'nusrat@songisathi.test']);
+
+    // self-managed candidate login (Tasnim Rahman) — the bride/groom signup
+    // path, where the candidate decides for herself: edits her own biodata,
+    // searches the pool, and sends interest without a manager in between
+    const tasnimUserId = await insert(tx, 'INSERT INTO users (role, fullName, phone, passwordHash, email) VALUES (?, ?, ?, ?, ?)',
+      ['CANDIDATE', 'Tasnim Rahman', '01911222333', hash('selfmanaged123'), 'tasnim@songisathi.test']);
 
     // ── profiles (biodata) ──
     console.log('Seeding profiles…');
@@ -121,6 +128,7 @@ async function main() {
       { prn: 'PRN-20881', name: 'Sumaiya Haque', gender: 'FEMALE', age: 24, height: '5′2″', degree: 'BSc Pharmacy', institution: 'SUST', profession: 'Pharmacist', district: 'Sylhet', area: 'Zindabazar', familyType: 'JOINT', religion: 'Islam — Sunni', practice: 'Strictly practising', status: 'ACTIVE', verified: true, locked: true, pool: true, completeness: 89, ghotokId: K },
       { prn: 'PRN-24410', name: 'Rifat Jahan', gender: 'FEMALE', age: 29, height: '5′5″', degree: 'MSc Economics', institution: 'University of Dhaka', profession: 'Research associate', district: 'Chattogram', area: 'Khulshi', familyType: 'NUCLEAR', religion: 'Islam — Sunni', practice: 'Moderately practising', status: 'ACTIVE', verified: true, locked: true, pool: true, completeness: 90, ghotokId: K },
       { prn: 'PRN-31204', name: 'Farhana Akter', gender: 'FEMALE', age: 27, height: '5′3″', degree: 'BBA', institution: 'North South University', profession: 'HR executive', district: 'Dhaka', area: 'Uttara', familyType: 'NUCLEAR', religion: 'Islam — Sunni', practice: 'Culturally observant', status: 'ACTIVE', verified: false, locked: true, pool: true, completeness: 70, guardianId: shirinId },
+      { prn: 'PRN-31206', name: 'Tasnim Rahman', gender: 'FEMALE', age: 29, height: '5′4″', degree: 'Postgraduate', institution: 'Dhaka University', profession: 'Lecturer', district: 'Dhaka', area: 'Dhanmondi', familyType: 'NUCLEAR', fatherInfo: 'Retired banker', motherInfo: 'Homemaker', siblings: 'One brother, married', religion: 'Islam — Sunni', practice: 'Moderately practising', status: 'ACTIVE', verified: false, locked: true, pool: true, completeness: 80, self: true, candidateUserId: tasnimUserId },
     ];
     const profileIdByPrn = {};
     for (const p of profileDefs) {
@@ -137,7 +145,7 @@ async function main() {
           p.institution ?? null, p.undergraduate ?? null, p.profession, p.organisation ?? null,
           p.familyType ?? null, p.fatherInfo ?? null, p.motherInfo ?? null, p.siblings ?? null,
           p.religion, p.practice, p.verified, p.locked, p.status, p.pool, p.completeness,
-          p.guardianId ? 'GUARDIAN' : 'GHOTOK', p.ghotokId ?? null, p.guardianId ?? null, p.candidateUserId ?? null,
+          p.self ? 'SELF' : p.guardianId ? 'GUARDIAN' : 'GHOTOK', p.ghotokId ?? null, p.guardianId ?? null, p.candidateUserId ?? null,
         ]
       );
       profileIdByPrn[p.prn] = profileId;
@@ -151,6 +159,12 @@ async function main() {
     for (const [label, enabled] of nusratPrefs) {
       await insert(tx, 'INSERT INTO profile_preferences (profileId, label, enabled) VALUES (?, ?, ?)',
         [profileIdByPrn['PRN-10245'], label, enabled]);
+    }
+
+    // ── profile preferences (Tasnim — set by herself, self-managed) ──
+    for (const [label, enabled] of [['Practising family', true], ['Dhaka based', true], ['Settled abroad', false]]) {
+      await insert(tx, 'INSERT INTO profile_preferences (profileId, label, enabled) VALUES (?, ?, ?)',
+        [profileIdByPrn['PRN-31206'], label, enabled]);
     }
 
     // ── sealed screening responses (Nusrat + Tanvir) ──

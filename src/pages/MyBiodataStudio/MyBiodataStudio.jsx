@@ -31,6 +31,10 @@ export default function MyBiodataStudio() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [blocked, setBlocked] = useState(null);
+  // A candidate whose ghotok or guardian manages the profile can read it but
+  // not change it — the same rule PATCH /api/my-profile/biodata enforces.
+  const [canEdit, setCanEdit] = useState(true);
+  const [managedBy, setManagedBy] = useState(null);
   const [toast, setToast] = useState(null);
   const timer = useRef(null);
   const say = useCallback((msg) => { clearTimeout(timer.current); setToast(msg); timer.current = setTimeout(() => setToast(null), 4400); }, []);
@@ -44,6 +48,8 @@ export default function MyBiodataStudio() {
       .then((data) => {
         if (!live || !data.profile) return;
         setProfile(data.profile);
+        setCanEdit(data.canEdit !== false);
+        setManagedBy(data.managedBy || null);
         setForm({
           ...Object.fromEntries(FIELDS.map((f) => [f.k, data.profile[f.k] || ''])),
           familyType: data.profile.familyType || '',
@@ -113,7 +119,11 @@ export default function MyBiodataStudio() {
           <div className="mb-left">
             <div>
               <div className="mb-h-bn">বায়োডাটা স্টুডিও</div>
-              <div className="mb-h-sub">Your own biodata · not editable by anyone else</div>
+              <div className="mb-h-sub">
+                {canEdit
+                  ? 'Your own biodata · not editable by anyone else'
+                  : `Your biodata · ${managedBy || 'your manager'} keeps this up to date for you`}
+              </div>
             </div>
 
             <div className="mb-status-row">
@@ -125,9 +135,9 @@ export default function MyBiodataStudio() {
 
             <div className="mb-fields">
               {FIELDS.map((f) => (
-                <Input key={f.k} label={f.label} placeholder={f.placeholder} value={form[f.k] || ''} onChange={(e) => setF(f.k, e.target.value)} />
+                <Input key={f.k} label={f.label} placeholder={f.placeholder} value={form[f.k] || ''} disabled={!canEdit} onChange={(e) => setF(f.k, e.target.value)} />
               ))}
-              <Select label="Family type" value={form.familyType || ''} onChange={(e) => setF('familyType', e.target.value)} options={[{ value: 'NUCLEAR', label: 'Nuclear' }, { value: 'JOINT', label: 'Joint' }]} />
+              <Select label="Family type" value={form.familyType || ''} disabled={!canEdit} onChange={(e) => setF('familyType', e.target.value)} options={[{ value: 'NUCLEAR', label: 'Nuclear' }, { value: 'JOINT', label: 'Joint' }]} />
             </div>
 
             <div>
@@ -135,20 +145,23 @@ export default function MyBiodataStudio() {
               <div className="mb-prefs">
                 {prefs.map((p) => (
                   <div key={p.label} className="mb-pref">
-                    <Switch label={p.label} checked={p.enabled} onChange={() => togglePref(p.label)} />
-                    <span className="mb-pref-remove" onClick={() => removePref(p.label)}>✕</span>
+                    <Switch label={p.label} checked={p.enabled} disabled={!canEdit} onChange={() => canEdit && togglePref(p.label)} />
+                    {canEdit && <span className="mb-pref-remove" onClick={() => removePref(p.label)}>✕</span>}
                   </div>
                 ))}
+                {!canEdit && prefs.length === 0 && <span className="mb-h-sub">Nothing recorded yet.</span>}
               </div>
-              <div className="mb-pref-add">
-                <Input placeholder="Add a preference, e.g. Settled abroad" value={newPref} onChange={(e) => setNewPref(e.target.value)} />
-                <Button variant="outline" size="sm" onClick={addPref}>Add</Button>
-              </div>
+              {canEdit && (
+                <div className="mb-pref-add">
+                  <Input placeholder="Add a preference, e.g. Settled abroad" value={newPref} onChange={(e) => setNewPref(e.target.value)} />
+                  <Button variant="outline" size="sm" onClick={addPref}>Add</Button>
+                </div>
+              )}
             </div>
 
             <div className="mb-switches">
-              <Switch label="Keep photo locked (released only on request)" checked={form.photoLocked !== false} onChange={() => setF('photoLocked', !(form.photoLocked !== false))} />
-              <Switch label="Share in the trusted network pool" checked={!!form.inNetworkPool} onChange={() => setF('inNetworkPool', !form.inNetworkPool)} />
+              <Switch label="Keep photo locked (released only on request)" checked={form.photoLocked !== false} disabled={!canEdit} onChange={() => canEdit && setF('photoLocked', !(form.photoLocked !== false))} />
+              <Switch label="Share in the trusted network pool" checked={!!form.inNetworkPool} disabled={!canEdit} onChange={() => canEdit && setF('inNetworkPool', !form.inNetworkPool)} />
             </div>
           </div>
 
@@ -176,9 +189,17 @@ export default function MyBiodataStudio() {
             </div>
 
             <div className="mb-actions">
-              <Button variant="primary" style={{ width: '100%' }} disabled={saving} onClick={() => save()}>{saving ? 'Saving…' : 'Save changes'}</Button>
-              {profile.status === 'DRAFT' && (
-                <Button variant="outline" style={{ width: '100%' }} disabled={saving} onClick={() => save({ publish: true })}>Publish · make searchable</Button>
+              {canEdit ? (
+                <>
+                  <Button variant="primary" style={{ width: '100%' }} disabled={saving} onClick={() => save()}>{saving ? 'Saving…' : 'Save changes'}</Button>
+                  {profile.status === 'DRAFT' && (
+                    <Button variant="outline" style={{ width: '100%' }} disabled={saving} onClick={() => save({ publish: true })}>Publish · make searchable</Button>
+                  )}
+                </>
+              ) : (
+                <div className="mb-readonly-note">
+                  This is how your biodata reads to the network. {managedBy ? `Ask ${managedBy} to change anything here.` : 'Ask your manager to change anything here.'}
+                </div>
               )}
             </div>
           </div>
