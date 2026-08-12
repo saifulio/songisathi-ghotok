@@ -48,6 +48,14 @@ export const api = {
   recordMarriage: (token, payload) => request('/marriages', { method: 'POST', body: payload, token }),
   testimonials: (token) => request('/testimonials', { token }),
 
+  // Admin moderation
+  adminVerifications: (token) => request('/admin/verifications', { token }),
+  updateVerification: (token, id, patch) => request(`/admin/verifications/${id}`, { method: 'PATCH', body: patch, token }),
+  adminReports: (token) => request('/admin/reports', { token }),
+  updateReport: (token, id, patch) => request(`/admin/reports/${id}`, { method: 'PATCH', body: patch, token }),
+  adminPayments: (token) => request('/admin/payments', { token }),
+  updatePayment: (token, id, patch) => request(`/admin/payments/${id}`, { method: 'PATCH', body: patch, token }),
+
   // Email verification
   verifyEmail: (token) => request('/auth/verify-email', { method: 'POST', body: { token } }),
   resendVerification: (email) => request('/auth/resend-verification', { method: 'POST', body: { email } }),

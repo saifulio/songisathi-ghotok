@@ -1,56 +1,67 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Badge, Tabs, Dialog } from '../../components/ui/index.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { api } from '../../lib/api.js';
 import './AdminModeration.css';
-
-const VERIFY = [
-  { id: 'v1', init: 'KI', name: 'Kamrul Islam', gid: 'GHT-0311', meta: 'Sylhet · applied 6 August · 31 profiles imported',
-    note: 'Two existing verified ghotoks in Sylhet have vouched for him. His register photographs show entries going back to 2019.',
-    checks: [ { label: 'NID', ok: true, note: 'Front and back legible, name matches' }, { label: 'Photograph', ok: true, note: 'Clear, recent, face visible' }, { label: 'Phone', ok: true, note: 'Verified by OTP, not seen before' }, { label: 'Referrals', ok: true, note: 'Two verified ghotoks vouched' } ] },
-  { id: 'v2', init: 'NB', name: 'Nazma Begum', gid: 'GHT-0198', meta: 'Mymensingh · applied 7 August · 17 profiles imported',
-    note: 'NID scan is readable but the photograph is a group photo cropped tightly. Ask for a plain one before issuing the seal.',
-    checks: [ { label: 'NID', ok: true, note: 'Legible, name matches' }, { label: 'Photograph', ok: false, note: 'Cropped from a group photo' }, { label: 'Phone', ok: true, note: 'Verified by OTP' }, { label: 'Referrals', ok: false, note: 'None yet — first in her district' } ] },
-  { id: 'v3', init: 'MR', name: 'Monir Rahman', gid: 'GHT-0402', meta: 'Dhaka · applied 7 August · 4 profiles imported',
-    note: 'The phone number was registered to a suspended account in June. Same NID, different name spelling. Do not approve without a call.',
-    checks: [ { label: 'NID', ok: false, note: 'Name spelling differs from application' }, { label: 'Photograph', ok: true, note: 'Clear and recent' }, { label: 'Phone', ok: false, note: 'Previously on a suspended account' }, { label: 'Referrals', ok: false, note: 'None' } ] },
-];
-
-const REPORTS = [
-  { id: 'r1', title: 'Contact details shared outside the platform', subject: 'GHT-0402', severity: 'Serious', tone: 'error', by: 'A guardian in Uttara', when: 'Yesterday', body: 'The guardian says this ghotok passed her daughter’s phone number to another family before any interest was accepted. She has the WhatsApp message.', evidence: ['Screenshot supplied', 'No release logged on the profile', 'Second report this month'] },
-  { id: 'r2', title: 'Profile appears to be duplicated', subject: 'PRN-31204', severity: 'Moderate', tone: 'warning', by: 'Automatic check', when: '2 days ago', body: 'The same name, date of birth and district appear under two managers. One is a self-managed guardian, the other a ghotok. Likely a genuine handover rather than fraud.', evidence: ['Matching DOB and district', 'Different phone numbers', 'Both created in the last month'] },
-  { id: 'r3', title: 'Photograph does not match the biodata', subject: 'PRN-19077', severity: 'Minor', tone: 'neutral', by: 'A ghotok in Sylhet', when: '4 days ago', body: 'A released photograph appears to be of a different person than described. May simply be an old photograph.', evidence: ['Released once, to one family', 'Manager verified in 2025'] },
-];
-
-const PAYMENTS = [
-  { id: 'p1', name: 'Kamrul Islam', gid: 'GHT-0311', txn: 'BKS8H2K91M', method: 'bKash', amount: '৳2,000', tier: 'Bureau', when: 'Today 09:12' },
-  { id: 'p2', name: 'Nazma Begum', gid: 'GHT-0198', txn: 'NGD4472PLQ', method: 'Nagad', amount: '৳960', tier: 'Solo', when: 'Today 08:40' },
-  { id: 'p3', name: 'Shafiqul Alam', gid: 'GHT-0155', txn: 'BKS1120XZT', method: 'bKash', amount: '৳4,000', tier: 'Agency', when: 'Yesterday 21:05' },
-  { id: 'p4', name: 'Rokeya Sultana', gid: 'GHT-0287', txn: 'BKS9910AAB', method: 'bKash', amount: '৳2,000', tier: 'Bureau', when: 'Yesterday 19:22' },
-  { id: 'p5', name: 'Jashim Uddin', gid: 'GHT-0361', txn: 'RKT5567MNO', method: 'Rocket', amount: '৳960', tier: 'Solo', when: 'Yesterday 17:48' },
-];
 
 const V_RES = { approved: { label: 'Approved — gold seal issued, ghotok notified', bg: 'var(--green-100)', fg: 'var(--brand-primary)' }, more: { label: 'Asked for a clearer photograph — awaiting reply', bg: 'var(--gold-100)', fg: 'var(--gold-700)' }, rejected: { label: 'Rejected — reason recorded, account closed', bg: 'var(--red-100)', fg: 'var(--red-700)' } };
 const R_RES = { suspended: { label: 'Suspended · both families notified, profiles paused', bg: 'var(--red-100)', fg: 'var(--red-700)' }, warned: { label: 'Warning sent to the manager', bg: 'var(--gold-100)', fg: 'var(--gold-700)' }, dismissed: { label: 'Closed with no action', bg: 'var(--surface-card-alt)', fg: 'var(--text-secondary)' } };
 const P_RES = { confirmed: { label: 'Confirmed', bg: 'var(--green-100)', fg: 'var(--brand-primary)' }, flagged: { label: 'Not found', bg: 'var(--red-100)', fg: 'var(--red-700)' } };
 
+const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+
 export default function AdminModeration() {
+  const { user, token } = useAuth();
   const [tab, setTab] = useState('verify');
-  const [vState, setV] = useState({});
-  const [rState, setR] = useState({});
-  const [pState, setP] = useState({});
+  const [VERIFY, setVERIFY] = useState([]);
+  const [REPORTS, setREPORTS] = useState([]);
+  const [PAYMENTS, setPAYMENTS] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [dialog, setDialog] = useState(null);
   const [toast, setToast] = useState(null);
   const timer = useRef(null);
   const say = useCallback((msg) => { clearTimeout(timer.current); setToast(msg); timer.current = setTimeout(() => setToast(null), 4400); }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  const pendingV = VERIFY.filter((v) => !vState[v.id]).length;
-  const openReports = REPORTS.filter((r) => !rState[r.id]);
+  // Load the three queues. Each row's own `status` field is the source of
+  // truth (null = still open) — no separate local override map.
+  useEffect(() => {
+    if (!token) return undefined;
+    let live = true;
+    Promise.all([api.adminVerifications(token), api.adminReports(token), api.adminPayments(token)])
+      .then(([v, r, p]) => {
+        if (!live) return;
+        setVERIFY(v.verifications);
+        setREPORTS(r.reports);
+        setPAYMENTS(p.payments);
+      })
+      .catch((e) => say(e.message || 'Could not load the moderation queues.'))
+      .finally(() => { if (live) setLoading(false); });
+    return () => { live = false; };
+  }, [token, say]);
+
+  const pendingV = VERIFY.filter((v) => !v.status).length;
+  const openReports = REPORTS.filter((r) => !r.status);
   const pendingR = openReports.length;
   const seriousOpen = openReports.filter((r) => r.severity === 'Serious').length;
-  const openPayments = PAYMENTS.filter((p) => !pState[p.id]);
+  const openPayments = PAYMENTS.filter((p) => !p.status);
   const pendingP = openPayments.length;
   const owed = openPayments.reduce((n, p) => n + Number(p.amount.replace(/[^0-9]/g, '')), 0);
-  const flagged = PAYMENTS.filter((p) => pState[p.id] === 'flagged').length;
+  const flagged = PAYMENTS.filter((p) => p.status === 'flagged').length;
+
+  // Optimistic decision, reverted on error.
+  const decide = async (list, setList, id, apiCall, decision, localStatus, successMsg) => {
+    const prev = list;
+    setList((rows) => rows.map((x) => (x.id === id ? { ...x, status: localStatus } : x)));
+    setDialog(null);
+    try {
+      const result = await apiCall(token, id, { decision });
+      say(typeof successMsg === 'function' ? successMsg(result) : successMsg);
+    } catch (e) {
+      setList(prev);
+      say(e.message || 'Could not record that decision.');
+    }
+  };
 
   const strip = [
     { label: 'Awaiting verification', value: String(pendingV), note: 'ghotoks', fg: 'var(--text-primary)' },
@@ -63,8 +74,21 @@ export default function AdminModeration() {
 
   const dlg = dialog ? {
     title: 'Suspend this ghotok?',
-    body: `Suspension pauses all ${dialog.count} profiles this manager holds and notifies every family currently mid-proposal. They keep read access to their book so nothing is lost.`,
-    actions: (<><Button variant="ghost" onClick={() => setDialog(null)}>Cancel</Button><Button variant="primary" onClick={() => { setR((st) => ({ ...st, [dialog.id]: 'suspended' })); setDialog(null); say('Suspended. 31 profiles paused, 4 families mid-proposal have been told their ghotok is under review.'); }}>Suspend</Button></>),
+    body: `Suspension pauses all ${dialog.count} profile${dialog.count === 1 ? '' : 's'} this manager holds and notifies every family currently mid-proposal. They keep read access to their book so nothing is lost.`,
+    actions: (
+      <>
+        <Button variant="ghost" onClick={() => setDialog(null)}>Cancel</Button>
+        <Button
+          variant="primary"
+          onClick={() => decide(
+            REPORTS, setREPORTS, dialog.id, api.updateReport, 'SUSPEND', 'suspended',
+            (result) => `Suspended. ${result.affectedProfileCount} profile${result.affectedProfileCount === 1 ? '' : 's'} paused; the manager has been told their account is under review.`
+          )}
+        >
+          Suspend
+        </Button>
+      </>
+    ),
   } : null;
 
   return (
@@ -77,7 +101,7 @@ export default function AdminModeration() {
             <span className="ad-badge">ADMIN</span>
           </div>
           <span className="ad-topbar-note">Internal · every action is logged against your account</span>
-          <div className="ad-topbar-right"><span>Farah H. · moderator</span><Avatar initials="FH" size={28} /></div>
+          <div className="ad-topbar-right"><span>{user?.fullName || ''} · moderator</span><Avatar initials={initialsOf(user?.fullName)} size={28} /></div>
         </div>
 
         <div className="ad-strip">
@@ -97,8 +121,10 @@ export default function AdminModeration() {
 
           {tab === 'verify' && (
             <div className="ad-list">
+              {loading && <div className="ad-card">Loading…</div>}
+              {!loading && VERIFY.length === 0 && <div className="ad-card">No verification requests.</div>}
               {VERIFY.map((v) => {
-                const st = vState[v.id]; const r = V_RES[st]; const clean = v.checks.every((c) => c.ok);
+                const st = v.status; const r = V_RES[st]; const clean = v.checks.every((c) => c.ok);
                 return (
                   <div key={v.id} className="ad-card" style={{ borderColor: clean ? 'var(--border-subtle)' : 'var(--gold-300)' }}>
                     <div className="ad-v-top">
@@ -128,9 +154,9 @@ export default function AdminModeration() {
                       <div className="ad-res" style={{ background: r.bg, color: r.fg }}>{r.label}</div>
                     ) : (
                       <div className="ad-actions">
-                        <Button variant="primary" onClick={() => { setV((p) => ({ ...p, [v.id]: 'approved' })); say(`${v.name} approved. The gold seal is live and his profiles enter the trusted pool tonight.`); }}>Approve · issue gold seal</Button>
-                        <Button variant="outline" onClick={() => { setV((p) => ({ ...p, [v.id]: 'more' })); say(`Asked ${v.name.split(' ')[0]} for a clearer photograph. Nothing else about the application changes.`); }}>Ask for a clearer scan</Button>
-                        <Button variant="ghost" onClick={() => { setV((p) => ({ ...p, [v.id]: 'rejected' })); say('Rejected with a written reason. The imported profiles are deleted, not retained.'); }}>Reject</Button>
+                        <Button variant="primary" onClick={() => decide(VERIFY, setVERIFY, v.id, api.updateVerification, 'APPROVE', 'approved', `${v.name} approved. The gold seal is live and their profiles enter the trusted pool tonight.`)}>Approve · issue gold seal</Button>
+                        <Button variant="outline" onClick={() => decide(VERIFY, setVERIFY, v.id, api.updateVerification, 'MORE_INFO', 'more', `Asked ${v.name.split(' ')[0]} for a clearer photograph. Nothing else about the application changes.`)}>Ask for a clearer scan</Button>
+                        <Button variant="ghost" onClick={() => decide(VERIFY, setVERIFY, v.id, api.updateVerification, 'REJECT', 'rejected', 'Rejected with a written reason. The account is deactivated; nothing is deleted.')}>Reject</Button>
                       </div>
                     )}
                   </div>
@@ -142,8 +168,10 @@ export default function AdminModeration() {
           {tab === 'reports' && (
             <div className="ad-reports">
               <div className="ad-reports-list">
+                {loading && <div className="ad-card">Loading…</div>}
+                {!loading && REPORTS.length === 0 && <div className="ad-card">No reports.</div>}
                 {REPORTS.map((r) => {
-                  const st = rState[r.id]; const res = R_RES[st];
+                  const st = r.status; const res = R_RES[st];
                   return (
                     <div key={r.id} className="ad-card" style={{ borderColor: r.tone === 'error' ? 'var(--red-500)' : 'var(--border-subtle)' }}>
                       <div className="ad-r-top">
@@ -158,9 +186,9 @@ export default function AdminModeration() {
                         <div className="ad-res" style={{ background: res.bg, color: res.fg }}>{res.label}</div>
                       ) : (
                         <div className="ad-actions">
-                          <Button variant="primary" onClick={() => setDialog({ id: r.id, count: 31 })}>Suspend and notify</Button>
-                          <Button variant="outline" onClick={() => { setR((p) => ({ ...p, [r.id]: 'warned' })); say('Warning sent. A second warning within six months triggers automatic suspension.'); }}>Warn the manager</Button>
-                          <Button variant="ghost" onClick={() => { setR((p) => ({ ...p, [r.id]: 'dismissed' })); say('Closed with no action. The reporter is told a decision was made, not what it was.'); }}>No action needed</Button>
+                          <Button variant="primary" onClick={() => setDialog({ id: r.id, count: r.affectedProfileCount })}>Suspend and notify</Button>
+                          <Button variant="outline" onClick={() => decide(REPORTS, setREPORTS, r.id, api.updateReport, 'WARN', 'warned', 'Warning sent. A second warning within six months triggers automatic suspension.')}>Warn the manager</Button>
+                          <Button variant="ghost" onClick={() => decide(REPORTS, setREPORTS, r.id, api.updateReport, 'DISMISS', 'dismissed', 'Closed with no action. The reporter is told a decision was made, not what it was.')}>No action needed</Button>
                         </div>
                       )}
                     </div>
@@ -204,8 +232,10 @@ export default function AdminModeration() {
               <div className="ad-pay-table-wrap">
                 <div className="ad-pay-table">
                   <div className="ad-pay-thead"><span>Ghotok</span><span>Transaction ID</span><span>Method</span><span>Amount</span><span>Tier</span><span style={{ textAlign: 'right' }}>Action</span></div>
+                  {loading && <div className="ad-pay-row">Loading…</div>}
+                  {!loading && PAYMENTS.length === 0 && <div className="ad-pay-row">No payments to match.</div>}
                   {PAYMENTS.map((p) => {
-                    const st = pState[p.id]; const r = P_RES[st];
+                    const st = p.status; const r = P_RES[st];
                     return (
                       <div key={p.id} className="ad-pay-row">
                         <div className="ad-pay-cell" data-label="Ghotok"><div className="ad-pay-name">{p.name}</div><div className="ad-pay-sub">{p.gid} · {p.when}</div></div>
@@ -218,8 +248,8 @@ export default function AdminModeration() {
                             <span className="ad-pay-res" style={{ background: r.bg, color: r.fg }}>{r.label}</span>
                           ) : (
                             <>
-                              <Button variant="primary" size="sm" onClick={() => { setP((x) => ({ ...x, [p.id]: 'confirmed' })); say(`${p.name}’s ${p.tier} plan is active for the month. Receipt sent by SMS.`); }}>Confirm</Button>
-                              <Button variant="ghost" size="sm" onClick={() => { setP((x) => ({ ...x, [p.id]: 'flagged' })); say(`Marked not found. ${p.name.split(' ')[0]} is asked to re-check the transaction ID — no account change yet.`); }}>Not found</Button>
+                              <Button variant="primary" size="sm" onClick={() => decide(PAYMENTS, setPAYMENTS, p.id, api.updatePayment, 'CONFIRMED', 'confirmed', `${p.name}’s ${p.tier} plan is active for the month. Receipt sent by SMS.`)}>Confirm</Button>
+                              <Button variant="ghost" size="sm" onClick={() => decide(PAYMENTS, setPAYMENTS, p.id, api.updatePayment, 'FLAGGED', 'flagged', `Marked not found. ${p.name.split(' ')[0]} is asked to re-check the transaction ID — no account change yet.`)}>Not found</Button>
                             </>
                           )}
                         </div>
