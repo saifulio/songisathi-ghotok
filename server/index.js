@@ -101,6 +101,7 @@ function profileCard(p) {
 const suggestionPerson = (p) => ({
   init: initialsOf(p.fullName), name: p.fullName, age: yearsSince(p.dob),
   job: p.profession, city: p.area || p.district,
+  edu: [p.degree, p.institution].filter(Boolean).join(', '),
 });
 
 const capWord = (x) => (x ? x[0] + x.slice(1).toLowerCase() : x);
@@ -697,14 +698,15 @@ app.get('/api/match-suggestions', requireAuth, requireRole('GHOTOK'), async (req
   const out = [];
   for (const s of sugs) {
     const [a, b, factors] = await Promise.all([
-      queryOne('SELECT fullName, dob, profession, area, district FROM profiles WHERE id = ?', [s.profileAId]),
-      queryOne('SELECT fullName, dob, profession, area, district FROM profiles WHERE id = ?', [s.profileBId]),
+      queryOne('SELECT fullName, dob, profession, area, district, degree, institution FROM profiles WHERE id = ?', [s.profileAId]),
+      queryOne('SELECT fullName, dob, profession, area, district, degree, institution FROM profiles WHERE id = ?', [s.profileBId]),
       query('SELECT label, percentage, note FROM match_factors WHERE suggestionId = ? ORDER BY id', [s.id]),
     ]);
     out.push({
       id: s.id,
       score: s.score,
       screeningPassed: Boolean(s.screeningPassed),
+      weekOf: s.weekOf,
       a: a ? suggestionPerson(a) : null,
       b: b ? suggestionPerson(b) : null,
       factors: factors.map((f) => ({ label: f.label, pct: f.percentage, note: f.note })),
