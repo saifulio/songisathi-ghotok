@@ -27,16 +27,15 @@ export const NAV_GROUPS = [
     items: [
       { path: '/onboarding', label: 'Onboarding & pricing', public: true },
       { path: '/guardian', label: 'Guardian & candidate', roles: ['GUARDIAN', 'CANDIDATE'] },
-      // Every candidate can look: browse the pool and read their own profile,
-      // whether their biodata is self-managed or run by a ghotok or guardian.
-      // Acting on what they see is the part that stays with the manager — a
-      // managed candidate gets these two pages read-only (the server decides,
-      // via canSendInterest / canEdit; the pages render to match).
+      // Every candidate can look: browse the pool, read their own profile, and
+      // see their scored matches, whether their biodata is self-managed or run
+      // by a ghotok or guardian. Acting on what they see is the part that stays
+      // with the manager — a managed candidate gets all three read-only (the
+      // server decides, via canSendInterest / canEdit; the pages render to
+      // match, so nothing is offered that the server would refuse).
       { path: '/my-search', label: 'Search & profiles', roles: ['GUARDIAN', 'CANDIDATE'] },
       { path: '/my-biodata', label: 'Biodata studio', roles: ['GUARDIAN', 'CANDIDATE'] },
-      // AI matching still needs standing to act on a suggestion, so it stays
-      // with the manager (see requiresSelfManaged in Layout's canSee).
-      { path: '/my-matches', label: 'AI matching', roles: ['GUARDIAN', 'CANDIDATE'], requiresSelfManaged: true },
+      { path: '/my-matches', label: 'AI matching', roles: ['GUARDIAN', 'CANDIDATE'] },
     ],
   },
   {

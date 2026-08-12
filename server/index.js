@@ -1469,13 +1469,16 @@ function scoreMatch(mine, cand) {
   return { score, factors };
 }
 
-// ── AI matching for a guardian / self-managed candidate ──
+// ── AI matching for a guardian / candidate ──
 // Computed on demand over the same visible pool as /api/my-search — no
 // persisted suggestion table (that one is keyed to a ghotok's book).
+// Readable by every candidate, on the same footing as the search it scores:
+// the reasoning is all drawn from fields they can already see. Expressing
+// interest in a match is the part that needs standing, so the response
+// carries the same canSendInterest flag /api/my-search does.
 app.get('/api/my-matches', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), async (req, res) => {
   const me = await myProfileForReq(req);
-  if (!me) return res.json({ matches: [] });
-  if (req.auth.role === 'CANDIDATE' && !me.selfManaged) return bad(res, `${capFirst(managerLabel(me.profile))} reviews matches on your behalf.`, 403);
+  if (!me) return res.json({ matches: [], canSendInterest: false });
 
   const mine = me.profile;
   const opposite = mine.gender === 'MALE' ? 'FEMALE' : 'MALE';
@@ -1503,7 +1506,7 @@ app.get('/api/my-matches', requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), as
     .sort((a, b) => b.score - a.score)
     .slice(0, 8);
 
-  return res.json({ matches });
+  return res.json({ matches, canSendInterest: req.auth.role !== 'CANDIDATE' || me.selfManaged });
 });
 
 // ── verify email ──

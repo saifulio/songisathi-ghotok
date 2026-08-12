@@ -11,6 +11,9 @@ export default function MyMatches() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [blocked, setBlocked] = useState(null);
+  // A managed candidate reads the same scoring but can't act on it — their
+  // ghotok or guardian expresses interest (see my-matches / POST /api/interests).
+  const [canSendInterest, setCanSendInterest] = useState(true);
   const [open, setOpen] = useState(null);
   const [decision, setDecision] = useState({});
   const [toast, setToast] = useState(null);
@@ -22,7 +25,12 @@ export default function MyMatches() {
     if (!token) return undefined;
     let live = true;
     api.myMatches(token)
-      .then((data) => { if (live) { setMatches(data.matches); setOpen((cur) => cur ?? data.matches[0]?.profileId ?? null); } })
+      .then((data) => {
+        if (!live) return;
+        setMatches(data.matches);
+        setCanSendInterest(data.canSendInterest !== false);
+        setOpen((cur) => cur ?? data.matches[0]?.profileId ?? null);
+      })
       .catch((e) => { if (live) setBlocked(e.message || 'Matching is not available for this account.'); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
@@ -102,7 +110,9 @@ export default function MyMatches() {
                       </div>
                       {!st ? (
                         <div className="mm-pair-actions">
-                          <Button variant="primary" size="sm" onClick={() => express(m)}>Express interest</Button>
+                          {canSendInterest
+                            ? <Button variant="primary" size="sm" onClick={() => express(m)}>Express interest</Button>
+                            : <span className="mm-pair-res">Your manager expresses interest on your behalf — show them this match.</span>}
                           <Button variant="ghost" size="sm" onClick={() => dismiss(m)}>Dismiss</Button>
                         </div>
                       ) : (

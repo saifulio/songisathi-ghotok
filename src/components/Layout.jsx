@@ -12,9 +12,6 @@ function canSee(item, user) {
   if (item.public) return true;
   if (!user) return false;
   if (item.roles && !item.roles.includes(user.role)) return false;
-  // A guardian always manages the profile they're linked to. A candidate
-  // only gets these links when their own profile is self-managed.
-  if (item.requiresSelfManaged && user.role === 'CANDIDATE' && !user.selfManaged) return false;
   return true;
 }
 
