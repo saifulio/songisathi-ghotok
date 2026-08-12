@@ -589,6 +589,47 @@ app.get('/api/profiles', requireAuth, requireRole('GHOTOK'), async (req, res) =>
   return res.json({ profiles: rows.map(profileCard) });
 });
 
+// ── search: the ghotok's book + the trusted-network pool ──
+// Returns every profile this ghotok may see (their own, plus any pooled
+// profile from another manager), as rich objects the search UI filters
+// client-side. Drafts and auto-archived profiles are left out.
+// Must stay ABOVE /api/profiles/:id — Express matches in declaration order, so
+// with :id first the literal "search" is read as an id and this 404s.
+app.get('/api/profiles/search', requireAuth, requireRole('GHOTOK'), async (req, res) => {
+  const ghotok = await ghotokForReq(req);
+  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
+
+  const rows = await query(
+    `SELECT p.*,
+        gu.fullName AS ghotokName, g.code AS ghotokCode, g.district AS ghotokDistrict, g.marriagesClosed AS ghotokMarriages,
+        gdu.fullName AS guardianName, gd.relation AS guardianRelation,
+        cu.fullName AS candidateName,
+        (SELECT COUNT(*) FROM screening_responses sr WHERE sr.profileId = p.id AND sr.sealed = 1) AS sealedCount
+       FROM profiles p
+       LEFT JOIN ghotoks g   ON p.managedByGhotokId = g.id
+       LEFT JOIN users gu    ON g.userId = gu.id
+       LEFT JOIN guardians gd ON p.managedByGuardianId = gd.id
+       LEFT JOIN users gdu   ON gd.userId = gdu.id
+       LEFT JOIN users cu    ON p.candidateUserId = cu.id
+      WHERE (p.managedByGhotokId = ? OR p.inNetworkPool = 1)
+        AND p.status NOT IN ('DRAFT', 'AUTO_ARCHIVED')
+      ORDER BY p.lastUpdatedAt DESC`,
+    [ghotok.id]
+  );
+
+  const ids = rows.map((r) => r.id);
+  const prefsByProfile = {};
+  if (ids.length) {
+    const prefs = await query(
+      `SELECT profileId, label FROM profile_preferences WHERE enabled = 1 AND profileId IN (${ids.map(() => '?').join(',')})`,
+      ids
+    );
+    for (const pr of prefs) (prefsByProfile[pr.profileId] ||= []).push(pr.label);
+  }
+
+  return res.json({ profiles: rows.map((r) => searchProfile(r, ghotok.id, prefsByProfile[r.id] || [])) });
+});
+
 // ── full detail for one profile (biodata studio) ──
 app.get('/api/profiles/:id', requireAuth, requireRole('GHOTOK'), async (req, res) => {
   const ghotok = await ghotokForReq(req);
@@ -695,45 +736,6 @@ app.get('/api/dashboard/stats', requireAuth, requireRole('GHOTOK'), async (req, 
       referralCode: ghotok.referralCode,
     },
   });
-});
-
-// ── search: the ghotok's book + the trusted-network pool ──
-// Returns every profile this ghotok may see (their own, plus any pooled
-// profile from another manager), as rich objects the search UI filters
-// client-side. Drafts and auto-archived profiles are left out.
-app.get('/api/profiles/search', requireAuth, requireRole('GHOTOK'), async (req, res) => {
-  const ghotok = await ghotokForReq(req);
-  if (!ghotok) return bad(res, 'No matchmaker profile is linked to this account.', 403);
-
-  const rows = await query(
-    `SELECT p.*,
-        gu.fullName AS ghotokName, g.code AS ghotokCode, g.district AS ghotokDistrict, g.marriagesClosed AS ghotokMarriages,
-        gdu.fullName AS guardianName, gd.relation AS guardianRelation,
-        cu.fullName AS candidateName,
-        (SELECT COUNT(*) FROM screening_responses sr WHERE sr.profileId = p.id AND sr.sealed = 1) AS sealedCount
-       FROM profiles p
-       LEFT JOIN ghotoks g   ON p.managedByGhotokId = g.id
-       LEFT JOIN users gu    ON g.userId = gu.id
-       LEFT JOIN guardians gd ON p.managedByGuardianId = gd.id
-       LEFT JOIN users gdu   ON gd.userId = gdu.id
-       LEFT JOIN users cu    ON p.candidateUserId = cu.id
-      WHERE (p.managedByGhotokId = ? OR p.inNetworkPool = 1)
-        AND p.status NOT IN ('DRAFT', 'AUTO_ARCHIVED')
-      ORDER BY p.lastUpdatedAt DESC`,
-    [ghotok.id]
-  );
-
-  const ids = rows.map((r) => r.id);
-  const prefsByProfile = {};
-  if (ids.length) {
-    const prefs = await query(
-      `SELECT profileId, label FROM profile_preferences WHERE enabled = 1 AND profileId IN (${ids.map(() => '?').join(',')})`,
-      ids
-    );
-    for (const pr of prefs) (prefsByProfile[pr.profileId] ||= []).push(pr.label);
-  }
-
-  return res.json({ profiles: rows.map((r) => searchProfile(r, ghotok.id, prefsByProfile[r.id] || [])) });
 });
 
 // ── AI match suggestions (this ghotok's open suggestions) ──
@@ -1379,10 +1381,18 @@ app.patch('/api/my-profile/biodata', requireAuth, requireRole('GUARDIAN', 'CANDI
   sets.push('completeness = ?');
   params.push(completenessOf(merged));
   if (typeof b.photoLocked === 'boolean') { sets.push('photoLocked = ?'); params.push(b.photoLocked ? 1 : 0); }
-  if (typeof b.inNetworkPool === 'boolean') { sets.push('inNetworkPool = ?'); params.push(b.inNetworkPool ? 1 : 0); }
+
+  // Publishing is "make searchable", so it implies pool membership — every
+  // search filters on inNetworkPool = 1 AND status = 'ACTIVE', and a signup
+  // leaves the profile out of the pool by default. Without this, publishing
+  // hands out a PRN that nobody can ever find. A plain save still honours the
+  // pool switch, so opting back out afterwards works as before.
+  const publishing = b.publish === true && me.profile.status === 'DRAFT';
+  const pool = publishing ? true : typeof b.inNetworkPool === 'boolean' ? b.inNetworkPool : null;
+  if (pool !== null) { sets.push('inNetworkPool = ?'); params.push(pool ? 1 : 0); }
 
   let newPrn = me.profile.prn;
-  if (b.publish === true && me.profile.status === 'DRAFT') {
+  if (publishing) {
     newPrn = me.profile.prn || await nextPrn();
     sets.push('prn = ?', "status = 'ACTIVE'");
     params.push(newPrn);

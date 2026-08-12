@@ -73,6 +73,13 @@ export default function MyBiodataStudio() {
     try {
       const data = await api.updateMyBiodata(token, { ...form, preferences: prefs, ...extra });
       setProfile((p) => ({ ...p, ...data.profile }));
+      // Publishing turns pool sharing on server-side; mirror the saved flags
+      // back into the form so the next "Save changes" doesn't undo it.
+      setForm((s) => ({
+        ...s,
+        photoLocked: Boolean(data.profile.photoLocked),
+        inNetworkPool: Boolean(data.profile.inNetworkPool),
+      }));
       say(extra.publish ? 'Published — your profile is now searchable in the network.' : 'Biodata saved.');
     } catch (e) {
       say(e.message || 'Could not save your biodata.');
