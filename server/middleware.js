@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken';
 import { queryOne } from '../db/pool.js';
 import { JWT_SECRET } from './config.js';
 import { bad } from './lib/http.js';
+import { myProfilesForReq, profileContext } from './lib/accounts.js';
 
 // Verifies the Bearer token and hangs { sub, role } on req.auth.
 export function requireAuth(req, res, next) {
@@ -34,9 +35,30 @@ async function loadGhotok(req, res, next) {
   next();
 }
 
+// Loads what a member account may act on:
+//   req.myProfiles — every profile they hold (a guardian holds up to five),
+//   req.guardian   — their guardian row, for a guardian,
+//   req.me         — { profile, selfManaged } for the one profile this request
+//                    is about, or null when the account holds none yet.
+// Which profile that is: the one named by ?profileId= (or body.profileId),
+// falling back to the first — so a single-profile account, and every client
+// that predates the switcher, keeps working without naming anything.
+async function loadMyProfiles(req, res, next) {
+  const { guardian, profiles } = await myProfilesForReq(req);
+  req.guardian = guardian;
+  req.myProfiles = profiles;
+
+  const named = Number(req.query?.profileId ?? req.body?.profileId) || null;
+  const profile = named ? profiles.find((p) => p.id === named) : profiles[0];
+  if (named && !profile) return bad(res, 'That profile is not one of yours.', 403);
+
+  req.me = profile ? profileContext(req, profile) : null;
+  next();
+}
+
 // The three audiences the API serves. Spread into a route's middleware list:
 //   router.get('/profiles', ghotokOnly, handler)
 export const ghotokOnly = [requireAuth, requireRole('GHOTOK'), loadGhotok];
 export const adminOnly = [requireAuth, requireRole('ADMIN')];
-// A guardian, or the bride/groom themselves — see myProfileForReq.
-export const memberOnly = [requireAuth, requireRole('GUARDIAN', 'CANDIDATE')];
+// A guardian, or the bride/groom themselves — see loadMyProfiles.
+export const memberOnly = [requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), loadMyProfiles];

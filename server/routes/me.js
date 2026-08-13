@@ -1,16 +1,23 @@
 // The guardian / bride / groom side of the app: your own profile, the
 // proposals on it, the pool you can browse, and your own biodata.
 //
-// Standing, throughout: a guardian always decides for the profile they manage;
-// a candidate only when their profile is self-managed. Reading never needs
-// standing — browsing and seeing your own biodata are open to every candidate
-// — so each read reports canSendInterest / canEdit and the UI renders from it.
+// Standing, throughout: a guardian always decides for the profiles they
+// manage; a candidate only when their profile is self-managed. Reading never
+// needs standing — browsing and seeing your own biodata are open to every
+// candidate — so each read reports canSendInterest / canEdit and the UI
+// renders from it.
+//
+// A guardian holds up to GUARDIAN_PROFILE_LIMIT profiles (a daughter and a
+// nephew are two separate searches), a candidate exactly one. Every route
+// below acts on a single profile: the one named by ?profileId= / body
+// profileId, or the first — memberOnly resolves it onto req.me, and refuses an
+// id the account does not hold (see middleware.js).
 
 import express from 'express';
 import { query, queryOne, withTransaction, insert } from '../../db/pool.js';
 import { bad } from '../lib/http.js';
 import { STATUS_LABEL, initialsOf, yearsSince, relativeTime } from '../lib/format.js';
-import { myProfileForReq, managerSubject } from '../lib/accounts.js';
+import { GUARDIAN_PROFILE_LIMIT, managerSubject } from '../lib/accounts.js';
 import { INTEREST_SELECT, interestItem, interestById } from '../lib/interests.js';
 import {
   POOL_PROFILE_SELECT, preferencesFor, searchProfile, markPairInDiscussion,
@@ -27,8 +34,8 @@ const hasStanding = (req, me) => req.auth.role !== 'CANDIDATE' || me.selfManaged
 // The profile context for a route that acts. Returns null once it has already
 // replied, so callers just `if (!me) return;`. `refusal` completes the
 // sentence "Your matchmaker …" / "Your guardian …".
-async function actingProfile(req, res, refusal) {
-  const me = await myProfileForReq(req);
+function actingProfile(req, res, refusal) {
+  const me = req.me;
   if (!me) {
     bad(res, 'No profile is linked to this account.', 403);
     return null;
@@ -40,9 +47,133 @@ async function actingProfile(req, res, refusal) {
   return me;
 }
 
+// Fields a guardian / self-managed candidate may edit on their own biodata.
+// Identity basics (name, gender, dob, district) are set when the profile is
+// created and stay out of scope here, same as the ghotok's own
+// PATCH /profiles/:id.
+const BIODATA_EDITABLE = [
+  'heightLabel', 'maritalStatus', 'area', 'degree', 'institution', 'undergraduate',
+  'profession', 'organisation', 'familyType', 'fatherInfo', 'motherInfo', 'siblings',
+  'familyIncome', 'religion', 'religiousPractice',
+];
+const completenessOf = (row) => Math.round(
+  100 * BIODATA_EDITABLE.filter((f) => String(row[f] ?? '').trim() !== '').length / BIODATA_EDITABLE.length
+);
+
+// One entry in the profile switcher a guardian picks from.
+const myProfileCard = (p) => ({
+  id: p.id,
+  name: p.fullName,
+  init: initialsOf(p.fullName),
+  prn: p.prn,
+  gender: p.gender,
+  status: p.status,
+  statusLabel: STATUS_LABEL[p.status] || p.status,
+  completeness: p.completeness,
+});
+
+// ── the profiles this account holds ──
+// The switcher's source of truth: a guardian sees each family member they
+// manage, a candidate sees the single profile that is their own.
+router.get('/my-profiles', memberOnly, async (req, res) => {
+  const limit = req.auth.role === 'GUARDIAN' ? GUARDIAN_PROFILE_LIMIT : 1;
+  return res.json({
+    profiles: req.myProfiles.map(myProfileCard),
+    limit,
+    canAdd: req.auth.role === 'GUARDIAN' && req.myProfiles.length < limit,
+  });
+});
+
+// ── add a profile (guardian) ──
+// A guardian adds the family member they are matchmaking for, up to
+// GUARDIAN_PROFILE_LIMIT of them. The profile starts as a DRAFT with the
+// guardian as its manager; publishing it (PATCH /my-profile/biodata with
+// publish: true) issues the PRN and puts it in the pool — the same second step
+// a self-signed-up candidate takes.
+// body: { fullName, gender, dob?, heightLabel?, maritalStatus?, district, area?,
+//         degree?, institution?, undergraduate?, profession?, organisation?,
+//         familyType?, fatherInfo?, motherInfo?, siblings?, familyIncome?,
+//         religion?, religiousPractice?, preferences?: [{label,enabled}] }
+router.post('/my-profiles', memberOnly, async (req, res) => {
+  if (req.auth.role !== 'GUARDIAN') {
+    return bad(res, 'Your account has its own single profile — there is nothing to add.', 403);
+  }
+  if (!req.guardian) return bad(res, 'No guardian profile is linked to this account.', 403);
+  if (req.myProfiles.length >= GUARDIAN_PROFILE_LIMIT) {
+    return bad(
+      res,
+      `A guardian account holds up to ${GUARDIAN_PROFILE_LIMIT} profiles, and yours is full.`,
+      409
+    );
+  }
+
+  const b = req.body || {};
+  const fullName = String(b.fullName || '').trim();
+  if (!fullName) return bad(res, 'Full name is required.');
+  const gender = ['MALE', 'FEMALE'].includes(b.gender) ? b.gender : null;
+  if (!gender) return bad(res, 'Gender is required.');
+  const district = String(b.district || '').trim();
+  if (!district) return bad(res, 'District is required.');
+
+  let dob = null;
+  if (b.dob) {
+    dob = new Date(b.dob);
+    if (Number.isNaN(dob.getTime())) return bad(res, 'Date of birth is invalid.');
+  }
+  const familyType = ['NUCLEAR', 'JOINT'].includes(String(b.familyType || '').toUpperCase())
+    ? String(b.familyType).toUpperCase()
+    : null;
+
+  // The optional biodata fields, kept on the same footing as the ones
+  // PATCH /my-profile/biodata writes — including how completeness is counted,
+  // so the figure doesn't jump the first time the guardian saves an edit.
+  const optional = Object.fromEntries(
+    BIODATA_EDITABLE.map((f) => [f, String(b[f] ?? '').trim() || null])
+  );
+  optional.familyType = familyType;
+  optional.maritalStatus = optional.maritalStatus || 'Never married';
+
+  const profileId = await withTransaction(async (tx) => {
+    const id = await insert(
+      tx,
+      `INSERT INTO profiles
+        (fullName, gender, dob, heightLabel, maritalStatus, district, area, degree, institution,
+         undergraduate, profession, organisation, familyType, fatherInfo, motherInfo, siblings,
+         familyIncome, religion, religiousPractice, managerType, managedByGuardianId,
+         status, photoLocked, inNetworkPool, completeness)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'GUARDIAN', ?, 'DRAFT', ?, ?, ?)`,
+      [
+        fullName, gender, dob, optional.heightLabel, optional.maritalStatus, district,
+        optional.area, optional.degree, optional.institution, optional.undergraduate,
+        optional.profession, optional.organisation, familyType, optional.fatherInfo,
+        optional.motherInfo, optional.siblings, optional.familyIncome, optional.religion,
+        optional.religiousPractice, req.guardian.id, true, false, completenessOf(optional),
+      ]
+    );
+    if (Array.isArray(b.preferences)) {
+      for (const p of b.preferences) {
+        if (p && p.label) {
+          await insert(
+            tx,
+            'INSERT INTO profile_preferences (profileId, label, enabled) VALUES (?, ?, ?)',
+            [id, String(p.label), p.enabled ? 1 : 0]
+          );
+        }
+      }
+    }
+    return id;
+  });
+
+  const profile = await queryOne('SELECT * FROM profiles WHERE id = ?', [profileId]);
+  return res.status(201).json({
+    profile: myProfileCard(profile),
+    remaining: GUARDIAN_PROFILE_LIMIT - (req.myProfiles.length + 1),
+  });
+});
+
 // ── my profile (guardian / candidate self-view) ──
 router.get('/my-profile', memberOnly, async (req, res) => {
-  const me = await myProfileForReq(req);
+  const me = req.me;
   if (!me) return res.json({ profile: null, selfManaged: false });
   return res.json({
     profile: { id: me.profile.id, name: me.profile.fullName, init: initialsOf(me.profile.fullName), prn: me.profile.prn },
@@ -51,14 +182,14 @@ router.get('/my-profile', memberOnly, async (req, res) => {
 });
 
 router.get('/my-profile/proposals', memberOnly, async (req, res) => {
-  const me = await myProfileForReq(req);
+  const me = req.me;
   if (!me) return res.json({ proposals: [] });
   const rows = await query(`${INTEREST_SELECT} WHERE i.yourProfileId = ? ORDER BY i.createdAt DESC`, [me.profile.id]);
   return res.json({ proposals: rows.map(interestItem) });
 });
 
 router.get('/my-profile/activity', memberOnly, async (req, res) => {
-  const me = await myProfileForReq(req);
+  const me = req.me;
   if (!me) return res.json({ activity: [] });
   const rows = await query('SELECT text, occurredAt FROM activity_log WHERE profileId = ? ORDER BY occurredAt DESC LIMIT 10', [me.profile.id]);
   return res.json({ activity: rows.map((a) => ({ text: a.text, when: relativeTime(a.occurredAt) })) });
@@ -66,7 +197,7 @@ router.get('/my-profile/activity', memberOnly, async (req, res) => {
 
 // body: { decision: 'ACCEPT' | 'DECLINE' }
 router.patch('/my-profile/proposals/:id', memberOnly, async (req, res) => {
-  const me = await actingProfile(req, res, 'decides this for you.');
+  const me = actingProfile(req, res, 'decides this for you.');
   if (!me) return;
 
   const decision = req.body?.decision;
@@ -90,12 +221,16 @@ router.patch('/my-profile/proposals/:id', memberOnly, async (req, res) => {
 // ── send interest (guardian / self-managed candidate) ──
 // body: { targetProfileId, message? }
 router.post('/interests', memberOnly, async (req, res) => {
-  const me = await actingProfile(req, res, 'sends interest on your behalf.');
+  const me = actingProfile(req, res, 'sends interest on your behalf.');
   if (!me) return;
 
   const targetProfileId = Number(req.body?.targetProfileId);
   if (!targetProfileId) return bad(res, 'targetProfileId is required.');
-  if (targetProfileId === me.profile.id) return bad(res, 'You cannot send interest to your own profile.');
+  // Not your own, and not another of the profiles you hold — a guardian
+  // matchmaking for two family members cannot introduce them to each other.
+  if (req.myProfiles.some((p) => p.id === targetProfileId)) {
+    return bad(res, 'You cannot send interest to a profile you manage yourself.');
+  }
   const target = await queryOne('SELECT id FROM profiles WHERE id = ? LIMIT 1', [targetProfileId]);
   if (!target) return bad(res, 'Profile not found.', 404);
 
@@ -109,9 +244,8 @@ router.post('/interests', memberOnly, async (req, res) => {
   let fromGuardianId = null;
   let fromLabel;
   if (req.auth.role === 'GUARDIAN') {
-    const guardian = await queryOne('SELECT * FROM guardians WHERE userId = ? LIMIT 1', [req.auth.sub]);
-    if (!guardian) return bad(res, 'No guardian profile is linked to this account.', 403);
-    fromGuardianId = guardian.id;
+    if (!req.guardian) return bad(res, 'No guardian profile is linked to this account.', 403);
+    fromGuardianId = req.guardian.id;
     const guardianUser = await queryOne('SELECT fullName FROM users WHERE id = ?', [req.auth.sub]);
     fromLabel = `Guardian — ${guardianUser?.fullName || ''}`.trim();
   } else {
@@ -129,17 +263,20 @@ router.post('/interests', memberOnly, async (req, res) => {
 
 // ── search: the pool visible to a guardian / candidate ──
 // Same visibility rule as the ghotok's search (inNetworkPool = 1), minus the
-// "your own book" concept — a guardian/candidate has exactly one profile,
-// which is excluded from its own results.
+// "your own book" concept. Every profile the account holds is left out, not
+// just the selected one — a guardian browsing for their daughter should not be
+// shown their nephew.
 router.get('/my-search', memberOnly, async (req, res) => {
-  const me = await myProfileForReq(req);
+  const me = req.me;
   if (!me) return res.json({ profiles: [], canSendInterest: false });
 
+  const mineIds = req.myProfiles.map((p) => p.id);
   const rows = await query(
     `${POOL_PROFILE_SELECT}
-      WHERE p.id != ? AND p.inNetworkPool = 1 AND p.status = 'ACTIVE'
+      WHERE p.id NOT IN (${mineIds.map(() => '?').join(',')})
+        AND p.inNetworkPool = 1 AND p.status = 'ACTIVE'
       ORDER BY p.lastUpdatedAt DESC`,
-    [me.profile.id]
+    mineIds
   );
 
   const prefsByProfile = await preferencesFor(rows.map((r) => r.id));
@@ -152,7 +289,7 @@ router.get('/my-search', memberOnly, async (req, res) => {
 
 // ── full biodata detail for a guardian / candidate's own profile ──
 router.get('/my-profile/biodata', memberOnly, async (req, res) => {
-  const me = await myProfileForReq(req);
+  const me = req.me;
   if (!me) return res.json({ profile: null, canEdit: false });
   const p = me.profile;
   const prefs = await query('SELECT label, enabled FROM profile_preferences WHERE profileId = ? ORDER BY id', [p.id]);
@@ -193,23 +330,11 @@ router.get('/my-profile/biodata', memberOnly, async (req, res) => {
   });
 });
 
-// Fields a guardian / self-managed candidate may edit on their own biodata —
-// identity basics (name, gender, dob, district) stay out of scope here, same
-// as the ghotok's own PATCH /profiles/:id.
-const BIODATA_EDITABLE = [
-  'heightLabel', 'maritalStatus', 'area', 'degree', 'institution', 'undergraduate',
-  'profession', 'organisation', 'familyType', 'fatherInfo', 'motherInfo', 'siblings',
-  'familyIncome', 'religion', 'religiousPractice',
-];
-const completenessOf = (row) => Math.round(
-  100 * BIODATA_EDITABLE.filter((f) => String(row[f] ?? '').trim() !== '').length / BIODATA_EDITABLE.length
-);
-
 // body: { ...BIODATA_EDITABLE fields, photoLocked?, inNetworkPool?, preferences?: [{label,enabled}], publish? }
 // publish: true moves a DRAFT profile to ACTIVE and issues a PRN — the one
 // step a self-signed-up candidate needs to become visible/searchable.
 router.patch('/my-profile/biodata', memberOnly, async (req, res) => {
-  const me = await actingProfile(req, res, 'edits your biodata for you.');
+  const me = actingProfile(req, res, 'edits your biodata for you.');
   if (!me) return;
 
   const b = req.body || {};
@@ -273,14 +398,18 @@ router.patch('/my-profile/biodata', memberOnly, async (req, res) => {
 // candidate, on the same footing as the search it scores: the reasoning is all
 // drawn from fields they can already see.
 router.get('/my-matches', memberOnly, async (req, res) => {
-  const me = await myProfileForReq(req);
+  const me = req.me;
   if (!me) return res.json({ matches: [], canSendInterest: false });
 
   const mine = me.profile;
   const opposite = mine.gender === 'MALE' ? 'FEMALE' : 'MALE';
+  const mineIds = req.myProfiles.map((p) => p.id);
   const rows = await query(
-    "SELECT * FROM profiles WHERE gender = ? AND id != ? AND inNetworkPool = 1 AND status = 'ACTIVE' ORDER BY lastUpdatedAt DESC LIMIT 60",
-    [opposite, mine.id]
+    `SELECT * FROM profiles
+      WHERE gender = ? AND id NOT IN (${mineIds.map(() => '?').join(',')})
+        AND inNetworkPool = 1 AND status = 'ACTIVE'
+      ORDER BY lastUpdatedAt DESC LIMIT 60`,
+    [opposite, ...mineIds]
   );
 
   const matches = rows

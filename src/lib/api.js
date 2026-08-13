@@ -31,6 +31,10 @@ async function request(path, { method = 'GET', body, token } = {}) {
   return data;
 }
 
+// A guardian holds several profiles, so every guardian/candidate read names
+// the one it is about. Left off, the API falls back to the first profile.
+const forProfile = (path, profileId) => (profileId ? `${path}?profileId=${profileId}` : path);
+
 export const api = {
   signup: (payload) => request('/auth/signup', { method: 'POST', body: payload }),
   signin: (payload) => request('/auth/signin', { method: 'POST', body: payload }),
@@ -67,16 +71,19 @@ export const api = {
   adminPayments: (token) => request('/admin/payments', { token }),
   updatePayment: (token, id, patch) => request(`/admin/payments/${id}`, { method: 'PATCH', body: patch, token }),
 
-  // Guardian / candidate self-view
-  myProfile: (token) => request('/my-profile', { token }),
-  myProposals: (token) => request('/my-profile/proposals', { token }),
-  myActivity: (token) => request('/my-profile/activity', { token }),
-  decideProposal: (token, id, patch) => request(`/my-profile/proposals/${id}`, { method: 'PATCH', body: patch, token }),
-  myBiodata: (token) => request('/my-profile/biodata', { token }),
-  updateMyBiodata: (token, patch) => request('/my-profile/biodata', { method: 'PATCH', body: patch, token }),
-  mySearch: (token) => request('/my-search', { token }),
-  myMatches: (token) => request('/my-matches', { token }),
-  sendInterest: (token, targetProfileId, message) => request('/interests', { method: 'POST', body: { targetProfileId, message }, token }),
+  // Guardian / candidate self-view — profileId picks which profile a guardian
+  // is acting for (see forProfile above).
+  myProfiles: (token) => request('/my-profiles', { token }),
+  createMyProfile: (token, payload) => request('/my-profiles', { method: 'POST', body: payload, token }),
+  myProfile: (token, profileId) => request(forProfile('/my-profile', profileId), { token }),
+  myProposals: (token, profileId) => request(forProfile('/my-profile/proposals', profileId), { token }),
+  myActivity: (token, profileId) => request(forProfile('/my-profile/activity', profileId), { token }),
+  decideProposal: (token, id, patch, profileId) => request(`/my-profile/proposals/${id}`, { method: 'PATCH', body: { ...patch, profileId }, token }),
+  myBiodata: (token, profileId) => request(forProfile('/my-profile/biodata', profileId), { token }),
+  updateMyBiodata: (token, patch, profileId) => request('/my-profile/biodata', { method: 'PATCH', body: { ...patch, profileId }, token }),
+  mySearch: (token, profileId) => request(forProfile('/my-search', profileId), { token }),
+  myMatches: (token, profileId) => request(forProfile('/my-matches', profileId), { token }),
+  sendInterest: (token, targetProfileId, message, profileId) => request('/interests', { method: 'POST', body: { targetProfileId, message, profileId }, token }),
 
   // Email verification
   verifyEmail: (token) => request('/auth/verify-email', { method: 'POST', body: { token } }),

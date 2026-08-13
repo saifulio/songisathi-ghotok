@@ -62,25 +62,40 @@ export async function issueVerificationEmail(user) {
   }
 }
 
-// The single profile this account has standing over: the one a guardian
-// manages, or the candidate's own biodata. selfManaged mirrors
-// profiles.managerType === 'SELF' — a self-signed-up bride/groom decides for
-// themselves; a candidate whose profile a ghotok or guardian manages does not.
-export async function myProfileForReq(req) {
+// How many profiles one guardian account may hold — a guardian matchmakes for
+// their own family (a daughter, a nephew, a widowed sister), not for a book.
+export const GUARDIAN_PROFILE_LIMIT = 5;
+
+// Every profile this account has standing over: the ones a guardian manages
+// (oldest first, up to GUARDIAN_PROFILE_LIMIT), or the candidate's own single
+// biodata. The guardian row comes back with them — the callers that add or
+// count profiles need it, and it is the same lookup.
+export async function myProfilesForReq(req) {
   if (req.auth.role === 'GUARDIAN') {
     const guardian = await queryOne('SELECT * FROM guardians WHERE userId = ? LIMIT 1', [req.auth.sub]);
-    if (!guardian) return null;
-    const profile = await queryOne('SELECT * FROM profiles WHERE managedByGuardianId = ? LIMIT 1', [guardian.id]);
-    if (!profile) return null;
-    return { profile, selfManaged: false };
+    if (!guardian) return { guardian: null, profiles: [] };
+    const profiles = await query(
+      'SELECT * FROM profiles WHERE managedByGuardianId = ? ORDER BY id',
+      [guardian.id]
+    );
+    return { guardian, profiles };
   }
   if (req.auth.role === 'CANDIDATE') {
     const profile = await queryOne('SELECT * FROM profiles WHERE candidateUserId = ? LIMIT 1', [req.auth.sub]);
-    if (!profile) return null;
-    return { profile, selfManaged: profile.managerType === 'SELF' };
+    return { guardian: null, profiles: profile ? [profile] : [] };
   }
-  return null;
+  return { guardian: null, profiles: [] };
 }
+
+// One of those profiles, paired with the standing that comes with it.
+// selfManaged mirrors profiles.managerType === 'SELF' — a self-signed-up
+// bride/groom decides for themselves; a candidate whose profile a ghotok or
+// guardian manages does not. A guardian always decides, so it is never their
+// profile's own flag that matters here.
+export const profileContext = (req, profile) => ({
+  profile,
+  selfManaged: req.auth.role === 'CANDIDATE' && profile.managerType === 'SELF',
+});
 
 // Names whoever holds the decisions for a managed candidate, so the refusals
 // in routes/me.js don't tell a ghotok-managed candidate to ask their guardian.

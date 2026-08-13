@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Switch, Input, Select, Badge } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
 import './MyBiodataStudio.css';
 
@@ -24,6 +25,10 @@ const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w
 
 export default function MyBiodataStudio() {
   const { token } = useAuth();
+  // The profile the switcher is on — a guardian edits one family member at a
+  // time. reload() keeps the switcher's own copy (name, status, PRN) current
+  // after a save that publishes.
+  const { activeId, reload } = useMyProfiles();
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({});
   const [prefs, setPrefs] = useState([]);
@@ -44,7 +49,7 @@ export default function MyBiodataStudio() {
     if (!token) return undefined;
     let live = true;
     setLoading(true);
-    api.myBiodata(token)
+    api.myBiodata(token, activeId)
       .then((data) => {
         if (!live || !data.profile) return;
         setProfile(data.profile);
@@ -61,7 +66,7 @@ export default function MyBiodataStudio() {
       .catch((e) => { if (live) setBlocked(e.message || 'Biodata editing is not available for this account.'); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [token]);
+  }, [token, activeId]);
   useEffect(() => load(), [load]);
 
   const setF = (k, v) => setForm((s) => ({ ...s, [k]: v }));
@@ -77,8 +82,9 @@ export default function MyBiodataStudio() {
   const save = async (extra = {}) => {
     setSaving(true);
     try {
-      const data = await api.updateMyBiodata(token, { ...form, preferences: prefs, ...extra });
+      const data = await api.updateMyBiodata(token, { ...form, preferences: prefs, ...extra }, activeId);
       setProfile((p) => ({ ...p, ...data.profile }));
+      reload().catch(() => { /* the switcher keeps its previous copy */ });
       // Publishing turns pool sharing on server-side; mirror the saved flags
       // back into the form so the next "Save changes" doesn't undo it.
       setForm((s) => ({

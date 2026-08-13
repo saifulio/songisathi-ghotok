@@ -12,6 +12,7 @@ import Onboarding from './Onboarding/Onboarding.jsx';
 import GuardianCandidate from './GuardianCandidate/GuardianCandidate.jsx';
 import Commission from './Commission/Commission.jsx';
 import AdminModeration from './AdminModeration/AdminModeration.jsx';
+import MyAddProfile from './MyAddProfile/MyAddProfile.jsx';
 import MySearch from './MySearch/MySearch.jsx';
 import MyBiodataStudio from './MyBiodataStudio/MyBiodataStudio.jsx';
 import MyMatches from './MyMatches/MyMatches.jsx';
@@ -27,6 +28,7 @@ const ELEMENTS = {
   '/commission': <Commission />,
   '/onboarding': <Onboarding />,
   '/guardian': <GuardianCandidate />,
+  '/my-add-profile': <MyAddProfile />,
   '/my-search': <MySearch />,
   '/my-biodata': <MyBiodataStudio />,
   '/my-matches': <MyMatches />,

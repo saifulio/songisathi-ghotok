@@ -27,6 +27,10 @@ export const NAV_GROUPS = [
     items: [
       { path: '/onboarding', label: 'Onboarding & pricing', public: true },
       { path: '/guardian', label: 'Guardian & candidate', roles: ['GUARDIAN', 'CANDIDATE'] },
+      // A guardian matchmakes for their own family — up to five profiles, one
+      // per person. A candidate's single profile is created at signup, so the
+      // page has nothing to offer them.
+      { path: '/my-add-profile', label: 'Add a profile', roles: ['GUARDIAN'] },
       // Every candidate can look: browse the pool, read their own profile, and
       // see their scored matches, whether their biodata is self-managed or run
       // by a ghotok or guardian. Acting on what they see is the part that stays

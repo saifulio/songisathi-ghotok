@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Badge } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
 import './MyMatches.css';
 
@@ -8,6 +9,8 @@ const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w
 
 export default function MyMatches() {
   const { user, token } = useAuth();
+  // Matches are scored against one profile — the one the switcher is on.
+  const { activeId } = useMyProfiles();
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [blocked, setBlocked] = useState(null);
@@ -24,7 +27,8 @@ export default function MyMatches() {
   useEffect(() => {
     if (!token) return undefined;
     let live = true;
-    api.myMatches(token)
+    setLoading(true);
+    api.myMatches(token, activeId)
       .then((data) => {
         if (!live) return;
         setMatches(data.matches);
@@ -34,11 +38,11 @@ export default function MyMatches() {
       .catch((e) => { if (live) setBlocked(e.message || 'Matching is not available for this account.'); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [token]);
+  }, [token, activeId]);
 
   const express = async (m) => {
     try {
-      await api.sendInterest(token, m.profileId);
+      await api.sendInterest(token, m.profileId, undefined, activeId);
       setDecision((d) => ({ ...d, [m.profileId]: 'sent' }));
       say(`Interest sent to ${m.name}. They decide whether to accept it.`);
     } catch (e) {

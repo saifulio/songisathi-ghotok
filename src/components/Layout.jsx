@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { NAV_GROUPS } from '../nav.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import ProfileSwitcher from './ProfileSwitcher.jsx';
 import './Layout.css';
 
 const ROLE_LABEL = { GHOTOK: 'Matchmaker', GUARDIAN: 'Guardian', CANDIDATE: 'Member', ADMIN: 'Admin' };
@@ -90,6 +91,9 @@ export default function Layout({ children }) {
       </header>
 
       {open && <div className="ss-scrim" onClick={() => setOpen(false)} />}
+
+      {/* Renders itself away for everyone but a guardian — see ProfileSwitcher. */}
+      <ProfileSwitcher />
 
       <main className="ss-content">{children}</main>
     </div>

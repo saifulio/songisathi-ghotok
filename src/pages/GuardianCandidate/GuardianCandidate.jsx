@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Badge } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
 import './GuardianCandidate.css';
 
@@ -26,6 +27,9 @@ const CANNOT = ['Search or browse other profiles', 'Message another family direc
 
 export default function GuardianCandidate() {
   const { user, token } = useAuth();
+  // Which family member this page is about — a guardian switches between
+  // several from the bar above (see ProfileSwitcher).
+  const { activeId } = useMyProfiles();
   const role = user?.role; // 'GUARDIAN' | 'CANDIDATE'
   const [profile, setProfile] = useState(null);
   const [selfManaged, setSelfManaged] = useState(false);
@@ -44,7 +48,8 @@ export default function GuardianCandidate() {
   useEffect(() => {
     if (!token) return undefined;
     let live = true;
-    Promise.all([api.myProfile(token), api.myProposals(token), api.myActivity(token)])
+    setLoading(true);
+    Promise.all([api.myProfile(token, activeId), api.myProposals(token, activeId), api.myActivity(token, activeId)])
       .then(([p, props, act]) => {
         if (!live) return;
         setProfile(p.profile);
@@ -55,7 +60,7 @@ export default function GuardianCandidate() {
       .catch((e) => say(e.message || 'Could not load your proposals.'))
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [token, say]);
+  }, [token, activeId, say]);
 
   // A proposal's photo unlocks once a photo request naming the same
   // candidate has been accepted — derived from real data, not a single
@@ -77,7 +82,7 @@ export default function GuardianCandidate() {
     const prev = proposals;
     setProposals((list) => list.map((x) => (x.id === id ? { ...x, status: localStatus } : x)));
     try {
-      await api.decideProposal(token, id, { decision: apiDecision });
+      await api.decideProposal(token, id, { decision: apiDecision }, activeId);
       say(successMsg);
     } catch (e) {
       setProposals(prev);
@@ -106,7 +111,12 @@ export default function GuardianCandidate() {
                 <div className="gc-h-sub">Proposals routed to your family's profile. Nothing moves without your word.</div>
               </div>
               {loading && <div className="gc-proposal">Loading…</div>}
-              {!loading && !profile && <div className="gc-proposal">No profile is linked to your account yet.</div>}
+              {!loading && !profile && (
+                <div className="gc-proposal">
+                  No profile is linked to your account yet.{' '}
+                  <a className="gc-add-link" href="/my-add-profile">Add the family member you are matchmaking for</a> to start receiving proposals.
+                </div>
+              )}
               {!loading && profile && decisionable.length === 0 && <div className="gc-proposal">No proposals yet.</div>}
               {decisionable.map((p) => {
                 const d = displayStatus(p); const r = RES[d];

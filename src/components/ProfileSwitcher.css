@@ -1,0 +1,109 @@
+.ps {
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.ps-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px;
+  max-width: 1600px;
+  margin: 0 auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ps-inner::-webkit-scrollbar {
+  display: none;
+}
+.ps-label {
+  font-family: var(--font-sans-body);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex: none;
+}
+.ps-empty {
+  font-family: var(--font-sans-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.ps-chips {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+.ps-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 6px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-default);
+  background: var(--surface-card);
+  cursor: pointer;
+  font-family: var(--font-sans-body);
+  transition: border-color var(--duration-fast), background var(--duration-fast);
+}
+.ps-chip:hover {
+  background: var(--surface-card-alt);
+}
+.ps-chip.is-active {
+  border-color: var(--brand-primary);
+  background: var(--green-100);
+}
+.ps-chip-init {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--green-600);
+  color: var(--text-on-brand);
+  font-size: 10.5px;
+  font-weight: 700;
+  flex: none;
+}
+.ps-chip-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  text-align: left;
+}
+.ps-chip-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.ps-chip-meta {
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+.ps-add {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--font-sans-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--brand-primary);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1px dashed var(--green-300);
+  white-space: nowrap;
+}
+.ps-add:hover {
+  background: var(--green-100);
+  color: var(--brand-primary);
+}
+.ps-full {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--font-sans-body);
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}

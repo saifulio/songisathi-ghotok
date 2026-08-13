@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Pagination, RangeSlider } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
 import './MySearch.css';
 
@@ -11,6 +12,9 @@ const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w
 
 export default function MySearch() {
   const { user, token } = useAuth();
+  // Whose search this is: the profile the switcher is on. Every profile the
+  // account holds is left out of the results server-side.
+  const { activeId } = useMyProfiles();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [blocked, setBlocked] = useState(null);
@@ -33,7 +37,8 @@ export default function MySearch() {
   useEffect(() => {
     if (!token) return undefined;
     let live = true;
-    api.mySearch(token)
+    setLoading(true);
+    api.mySearch(token, activeId)
       .then((data) => {
         if (!live) return;
         setResults(data.profiles);
@@ -44,7 +49,7 @@ export default function MySearch() {
       .catch((e) => { if (live) setBlocked(e.message || 'Search is not available for this account.'); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [token]);
+  }, [token, activeId]);
 
   const matches = (r) => {
     if (ff.gender !== 'Any' && r.gender !== ff.gender) return false;
@@ -88,7 +93,7 @@ export default function MySearch() {
   const sendInterest = async () => {
     const id = sel.id;
     try {
-      await api.sendInterest(token, id);
+      await api.sendInterest(token, id, undefined, activeId);
       setSent((s) => ({ ...s, [id]: true }));
       say(`Interest sent to ${sel.managedBy}. They decide whether to accept it.`);
     } catch (e) {
