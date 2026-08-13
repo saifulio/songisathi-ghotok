@@ -84,7 +84,10 @@ export const api = {
   updateMyBiodata: (token, patch, profileId) => request('/my-profile/biodata', { method: 'PATCH', body: { ...patch, profileId }, token }),
   mySearch: (token, profileId) => request(forProfile('/my-search', profileId), { token }),
   myMatches: (token, profileId) => request(forProfile('/my-matches', profileId), { token }),
-  sendInterest: (token, targetProfileId, message, profileId) => request('/interests', { method: 'POST', body: { targetProfileId, message, profileId }, token }),
+  // Sent by whoever manages the profile being put forward: a member names it
+  // with profileId (or lets the server take their first), a ghotok names one
+  // of their book with fromProfileId.
+  sendInterest: (token, payload) => request('/interests', { method: 'POST', body: payload, token }),
 
   // Email verification
   verifyEmail: (token) => request('/auth/verify-email', { method: 'POST', body: { token } }),

@@ -42,7 +42,7 @@ export default function MyMatches() {
 
   const express = async (m) => {
     try {
-      await api.sendInterest(token, m.profileId, undefined, activeId);
+      await api.sendInterest(token, { targetProfileId: m.profileId, profileId: activeId });
       setDecision((d) => ({ ...d, [m.profileId]: 'sent' }));
       say(`Interest sent to ${m.name}. They decide whether to accept it.`);
     } catch (e) {

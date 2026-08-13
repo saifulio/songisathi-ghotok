@@ -5,6 +5,7 @@ import { query, queryOne } from '../../db/pool.js';
 import { EMAIL_TOKEN_TTL_MS } from '../config.js';
 import { makeToken } from './tokens.js';
 import { capFirst } from './format.js';
+import { bad } from './http.js';
 import { sendVerificationEmail } from '../mailer.js';
 
 export const publicUser = (user, extra = {}) => ({
@@ -102,3 +103,26 @@ export const profileContext = (req, profile) => ({
 // Already capitalised: each use starts a sentence.
 export const managerSubject = (profile) =>
   capFirst(profile.managerType === 'GHOTOK' ? 'your matchmaker' : 'your guardian');
+
+// Whether a member account may act on its profile, not merely read it: a
+// guardian always decides for the profiles they manage, a candidate only when
+// their own profile is self-managed.
+export const hasStanding = (req, me) => req.auth.role !== 'CANDIDATE' || me.selfManaged;
+
+// The profile a member route is acting for. Returns null once it has already
+// replied, so callers just `if (!me) return;`. `refusal` completes the
+// sentence "Your matchmaker …" / "Your guardian …". Lives here rather than in
+// routes/me.js because sending an interest — which either a member or a ghotok
+// may do — needs the same answer.
+export function actingProfile(req, res, refusal) {
+  const me = req.me;
+  if (!me) {
+    bad(res, 'No profile is linked to this account.', 403);
+    return null;
+  }
+  if (!hasStanding(req, me)) {
+    bad(res, `${managerSubject(me.profile)} ${refusal}`, 403);
+    return null;
+  }
+  return me;
+}

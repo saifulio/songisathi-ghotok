@@ -17,7 +17,7 @@ import express from 'express';
 import { query, queryOne, withTransaction, insert } from '../../db/pool.js';
 import { bad } from '../lib/http.js';
 import { STATUS_LABEL, initialsOf, yearsSince, relativeTime } from '../lib/format.js';
-import { GUARDIAN_PROFILE_LIMIT, managerSubject } from '../lib/accounts.js';
+import { GUARDIAN_PROFILE_LIMIT, actingProfile, hasStanding } from '../lib/accounts.js';
 import { INTEREST_SELECT, interestItem, interestById } from '../lib/interests.js';
 import {
   POOL_PROFILE_SELECT, preferencesFor, searchProfile, markPairInDiscussion,
@@ -28,9 +28,6 @@ import { memberOnly } from '../middleware.js';
 
 const router = express.Router();
 
-// Whether this account may act (not just look) on its profile.
-const hasStanding = (req, me) => req.auth.role !== 'CANDIDATE' || me.selfManaged;
-
 const oppositeGender = (g) => (g === 'MALE' ? 'FEMALE' : 'MALE');
 
 // The genders this account has any reason to browse: the opposite of each
@@ -39,22 +36,6 @@ const oppositeGender = (g) => (g === 'MALE' ? 'FEMALE' : 'MALE');
 // filter opens rather than guessing at one of them. A candidate holds a single
 // profile, so this is the one gender opposite their own, as it always was.
 const gendersToBrowse = (profiles) => [...new Set(profiles.map((p) => oppositeGender(p.gender)))];
-
-// The profile context for a route that acts. Returns null once it has already
-// replied, so callers just `if (!me) return;`. `refusal` completes the
-// sentence "Your matchmaker …" / "Your guardian …".
-function actingProfile(req, res, refusal) {
-  const me = req.me;
-  if (!me) {
-    bad(res, 'No profile is linked to this account.', 403);
-    return null;
-  }
-  if (!hasStanding(req, me)) {
-    bad(res, `${managerSubject(me.profile)} ${refusal}`, 403);
-    return null;
-  }
-  return me;
-}
 
 // Fields a guardian / self-managed candidate may edit on their own biodata.
 // Identity basics (name, gender, dob, district) are set when the profile is
@@ -227,48 +208,8 @@ router.patch('/my-profile/proposals/:id', memberOnly, async (req, res) => {
   return res.json({ proposal: await interestById(interest.id) });
 });
 
-// ── send interest (guardian / self-managed candidate) ──
-// body: { targetProfileId, message? }
-router.post('/interests', memberOnly, async (req, res) => {
-  const me = actingProfile(req, res, 'sends interest on your behalf.');
-  if (!me) return;
-
-  const targetProfileId = Number(req.body?.targetProfileId);
-  if (!targetProfileId) return bad(res, 'targetProfileId is required.');
-  // Not your own, and not another of the profiles you hold — a guardian
-  // matchmaking for two family members cannot introduce them to each other.
-  if (req.myProfiles.some((p) => p.id === targetProfileId)) {
-    return bad(res, 'You cannot send interest to a profile you manage yourself.');
-  }
-  const target = await queryOne('SELECT id FROM profiles WHERE id = ? LIMIT 1', [targetProfileId]);
-  if (!target) return bad(res, 'Profile not found.', 404);
-
-  const already = await queryOne(
-    "SELECT id FROM interests WHERE theirProfileId = ? AND yourProfileId = ? AND kind = 'INTEREST' AND status = 'PENDING' LIMIT 1",
-    [me.profile.id, targetProfileId]
-  );
-  if (already) return bad(res, 'Interest already sent and awaiting a reply.', 409);
-
-  const message = String(req.body?.message || '').trim() || null;
-  let fromGuardianId = null;
-  let fromLabel;
-  if (req.auth.role === 'GUARDIAN') {
-    if (!req.guardian) return bad(res, 'No guardian profile is linked to this account.', 403);
-    fromGuardianId = req.guardian.id;
-    const guardianUser = await queryOne('SELECT fullName FROM users WHERE id = ?', [req.auth.sub]);
-    fromLabel = `Guardian — ${guardianUser?.fullName || ''}`.trim();
-  } else {
-    fromLabel = `${me.profile.fullName} (self)`;
-  }
-
-  const newId = await withTransaction((tx) => insert(
-    tx,
-    `INSERT INTO interests (kind, fromGhotokId, fromGuardianId, fromLabel, theirProfileId, yourProfileId, status, message)
-     VALUES ('INTEREST', NULL, ?, ?, ?, ?, 'PENDING', ?)`,
-    [fromGuardianId, fromLabel, me.profile.id, targetProfileId, message]
-  ));
-  return res.status(201).json({ interest: await interestById(newId) });
-});
+// Sending an interest lives in routes/interests.js: a ghotok does it too, and
+// there is one act to implement rather than one per chair.
 
 // ── search: the pool visible to a guardian / candidate ──
 // Same visibility rule as the ghotok's search (inNetworkPool = 1), minus the

@@ -62,3 +62,12 @@ export const ghotokOnly = [requireAuth, requireRole('GHOTOK'), loadGhotok];
 export const adminOnly = [requireAuth, requireRole('ADMIN')];
 // A guardian, or the bride/groom themselves — see loadMyProfiles.
 export const memberOnly = [requireAuth, requireRole('GUARDIAN', 'CANDIDATE'), loadMyProfiles];
+
+// Anyone who manages a profile, with whatever their side needs loaded: a
+// ghotok gets req.ghotok, a member gets req.myProfiles and req.me. For the
+// routes both chairs use — sending an interest is the same act from either.
+export const managerOnly = [
+  requireAuth,
+  requireRole('GHOTOK', 'GUARDIAN', 'CANDIDATE'),
+  (req, res, next) => (req.auth.role === 'GHOTOK' ? loadGhotok(req, res, next) : loadMyProfiles(req, res, next)),
+];

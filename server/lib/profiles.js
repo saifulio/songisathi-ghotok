@@ -115,6 +115,10 @@ export function searchProfile(r, myGhotokId, prefLabels) {
     dcode: r.district,
     verified: Boolean(r.verified),
     screened: Number(r.sealedCount) > 0,
+    // Only ever ACTIVE for a member (their pool query says so); a ghotok also
+    // sees their own book's other states, which decide whether a candidate can
+    // still be put forward.
+    status: r.status,
     mine,
     managedBy,
     mgrMeta,

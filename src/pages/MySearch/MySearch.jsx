@@ -111,7 +111,7 @@ export default function MySearch() {
   const sendInterest = async () => {
     const id = sel.id;
     try {
-      await api.sendInterest(token, id, undefined, activeId);
+      await api.sendInterest(token, { targetProfileId: id, profileId: activeId });
       setSent((s) => ({ ...s, [id]: true }));
       say(`Interest sent to ${sel.managedBy}. They decide whether to accept it.`);
     } catch (e) {

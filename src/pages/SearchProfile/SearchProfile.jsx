@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Dialog, Pagination, RangeSlider } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
@@ -25,16 +25,19 @@ export default function SearchProfile() {
   const [selected, setSelected] = useState(null);
   const [ff, setFf] = useState(DEFAULT_FF);
   const [interest, setInterest] = useState({});
+  // Which of the ghotok's own candidates an interest goes out on behalf of.
+  // A ghotok holds a book, so unlike a family they have to say which one.
+  const [onBehalfOf, setOnBehalfOf] = useState('');
   const [photoReq, setPhotoReq] = useState({});
   const [released, setReleased] = useState({});
   const [dialog, setDialog] = useState(null);
   const [page, setPage] = useState(1);
   const [toast, setToast] = useState(null);
-  const timer = useRef(null), iTimer = useRef(null), pTimer = useRef(null);
+  const timer = useRef(null), pTimer = useRef(null);
   const cardsRef = useRef(null);
 
   const say = useCallback((msg) => { clearTimeout(timer.current); setToast(msg); timer.current = setTimeout(() => setToast(null), 4400); }, []);
-  useEffect(() => () => { clearTimeout(timer.current); clearTimeout(iTimer.current); clearTimeout(pTimer.current); }, []);
+  useEffect(() => () => { clearTimeout(timer.current); clearTimeout(pTimer.current); }, []);
   const setFF = (k, v) => setFf((s) => ({ ...s, [k]: v }));
 
   // Load the ghotok's book + the trusted-network pool once; all filtering
@@ -105,12 +108,33 @@ export default function SearchProfile() {
       ? { title: 'Contact not yet released', body: 'Interest was accepted. Releasing contact details is a separate, deliberate step — it cannot be undone, and both managers must agree.', bd: 'var(--gold-300)', bg: 'var(--gold-100)', fg: 'var(--gold-700)', icon: 'var(--gold-600)' }
       : { title: 'Contact details are hidden', body: 'Phone numbers and addresses stay sealed until interest is accepted and both managers release them. No exceptions, no paid unlock.', bd: 'var(--border-subtle)', bg: 'var(--surface-page)', fg: 'var(--text-primary)', icon: 'var(--text-secondary)' };
 
-  const sendInterest = () => {
+  // Candidates of this ghotok's own who could be put forward to the profile in
+  // the panel: theirs, still looking, and on the other side of the match.
+  const myCandidates = useMemo(() => results.filter((r) => r.mine && r.status !== 'MARRIED'), [results]);
+  const eligible = useMemo(
+    () => (sel ? myCandidates.filter((c) => c.gender !== sel.gender) : []),
+    [myCandidates, sel]
+  );
+  // Keep the picker on a candidate that still fits whatever profile is open.
+  useEffect(() => {
+    setOnBehalfOf((cur) => (eligible.some((c) => String(c.id) === cur) ? cur : String(eligible[0]?.id ?? '')));
+  }, [eligible]);
+
+  const sendInterest = async () => {
     const id = sel.id;
-    setInterest((st) => ({ ...st, [id]: 'sent' }));
-    say(`Interest sent to ${sel.managedBy} on behalf of your candidate. They decide whether to show it to the family.`);
-    clearTimeout(iTimer.current);
-    iTimer.current = setTimeout(() => { setInterest((st) => ({ ...st, [id]: 'accepted' })); say(`${sel.mgrMeta.split(' ')[0]} accepted the interest. Contact details still need a separate release.`); }, 2800);
+    const fromProfileId = Number(onBehalfOf);
+    if (!fromProfileId) return;
+    setInterest((st) => ({ ...st, [id]: 'sending' }));
+    try {
+      const { interest: created } = await api.sendInterest(token, { targetProfileId: id, fromProfileId });
+      // The server's status, not an assumption: it stays pending until the
+      // manager on the other side decides, in their own inbox.
+      setInterest((st) => ({ ...st, [id]: created.status }));
+      say(`Interest sent to ${sel.managedBy} on behalf of ${created.theirName}. They decide whether to show it to the family.`);
+    } catch (e) {
+      setInterest((st) => { const n = { ...st }; delete n[id]; return n; });
+      say(e.message || 'Could not send interest.');
+    }
   };
 
   const dlg = dialog === 'release'
@@ -286,8 +310,24 @@ export default function SearchProfile() {
               </div>
 
               <div className="sp-panel-actions">
-                {!iState && <Button variant="primary" style={{ width: '100%' }} onClick={sendInterest}>আগ্রহ পাঠান · Send interest</Button>}
-                {iState === 'sent' && <div className="sp-interest-sent">Interest sent — awaiting {sel.managedBy.split(' ')[0]}’s reply</div>}
+                {!iState && (eligible.length ? (
+                  <>
+                    <Select
+                      label="On behalf of"
+                      value={onBehalfOf}
+                      onChange={(e) => setOnBehalfOf(e.target.value)}
+                      options={eligible.map((c) => ({ value: String(c.id), label: `${c.name}${c.prn ? ` · ${c.prn}` : ''}` }))}
+                    />
+                    <Button variant="primary" style={{ width: '100%' }} onClick={sendInterest}>আগ্রহ পাঠান · Send interest</Button>
+                  </>
+                ) : (
+                  <div className="sp-interest-none">
+                    You have no {sel.gender === 'FEMALE' ? 'groom' : 'bride'} of your own to put forward. Interest goes out on behalf of one of your candidates.
+                  </div>
+                ))}
+                {iState === 'sending' && <div className="sp-interest-sent">Sending…</div>}
+                {iState === 'pending' && <div className="sp-interest-sent">Interest sent — awaiting {sel.managedBy.split(' ')[0]}’s reply</div>}
+                {iState === 'declined' && <div className="sp-interest-none">Declined — {sel.managedBy.split(' ')[0]} was not able to take it further.</div>}
                 {iState === 'accepted' && !isReleased && <Button variant="primary" style={{ width: '100%' }} onClick={() => setDialog('release')}>Release contact details</Button>}
                 <div className="sp-panel-actions-row">
                   <Button variant="outline" style={{ flex: 1 }} onClick={() => { if (pState !== 'granted') setDialog('photo'); else say('Photo already released for this request.'); }}>{photoBtnLabel}</Button>

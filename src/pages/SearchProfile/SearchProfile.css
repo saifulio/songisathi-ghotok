@@ -76,6 +76,8 @@
 .sp-panel-actions { margin-top: auto; border-top: 1px solid var(--border-subtle); padding: 14px 18px; display: flex; flex-direction: column; gap: 9px; }
 .sp-panel-actions-row { display: flex; gap: 9px; }
 .sp-interest-sent { padding: 11px; border-radius: 12px; background: var(--green-100); text-align: center; font-size: 12px; font-weight: 600; color: var(--brand-primary); }
+/* Why no send button is on offer: nothing of yours fits this side of the match. */
+.sp-interest-none { padding: 11px; border-radius: 12px; background: var(--surface-card-alt); font-size: 11.5px; line-height: 1.55; color: var(--text-secondary); }
 
 .sp-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 90; display: flex; align-items: center; gap: 11px; padding: 13px 18px; border-radius: 12px; background: var(--text-primary); box-shadow: var(--shadow-3); max-width: min(560px, calc(100vw - 32px)); animation: ss-fade 0.2s var(--ease-out); }
 .sp-toast-check { width: 24px; height: 24px; flex: none; border-radius: 50%; background: rgba(253, 251, 246, 0.14); display: grid; place-items: center; color: var(--gold-400); font-size: 12px; font-weight: 700; }
