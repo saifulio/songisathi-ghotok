@@ -41,6 +41,9 @@ export const NAV_GROUPS = [
       { path: '/my-search', label: 'Search & profiles', roles: ['GUARDIAN', 'CANDIDATE'] },
       { path: '/my-biodata', label: 'Biodata studio', roles: ['GUARDIAN', 'CANDIDATE'] },
       { path: '/my-matches', label: 'AI matching', roles: ['GUARDIAN', 'CANDIDATE'] },
+      // The plan is on the account, so every member account has one to read —
+      // including a candidate whose biodata someone else manages.
+      { path: '/membership', label: 'Membership', roles: ['GUARDIAN', 'CANDIDATE'] },
       // The same page as the ghotok's Messages above: both sides of a match
       // are managers, and they are talking to each other. Listed in both
       // groups so each audience finds it where they already look; the router

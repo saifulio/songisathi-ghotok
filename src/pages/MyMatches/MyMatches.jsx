@@ -17,6 +17,10 @@ export default function MyMatches() {
   // A managed candidate reads the same scoring but can't act on it — their
   // ghotok or guardian expresses interest (see my-matches / POST /api/interests).
   const [canSendInterest, setCanSendInterest] = useState(true);
+  // How far down the list this account's plan reaches. The matches beyond it
+  // are never sent, so this is a count, not hidden cards.
+  const [locked, setLocked] = useState(0);
+  const [plan, setPlan] = useState(null);
   const [open, setOpen] = useState(null);
   const [decision, setDecision] = useState({});
   const [toast, setToast] = useState(null);
@@ -32,6 +36,8 @@ export default function MyMatches() {
       .then((data) => {
         if (!live) return;
         setMatches(data.matches);
+        setLocked(data.lockedCount || 0);
+        setPlan(data.plan || null);
         setCanSendInterest(data.canSendInterest !== false);
         setOpen((cur) => cur ?? data.matches[0]?.profileId ?? null);
       })
@@ -127,6 +133,19 @@ export default function MyMatches() {
                 </div>
               );
             })}
+
+            {!loading && locked > 0 && (
+              <div className="mm-locked">
+                <div className="mm-locked-t">
+                  {locked} more scored {locked === 1 ? 'match is' : 'matches are'} waiting on this profile
+                </div>
+                <div className="mm-locked-b">
+                  A free account reads its top {plan?.matchLimit ?? 3}. Premium opens the whole shortlist, with the
+                  reasoning behind each — and lifts the {plan?.interestLimit ?? 3}-a-month limit on interests you send.
+                </div>
+                <a className="mm-locked-link" href="/membership">See what Premium costs</a>
+              </div>
+            )}
           </div>
         </div>
       </div>

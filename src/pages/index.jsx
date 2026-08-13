@@ -17,6 +17,7 @@ import MyAddProfile from './MyAddProfile/MyAddProfile.jsx';
 import MySearch from './MySearch/MySearch.jsx';
 import MyBiodataStudio from './MyBiodataStudio/MyBiodataStudio.jsx';
 import MyMatches from './MyMatches/MyMatches.jsx';
+import Membership from './Membership/Membership.jsx';
 import { NAV_GROUPS } from '../nav.js';
 
 const ELEMENTS = {
@@ -34,6 +35,7 @@ const ELEMENTS = {
   '/my-search': <MySearch />,
   '/my-biodata': <MyBiodataStudio />,
   '/my-matches': <MyMatches />,
+  '/membership': <Membership />,
   '/admin': <AdminModeration />,
 };
 

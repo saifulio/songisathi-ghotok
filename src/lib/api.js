@@ -89,6 +89,12 @@ export const api = {
   // of their book with fromProfileId.
   sendInterest: (token, payload) => request('/interests', { method: 'POST', body: payload, token }),
 
+  // Membership — the family side of billing. The plan lives on the account,
+  // not on a profile, so none of these name one.
+  plans: (token, audience) => request(audience ? `/plans?audience=${audience}` : '/plans', { token }),
+  myPlan: (token) => request('/my-plan', { token }),
+  submitMyPlanPayment: (token, payload) => request('/my-plan/payments', { method: 'POST', body: payload, token }),
+
   // Manager-to-manager messages
   conversations: (token) => request('/conversations', { token }),
   conversation: (token, id) => request(`/conversations/${id}`, { token }),

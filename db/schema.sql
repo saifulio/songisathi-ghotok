@@ -271,27 +271,66 @@ CREATE TABLE IF NOT EXISTS `marriages` (
     CONSTRAINT `marriages_ghotokId_fkey` FOREIGN KEY (`ghotokId`) REFERENCES `ghotoks`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- One row per subscription payment, from either audience the platform bills:
+-- a matchmaker upgrading their plan (ghotokId), or a family buying Premium on
+-- their own account (userId). Exactly one of the two is set — the payer is
+-- whoever the row names, and CHK_payments_payer is what keeps it to one.
+-- Both are matched against the merchant statement by hand in the admin queue,
+-- and confirming one is what grants the thing paid for.
 CREATE TABLE IF NOT EXISTS `payments` (
     `id`            INTEGER      NOT NULL AUTO_INCREMENT,
-    `ghotokId`      INTEGER      NOT NULL,
+    `ghotokId`      INTEGER      NULL,
+    `userId`        INTEGER      NULL,
     `transactionId` VARCHAR(191) NOT NULL,
     `method`        ENUM('BKASH', 'NAGAD', 'ROCKET') NOT NULL,
     `amount`        INTEGER      NOT NULL,
-    `tier`          ENUM('SOLO', 'BUREAU', 'AGENCY') NOT NULL,
+    `tier`          ENUM('SOLO', 'BUREAU', 'AGENCY', 'PREMIUM') NOT NULL,
+    `billing`       ENUM('MONTHLY', 'ANNUAL') NOT NULL DEFAULT 'MONTHLY',
     `status`        ENUM('PENDING', 'CONFIRMED', 'FLAGGED') NOT NULL DEFAULT 'PENDING',
     `paidAt`        DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `createdAt`     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `payments_transactionId_key`(`transactionId`),
     INDEX `payments_ghotokId_idx`(`ghotokId`),
+    INDEX `payments_userId_idx`(`userId`),
     INDEX `payments_status_idx`(`status`),
     PRIMARY KEY (`id`),
-    CONSTRAINT `payments_ghotokId_fkey` FOREIGN KEY (`ghotokId`) REFERENCES `ghotoks`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT `payments_ghotokId_fkey` FOREIGN KEY (`ghotokId`) REFERENCES `ghotoks`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `payments_userId_fkey`   FOREIGN KEY (`userId`)   REFERENCES `users`(`id`)   ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `CHK_payments_payer` CHECK ((`ghotokId` IS NULL) <> (`userId` IS NULL))
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- What a family's Premium subscription entitles them to, and until when.
+-- No row means the free plan — that is the default every member account
+-- starts on, so it is an absence rather than a row we have to write at signup.
+-- `status` is set by the admin queue; `expiresAt` is what the API actually
+-- reads, so a lapsed subscription falls back to free without a nightly job.
+CREATE TABLE IF NOT EXISTS `member_subscriptions` (
+    `id`         INTEGER     NOT NULL AUTO_INCREMENT,
+    `userId`     INTEGER     NOT NULL,
+    `tier`       ENUM('PREMIUM') NOT NULL DEFAULT 'PREMIUM',
+    `billing`    ENUM('MONTHLY', 'ANNUAL') NOT NULL DEFAULT 'MONTHLY',
+    `status`     ENUM('ACTIVE', 'CANCELLED') NOT NULL DEFAULT 'ACTIVE',
+    `startedAt`  DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `expiresAt`  DATETIME(3) NOT NULL,
+    `paymentId`  INTEGER     NULL,
+    `createdAt`  DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt`  DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `member_subscriptions_userId_key`(`userId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `member_subscriptions_userId_fkey`    FOREIGN KEY (`userId`)    REFERENCES `users`(`id`)    ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `member_subscriptions_paymentId_fkey` FOREIGN KEY (`paymentId`) REFERENCES `payments`(`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- The published price list, for both audiences. `audience` says whose plan a
+-- row is: GHOTOK rows carry the matchmaker tiers (and their active-profile
+-- limit), the MEMBER row is Premium for a family. profileLimit is 0 on a
+-- member row — what Premium lifts is the monthly interest cap, not a book.
 CREATE TABLE IF NOT EXISTS `pricing_tiers` (
     `id`           INTEGER      NOT NULL AUTO_INCREMENT,
-    `code`         ENUM('SOLO', 'BUREAU', 'AGENCY') NOT NULL,
+    `audience`     ENUM('GHOTOK', 'MEMBER') NOT NULL DEFAULT 'GHOTOK',
+    `code`         ENUM('SOLO', 'BUREAU', 'AGENCY', 'PREMIUM') NOT NULL,
     `nameEn`       VARCHAR(191) NOT NULL,
     `nameBn`       VARCHAR(191) NOT NULL,
     `monthlyPrice` INTEGER      NOT NULL,

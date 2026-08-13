@@ -39,6 +39,12 @@
 .mm-pair-actions { display: flex; gap: 9px; }
 .mm-pair-res { font-size: 12px; font-weight: 600; color: var(--brand-primary); }
 
+/* What the free plan is holding back — a count and a price, not a blurred card. */
+.mm-locked { background: var(--gold-100); border: 1px solid var(--gold-300); border-radius: 14px; padding: 16px; }
+.mm-locked-t { font-family: var(--font-serif-display); font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.mm-locked-b { font-size: 12px; line-height: 1.6; color: var(--text-secondary); margin-top: 6px; }
+.mm-locked-link { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 600; color: var(--brand-primary); }
+
 .mm-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 90; display: flex; align-items: center; gap: 11px; padding: 13px 18px; border-radius: 12px; background: var(--text-primary); box-shadow: var(--shadow-3); max-width: min(560px, calc(100vw - 32px)); }
 .mm-toast-check { width: 24px; height: 24px; flex: none; border-radius: 50%; background: rgba(253, 251, 246, 0.14); display: grid; place-items: center; color: var(--gold-400); font-size: 12px; font-weight: 700; }
 .mm-toast span:last-child { font-size: 12.5px; line-height: 1.45; color: var(--surface-card); }

@@ -13,7 +13,7 @@ const dobFromAge = (age) => new Date(Date.UTC(2026 - age, 0, 1));
 async function clearAll(tx) {
   const order = [
     'activity_log', 'testimonials', 'report_evidence', 'reports',
-    'verification_checks', 'verifications', 'payments', 'marriages',
+    'verification_checks', 'verifications', 'member_subscriptions', 'payments', 'marriages',
     'match_factors', 'match_suggestions', 'interests', 'screening_responses',
     'screening_options', 'screening_questions', 'profile_preferences',
     'profiles', 'guardians', 'ghotoks', 'pricing_tiers',
@@ -31,13 +31,16 @@ async function main() {
 
     // ── pricing tiers ──
     console.log('Seeding pricing tiers…');
+    // The matchmaker tiers, and the one plan a family can buy. A member's free
+    // plan has no row — it is what an account has when it has bought nothing.
     const tiers = [
-      ['SOLO', 'Solo', 'একক ঘটক', 1200, 960, 20],
-      ['BUREAU', 'Bureau', 'ব্যুরো', 2500, 2000, 50],
-      ['AGENCY', 'Agency', 'এজেন্সি', 5000, 4000, 150],
+      ['GHOTOK', 'SOLO', 'Solo', 'একক ঘটক', 1200, 960, 20],
+      ['GHOTOK', 'BUREAU', 'Bureau', 'ব্যুরো', 2500, 2000, 50],
+      ['GHOTOK', 'AGENCY', 'Agency', 'এজেন্সি', 5000, 4000, 150],
+      ['MEMBER', 'PREMIUM', 'Premium', 'প্রিমিয়াম', 500, 400, 0],
     ];
     for (const t of tiers) {
-      await insert(tx, 'INSERT INTO pricing_tiers (code, nameEn, nameBn, monthlyPrice, annualPrice, profileLimit) VALUES (?, ?, ?, ?, ?, ?)', t);
+      await insert(tx, 'INSERT INTO pricing_tiers (audience, code, nameEn, nameBn, monthlyPrice, annualPrice, profileLimit) VALUES (?, ?, ?, ?, ?, ?, ?)', t);
     }
 
     // ── screening questions (the sealed layer) ──
@@ -430,15 +433,31 @@ async function main() {
     // ── platform subscription payments (admin match queue) ──
     console.log('Seeding payments…');
     const payments = [
-      [ghotokIdByCode['GHT-0311'], 'BKS8H2K91M', 'BKASH', 2000, 'BUREAU', 'PENDING'],
-      [ghotokIdByCode['GHT-0198'], 'NGD4472PLQ', 'NAGAD', 960, 'SOLO', 'PENDING'],
-      [ghotokIdByCode['GHT-0155'], 'BKS1120XZT', 'BKASH', 4000, 'AGENCY', 'PENDING'],
-      [ghotokIdByCode['GHT-0287'], 'BKS9910AAB', 'BKASH', 2000, 'BUREAU', 'PENDING'],
-      [ghotokIdByCode['GHT-0361'], 'RKT5567MNO', 'ROCKET', 960, 'SOLO', 'PENDING'],
+      [ghotokIdByCode['GHT-0311'], null, 'BKS8H2K91M', 'BKASH', 2000, 'BUREAU', 'ANNUAL', 'PENDING'],
+      [ghotokIdByCode['GHT-0198'], null, 'NGD4472PLQ', 'NAGAD', 960, 'SOLO', 'ANNUAL', 'PENDING'],
+      [ghotokIdByCode['GHT-0155'], null, 'BKS1120XZT', 'BKASH', 4000, 'AGENCY', 'ANNUAL', 'PENDING'],
+      [ghotokIdByCode['GHT-0287'], null, 'BKS9910AAB', 'BKASH', 2000, 'BUREAU', 'ANNUAL', 'PENDING'],
+      [ghotokIdByCode['GHT-0361'], null, 'RKT5567MNO', 'ROCKET', 960, 'SOLO', 'ANNUAL', 'PENDING'],
+      // A family's Premium, waiting on the same queue as the ghotok upgrades.
+      [null, tasnimUserId, 'BKS7781PRM', 'BKASH', 500, 'PREMIUM', 'MONTHLY', 'PENDING'],
     ];
     for (const p of payments) {
-      await insert(tx, 'INSERT INTO payments (ghotokId, transactionId, method, amount, tier, status) VALUES (?, ?, ?, ?, ?, ?)', p);
+      await insert(tx, 'INSERT INTO payments (ghotokId, userId, transactionId, method, amount, tier, billing, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', p);
     }
+
+    // ── an already-running member subscription ──
+    // Shirin's household is on Premium, so the free caps are visibly not the
+    // only state the member pages have to render.
+    const shirinPaymentId = await insert(
+      tx,
+      'INSERT INTO payments (ghotokId, userId, transactionId, method, amount, tier, billing, status, paidAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [null, shirinUserId, 'BKS5540ANN', 'BKASH', 4800, 'PREMIUM', 'ANNUAL', 'CONFIRMED', new Date(Date.UTC(2026, 4, 1))]
+    );
+    await insert(
+      tx,
+      'INSERT INTO member_subscriptions (userId, tier, billing, status, startedAt, expiresAt, paymentId) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [shirinUserId, 'PREMIUM', 'ANNUAL', 'ACTIVE', new Date(Date.UTC(2026, 4, 1)), new Date(Date.UTC(2027, 4, 1)), shirinPaymentId]
+    );
 
     // ── verification queue (admin) ──
     console.log('Seeding verifications…');
@@ -491,7 +510,7 @@ async function main() {
   });
 
   // ── summary ──
-  const tablesToCount = ['users', 'ghotoks', 'guardians', 'profiles', 'match_suggestions', 'interests', 'marriages', 'payments', 'reports', 'verifications'];
+  const tablesToCount = ['users', 'ghotoks', 'guardians', 'profiles', 'match_suggestions', 'interests', 'marriages', 'payments', 'member_subscriptions', 'reports', 'verifications'];
   const counts = {};
   for (const t of tablesToCount) {
     const [rows] = await pool.execute(`SELECT COUNT(*) AS n FROM \`${t}\``);

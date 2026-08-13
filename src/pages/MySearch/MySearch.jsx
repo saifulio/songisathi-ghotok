@@ -22,6 +22,9 @@ export default function MySearch() {
   // ghotok or guardian manages browses the same pool, but their manager is the
   // one who sends interest — the server is the source of truth (see my-search).
   const [canSendInterest, setCanSendInterest] = useState(true);
+  // The household's monthly interest allowance, so the send button says what
+  // it will spend before it is pressed.
+  const [plan, setPlan] = useState(null);
   const [q, setQ] = useState('');
   const [selected, setSelected] = useState(null);
   const [ff, setFf] = useState(DEFAULT_FF);
@@ -58,6 +61,7 @@ export default function MySearch() {
         setResults(data.profiles);
         setSearchGenders(wanted);
         setCanSendInterest(data.canSendInterest !== false);
+        setPlan(data.plan || null);
         if (!genderSeeded.current && wanted.length) {
           genderSeeded.current = true;
           setFf((s) => ({ ...s, gender: defaultGender }));
@@ -263,6 +267,14 @@ export default function MySearch() {
                   : !sent[sel.id]
                     ? <Button variant="primary" style={{ width: '100%' }} onClick={sendInterest}>আগ্রহ পাঠান · Send interest</Button>
                     : <div className="ms-interest-sent">Interest sent — awaiting their reply</div>}
+                {canSendInterest && plan && plan.interestLimit !== null && (
+                  <div className="ms-allowance">
+                    {plan.interestsLeft > 0
+                      ? `${plan.interestsLeft} of ${plan.interestLimit} interests left this month on your free plan.`
+                      : 'Your free interests for this month are spent — the allowance resets on the 1st.'}
+                    {' '}<a href="/membership">Premium sends as many as you need.</a>
+                  </div>
+                )}
               </div>
             </div>
           )}

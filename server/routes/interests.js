@@ -8,6 +8,7 @@ import { bad } from '../lib/http.js';
 import { actingProfile } from '../lib/accounts.js';
 import { INTEREST_SELECT, interestItem, interestById } from '../lib/interests.js';
 import { markPairInDiscussion } from '../lib/profiles.js';
+import { memberPlan } from '../lib/subscriptions.js';
 import { ghotokOnly, managerOnly } from '../middleware.js';
 
 const router = express.Router();
@@ -103,6 +104,23 @@ router.post('/interests', managerOnly, async (req, res) => {
     [from.profile.id, targetProfileId]
   );
   if (already) return bad(res, 'Interest already sent and awaiting a reply.', 409);
+
+  // The family side's monthly allowance. A free household sends
+  // MEMBER_FREE_INTEREST_LIMIT interests a calendar month; Premium lifts it.
+  // Checked here rather than in routes/me.js because this is the one place an
+  // interest is ever created, from either chair — and a ghotok is billed on
+  // their own plan, so they are not metered by this.
+  if (req.auth.role !== 'GHOTOK') {
+    const plan = await memberPlan(req.auth.sub, req.myProfiles.map((p) => p.id));
+    if (plan.interestLimit !== null && plan.interestsUsed >= plan.interestLimit) {
+      return bad(
+        res,
+        `A free account sends ${plan.interestLimit} interests a month, and yours are spent. `
+        + 'The allowance resets on the 1st, or Premium sends as many as you need.',
+        402
+      );
+    }
+  }
 
   const message = String(req.body?.message || '').trim() || null;
   const newId = await withTransaction((tx) => insert(

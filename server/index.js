@@ -19,6 +19,7 @@ import marriageRoutes from './routes/marriages.js';
 import adminRoutes from './routes/admin.js';
 import conversationRoutes from './routes/conversations.js';
 import meRoutes from './routes/me.js';
+import billingRoutes from './routes/billing.js';
 
 const app = express();
 app.use(cors());
@@ -38,6 +39,7 @@ app.use('/api', marriageRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', conversationRoutes);
 app.use('/api', meRoutes);
+app.use('/api', billingRoutes);
 
 // ── fallbacks ──
 // Any route not matched above.

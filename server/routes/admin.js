@@ -9,6 +9,7 @@ import { query, queryOne, withTransaction } from '../../db/pool.js';
 import { TIER_LIMIT } from '../config.js';
 import { bad } from '../lib/http.js';
 import { initialsOf, capWord, relativeTime } from '../lib/format.js';
+import { expiryFor } from '../lib/subscriptions.js';
 import { adminOnly } from '../middleware.js';
 
 const router = express.Router();
@@ -167,20 +168,30 @@ router.patch('/admin/reports/:id', adminOnly, async (req, res) => {
 router.get('/admin/payments', adminOnly, async (_req, res) => {
   const P_STATUS = { PENDING: null, CONFIRMED: 'confirmed', FLAGGED: 'flagged' };
   const METHOD_LABEL = { BKASH: 'bKash', NAGAD: 'Nagad', ROCKET: 'Rocket' };
+  // One queue, two payers: a matchmaker upgrading their tier, and a family
+  // buying Premium. The joins are LEFT so a row of either kind survives them,
+  // and the payer's name is whichever side the row names.
   const rows = await query(
-    `SELECT p.*, g.code AS gid, gu.fullName AS name
-       FROM payments p JOIN ghotoks g ON p.ghotokId = g.id JOIN users gu ON g.userId = gu.id
+    `SELECT p.*, g.code AS gid, gu.fullName AS ghotokName, mu.fullName AS memberName, mu.role AS memberRole
+       FROM payments p
+       LEFT JOIN ghotoks g  ON p.ghotokId = g.id
+       LEFT JOIN users   gu ON g.userId = gu.id
+       LEFT JOIN users   mu ON p.userId = mu.id
       ORDER BY p.paidAt DESC`
   );
   return res.json({
     payments: rows.map((p) => ({
       id: p.id,
-      name: p.name,
-      gid: p.gid,
+      name: p.ghotokName || p.memberName,
+      // The reference an admin matches by: a ghotok's code, or — for a family,
+      // who has none — what kind of account it was.
+      gid: p.gid || (p.memberRole === 'GUARDIAN' ? 'Guardian' : 'Candidate'),
+      payer: p.ghotokId ? 'ghotok' : 'member',
       txn: p.transactionId,
       method: METHOD_LABEL[p.method] || p.method,
       amount: `৳${Number(p.amount).toLocaleString('en-US')}`,
       tier: capWord(p.tier),
+      billing: capWord(p.billing),
       when: paymentWhen(p.paidAt),
       status: P_STATUS[p.status] ?? null,
     })),
@@ -196,8 +207,27 @@ router.patch('/admin/payments/:id', adminOnly, async (req, res) => {
 
   await withTransaction(async (tx) => {
     await tx.execute('UPDATE payments SET status = ? WHERE id = ?', [decision, p.id]);
-    if (decision === 'CONFIRMED') {
+    if (decision !== 'CONFIRMED') return;
+    if (p.ghotokId) {
+      // A matchmaker's plan is their active-profile limit.
       await tx.execute('UPDATE ghotoks SET tier = ?, activeProfileLimit = ? WHERE id = ?', [p.tier, TIER_LIMIT[p.tier] || 20, p.ghotokId]);
+      return;
+    }
+    // A family's Premium. Confirming while one is still running extends it
+    // from its own expiry rather than from today — the days already paid for
+    // are not thrown away (see expiryFor).
+    const current = await queryOne('SELECT * FROM member_subscriptions WHERE userId = ? LIMIT 1', [p.userId]);
+    const expiresAt = expiryFor(p.billing, current?.status === 'ACTIVE' ? current.expiresAt : null);
+    if (current) {
+      await tx.execute(
+        "UPDATE member_subscriptions SET tier = ?, billing = ?, status = 'ACTIVE', expiresAt = ?, paymentId = ? WHERE id = ?",
+        [p.tier, p.billing, expiresAt, p.id, current.id]
+      );
+    } else {
+      await tx.execute(
+        "INSERT INTO member_subscriptions (userId, tier, billing, status, expiresAt, paymentId) VALUES (?, ?, ?, 'ACTIVE', ?, ?)",
+        [p.userId, p.tier, p.billing, expiresAt, p.id]
+      );
     }
   });
   return res.json({ ok: true, status: decision });

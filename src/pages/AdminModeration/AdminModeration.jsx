@@ -225,20 +225,20 @@ export default function AdminModeration() {
               <div className="ad-pay-note">
                 <div>
                   <div className="ad-pay-note-t">Payments are matched by hand, on purpose</div>
-                  <div className="ad-pay-note-b">Ghotoks send to the merchant number and enter the transaction ID. A person confirms it against the bKash statement — no card details ever enter the product.</div>
+                  <div className="ad-pay-note-b">Ghotoks upgrading their tier and families taking Premium both send to the merchant number and enter the transaction ID. A person confirms it against the bKash statement — no card details ever enter the product.</div>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => say('Opening today’s bKash merchant statement — 12 incoming, 5 unmatched.')}>Open today’s statement</Button>
               </div>
               <div className="ad-pay-table-wrap">
                 <div className="ad-pay-table">
-                  <div className="ad-pay-thead"><span>Ghotok</span><span>Transaction ID</span><span>Method</span><span>Amount</span><span>Tier</span><span style={{ textAlign: 'right' }}>Action</span></div>
+                  <div className="ad-pay-thead"><span>Payer</span><span>Transaction ID</span><span>Method</span><span>Amount</span><span>Tier</span><span style={{ textAlign: 'right' }}>Action</span></div>
                   {loading && <div className="ad-pay-row">Loading…</div>}
                   {!loading && PAYMENTS.length === 0 && <div className="ad-pay-row">No payments to match.</div>}
                   {PAYMENTS.map((p) => {
                     const st = p.status; const r = P_RES[st];
                     return (
                       <div key={p.id} className="ad-pay-row">
-                        <div className="ad-pay-cell" data-label="Ghotok"><div className="ad-pay-name">{p.name}</div><div className="ad-pay-sub">{p.gid} · {p.when}</div></div>
+                        <div className="ad-pay-cell" data-label="Payer"><div className="ad-pay-name">{p.name}</div><div className="ad-pay-sub">{p.gid} · {p.when}</div></div>
                         <span className="ad-pay-txn" data-label="Txn">{p.txn}</span>
                         <span className="ad-pay-method" data-label="Method" style={{ color: p.method === 'bKash' ? 'var(--terracotta-600)' : p.method === 'Nagad' ? 'var(--terracotta-700)' : 'var(--brand-primary)' }}>{p.method}</span>
                         <span className="ad-pay-amt" data-label="Amount">{p.amount}</span>

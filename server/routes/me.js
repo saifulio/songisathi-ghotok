@@ -24,6 +24,8 @@ import {
 } from '../lib/profiles.js';
 import { nextPrn } from '../lib/refs.js';
 import { scoreMatch } from '../lib/matching.js';
+import { memberPlan } from '../lib/subscriptions.js';
+import { MEMBER_PREMIUM_MATCH_LIMIT } from '../config.js';
 import { memberOnly } from '../middleware.js';
 
 const router = express.Router();
@@ -249,6 +251,9 @@ router.get('/my-search', memberOnly, async (req, res) => {
     // way, and one with a daughter and a nephew needs both.
     searchGenders: genders,
     canSendInterest: hasStanding(req, me),
+    // The monthly interest allowance, so the page can say what is left before
+    // the send button spends it (POST /interests enforces the same numbers).
+    plan: await memberPlan(req.auth.sub, mineIds),
   });
 });
 
@@ -379,6 +384,11 @@ router.get('/my-matches', memberOnly, async (req, res) => {
     [opposite, ...mineIds]
   );
 
+  // How far down the scored list this account may read: the free plan sees
+  // the top few, Premium sees the whole shortlist. The rest are not sent at
+  // all — a locked card the client could open in devtools is not a lock.
+  const plan = await memberPlan(req.auth.sub, mineIds);
+
   const matches = rows
     .map((r) => {
       const { score, factors } = scoreMatch(mine, r);
@@ -396,9 +406,16 @@ router.get('/my-matches', memberOnly, async (req, res) => {
       };
     })
     .sort((a, b) => b.score - a.score)
-    .slice(0, 8);
+    .slice(0, MEMBER_PREMIUM_MATCH_LIMIT);
 
-  return res.json({ matches, canSendInterest: hasStanding(req, me) });
+  return res.json({
+    matches: matches.slice(0, plan.matchLimit),
+    // What the free plan is holding back, so the page can say how many rather
+    // than advertise Premium at an account that would gain nothing.
+    lockedCount: Math.max(0, matches.length - plan.matchLimit),
+    plan,
+    canSendInterest: hasStanding(req, me),
+  });
 });
 
 export default router;
