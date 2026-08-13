@@ -89,6 +89,22 @@ export const api = {
   // of their book with fromProfileId.
   sendInterest: (token, payload) => request('/interests', { method: 'POST', body: payload, token }),
 
+  // Hiring a matchmaker — the family searches the directory and asks one to
+  // take their profile on; the ghotok answers from their own inbox.
+  ghotokDirectory: (token, { profileId, district, q } = {}) => {
+    const p = new URLSearchParams();
+    if (profileId) p.set('profileId', profileId);
+    if (district) p.set('district', district);
+    if (q) p.set('q', q);
+    const qs = p.toString();
+    return request(qs ? `/ghotoks?${qs}` : '/ghotoks', { token });
+  },
+  myGhotokRequests: (token, profileId) => request(forProfile('/ghotok-requests', profileId), { token }),
+  requestGhotok: (token, payload) => request('/ghotok-requests', { method: 'POST', body: payload, token }),
+  withdrawGhotokRequest: (token, id, profileId) => request(`/ghotok-requests/${id}`, { method: 'DELETE', body: { profileId }, token }),
+  ghotokRequestInbox: (token) => request('/ghotok-requests/inbox', { token }),
+  decideGhotokRequest: (token, id, patch) => request(`/ghotok-requests/${id}`, { method: 'PATCH', body: patch, token }),
+
   // Membership — the family side of billing. The plan lives on the account,
   // not on a profile, so none of these name one.
   plans: (token, audience) => request(audience ? `/plans?audience=${audience}` : '/plans', { token }),

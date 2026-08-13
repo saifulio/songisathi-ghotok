@@ -14,7 +14,7 @@ async function clearAll(tx) {
   const order = [
     'activity_log', 'testimonials', 'report_evidence', 'reports',
     'verification_checks', 'verifications', 'member_subscriptions', 'payments', 'marriages',
-    'match_factors', 'match_suggestions', 'interests', 'screening_responses',
+    'management_requests', 'match_factors', 'match_suggestions', 'interests', 'screening_responses',
     'screening_options', 'screening_questions', 'profile_preferences',
     'profiles', 'guardians', 'ghotoks', 'pricing_tiers',
     'password_reset_tokens', 'email_verification_tokens', 'users',
@@ -69,21 +69,24 @@ async function main() {
 
     // ── users + ghotoks ──
     console.log('Seeding users, ghotoks, guardians…');
+    // serviceFee is what each asks a family to pay for taking a profile on —
+    // the figure the "find a matchmaker" directory publishes. Monir's is 0:
+    // he has not named one yet, which the directory prints as "ask them".
     const ghotokDefs = [
-      { code: 'GHT-0042', name: 'Rahima Akter', phone: '01712345678', pw: 'ghotok123', bureauName: 'Rahima Marriage Bureau', district: 'Sylhet', tier: 'BUREAU', verified: true, marriagesClosed: 27, yearsActive: 22, activeProfileLimit: 50, referralCode: 'RAHIMA-SYL', memberSince: 2003 },
-      { code: 'GHT-0311', name: 'Kamrul Islam', phone: '01712000311', pw: 'kamrul123', bureauName: 'Sylhet Bureau', district: 'Sylhet', tier: 'BUREAU', verified: true, marriagesClosed: 19, yearsActive: 6, activeProfileLimit: 50, referralCode: 'KAMRUL-SYL', memberSince: 2024 },
-      { code: 'GHT-0198', name: 'Nazma Begum', phone: '01712000198', pw: 'nazma123', bureauName: null, district: 'Mymensingh', tier: 'SOLO', verified: false, marriagesClosed: 8, yearsActive: 3, activeProfileLimit: 20, referralCode: 'NAZMA-MYM', memberSince: 2025 },
-      { code: 'GHT-0402', name: 'Monir Rahman', phone: '01712000402', pw: 'monir123', bureauName: null, district: 'Dhaka', tier: 'SOLO', verified: false, marriagesClosed: 0, yearsActive: 1, activeProfileLimit: 20, referralCode: 'MONIR-DHK', memberSince: 2026 },
-      { code: 'GHT-0155', name: 'Shafiqul Alam', phone: '01712000155', pw: 'shafiq123', bureauName: 'Alam Agency', district: 'Dhaka', tier: 'AGENCY', verified: true, marriagesClosed: 41, yearsActive: 12, activeProfileLimit: 150, referralCode: 'SHAFIQ-DHK', memberSince: 2018 },
-      { code: 'GHT-0287', name: 'Rokeya Sultana', phone: '01712000287', pw: 'rokeya123', bureauName: null, district: 'Khulna', tier: 'BUREAU', verified: true, marriagesClosed: 14, yearsActive: 5, activeProfileLimit: 50, referralCode: 'ROKEYA-KHL', memberSince: 2021 },
-      { code: 'GHT-0361', name: 'Jashim Uddin', phone: '01712000361', pw: 'jashim123', bureauName: null, district: 'Chattogram', tier: 'SOLO', verified: true, marriagesClosed: 9, yearsActive: 4, activeProfileLimit: 20, referralCode: 'JASHIM-CTG', memberSince: 2022 },
+      { code: 'GHT-0042', name: 'Rahima Akter', phone: '01712345678', pw: 'ghotok123', bureauName: 'Rahima Marriage Bureau', district: 'Sylhet', tier: 'BUREAU', verified: true, marriagesClosed: 27, yearsActive: 22, activeProfileLimit: 50, serviceFee: 12000, referralCode: 'RAHIMA-SYL', memberSince: 2003 },
+      { code: 'GHT-0311', name: 'Kamrul Islam', phone: '01712000311', pw: 'kamrul123', bureauName: 'Sylhet Bureau', district: 'Sylhet', tier: 'BUREAU', verified: true, marriagesClosed: 19, yearsActive: 6, activeProfileLimit: 50, serviceFee: 10000, referralCode: 'KAMRUL-SYL', memberSince: 2024 },
+      { code: 'GHT-0198', name: 'Nazma Begum', phone: '01712000198', pw: 'nazma123', bureauName: null, district: 'Mymensingh', tier: 'SOLO', verified: false, marriagesClosed: 8, yearsActive: 3, activeProfileLimit: 20, serviceFee: 6000, referralCode: 'NAZMA-MYM', memberSince: 2025 },
+      { code: 'GHT-0402', name: 'Monir Rahman', phone: '01712000402', pw: 'monir123', bureauName: null, district: 'Dhaka', tier: 'SOLO', verified: false, marriagesClosed: 0, yearsActive: 1, activeProfileLimit: 20, serviceFee: 0, referralCode: 'MONIR-DHK', memberSince: 2026 },
+      { code: 'GHT-0155', name: 'Shafiqul Alam', phone: '01712000155', pw: 'shafiq123', bureauName: 'Alam Agency', district: 'Dhaka', tier: 'AGENCY', verified: true, marriagesClosed: 41, yearsActive: 12, activeProfileLimit: 150, serviceFee: 20000, referralCode: 'SHAFIQ-DHK', memberSince: 2018 },
+      { code: 'GHT-0287', name: 'Rokeya Sultana', phone: '01712000287', pw: 'rokeya123', bureauName: null, district: 'Khulna', tier: 'BUREAU', verified: true, marriagesClosed: 14, yearsActive: 5, activeProfileLimit: 50, serviceFee: 9000, referralCode: 'ROKEYA-KHL', memberSince: 2021 },
+      { code: 'GHT-0361', name: 'Jashim Uddin', phone: '01712000361', pw: 'jashim123', bureauName: null, district: 'Chattogram', tier: 'SOLO', verified: true, marriagesClosed: 9, yearsActive: 4, activeProfileLimit: 20, serviceFee: 7000, referralCode: 'JASHIM-CTG', memberSince: 2022 },
       // The five bulk ghotoks — each carries ten of the generated profiles
       // further down, so the pool has more than one book behind it.
-      { code: 'GHT-0501', name: 'Sultana Parvin', phone: '01720100001', pw: 'demo123', bureauName: 'Parvin Matrimonial', district: 'Dhaka', tier: 'AGENCY', verified: true, marriagesClosed: 34, yearsActive: 9, activeProfileLimit: 150, referralCode: 'SULTANA-DHK', memberSince: 2017 },
-      { code: 'GHT-0502', name: 'Abdul Mannan', phone: '01720100002', pw: 'demo123', bureauName: 'Mannan Bibaho Bureau', district: 'Chattogram', tier: 'BUREAU', verified: true, marriagesClosed: 21, yearsActive: 6, activeProfileLimit: 50, referralCode: 'MANNAN-CTG', memberSince: 2020 },
-      { code: 'GHT-0503', name: 'Ruhul Amin', phone: '01720100003', pw: 'demo123', bureauName: null, district: 'Sylhet', tier: 'SOLO', verified: true, marriagesClosed: 12, yearsActive: 4, activeProfileLimit: 20, referralCode: 'RUHUL-SYL', memberSince: 2022 },
-      { code: 'GHT-0504', name: 'Ferdousi Begum', phone: '01720100004', pw: 'demo123', bureauName: 'Ferdousi Ghotokali', district: 'Rajshahi', tier: 'BUREAU', verified: true, marriagesClosed: 18, yearsActive: 7, activeProfileLimit: 50, referralCode: 'FERDOUSI-RAJ', memberSince: 2019 },
-      { code: 'GHT-0505', name: 'Shamim Reza', phone: '01720100005', pw: 'demo123', bureauName: null, district: 'Khulna', tier: 'SOLO', verified: false, marriagesClosed: 5, yearsActive: 2, activeProfileLimit: 20, referralCode: 'SHAMIM-KHL', memberSince: 2024 },
+      { code: 'GHT-0501', name: 'Sultana Parvin', phone: '01720100001', pw: 'demo123', bureauName: 'Parvin Matrimonial', district: 'Dhaka', tier: 'AGENCY', verified: true, marriagesClosed: 34, yearsActive: 9, activeProfileLimit: 150, serviceFee: 18000, referralCode: 'SULTANA-DHK', memberSince: 2017 },
+      { code: 'GHT-0502', name: 'Abdul Mannan', phone: '01720100002', pw: 'demo123', bureauName: 'Mannan Bibaho Bureau', district: 'Chattogram', tier: 'BUREAU', verified: true, marriagesClosed: 21, yearsActive: 6, activeProfileLimit: 50, serviceFee: 11000, referralCode: 'MANNAN-CTG', memberSince: 2020 },
+      { code: 'GHT-0503', name: 'Ruhul Amin', phone: '01720100003', pw: 'demo123', bureauName: null, district: 'Sylhet', tier: 'SOLO', verified: true, marriagesClosed: 12, yearsActive: 4, activeProfileLimit: 20, serviceFee: 6500, referralCode: 'RUHUL-SYL', memberSince: 2022 },
+      { code: 'GHT-0504', name: 'Ferdousi Begum', phone: '01720100004', pw: 'demo123', bureauName: 'Ferdousi Ghotokali', district: 'Rajshahi', tier: 'BUREAU', verified: true, marriagesClosed: 18, yearsActive: 7, activeProfileLimit: 50, serviceFee: 9500, referralCode: 'FERDOUSI-RAJ', memberSince: 2019 },
+      { code: 'GHT-0505', name: 'Shamim Reza', phone: '01720100005', pw: 'demo123', bureauName: null, district: 'Khulna', tier: 'SOLO', verified: false, marriagesClosed: 5, yearsActive: 2, activeProfileLimit: 20, serviceFee: 5000, referralCode: 'SHAMIM-KHL', memberSince: 2024 },
     ];
     const ghotokIdByCode = {};
     for (const g of ghotokDefs) {
@@ -94,9 +97,9 @@ async function main() {
       );
       const ghotokId = await insert(
         tx,
-        `INSERT INTO ghotoks (userId, code, bureauName, district, tier, verified, marriagesClosed, yearsActive, activeProfileLimit, referralCode, memberSince)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [userId, g.code, g.bureauName, g.district, g.tier, g.verified, g.marriagesClosed, g.yearsActive, g.activeProfileLimit, g.referralCode, g.memberSince]
+        `INSERT INTO ghotoks (userId, code, bureauName, district, tier, verified, marriagesClosed, yearsActive, activeProfileLimit, serviceFee, referralCode, memberSince)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [userId, g.code, g.bureauName, g.district, g.tier, g.verified, g.marriagesClosed, g.yearsActive, g.activeProfileLimit, g.serviceFee, g.referralCode, g.memberSince]
       );
       ghotokIdByCode[g.code] = ghotokId;
     }
@@ -417,6 +420,27 @@ async function main() {
       );
     }
 
+    // ── management requests (families asking Rahima to take them on) ──
+    // One waiting on her, one she turned down — enough for the request inbox
+    // to have both a decision to make and a closed row behind it. Neither
+    // profile changes hands here: accepting is what does that, and it is the
+    // ghotok's to do.
+    console.log('Seeding management requests…');
+    const managementRequests = [
+      { profile: 'PRN-31204', ghotokId: R, byUserId: shirinUserId, fee: 12000, status: 'PENDING', declineReason: null, decidedAt: null,
+        message: 'Apa, we have been running Farhana’s profile ourselves since March and are not getting far. Two families in Sylhet have asked about her and we do not know how to judge them. We would rather it went through you.' },
+      { profile: 'PRN-31206', ghotokId: R, byUserId: tasnimUserId, fee: 12000, status: 'DECLINED', declineReason: 'My book is full this season', decidedAt: new Date(Date.UTC(2026, 6, 21)),
+        message: 'I have been managing my own profile and would like help with the Dhaka side. Are you taking anyone on this month?' },
+    ];
+    for (const m of managementRequests) {
+      await insert(
+        tx,
+        `INSERT INTO management_requests (profileId, ghotokId, requestedByUserId, feeAmount, status, message, declineReason, decidedAt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [profileIdByPrn[m.profile], m.ghotokId, m.byUserId, m.fee, m.status, m.message, m.declineReason, m.decidedAt]
+      );
+    }
+
     // ── commission ledger (Rahima) ──
     console.log('Seeding marriages / commission ledger…');
     const marriages = [
@@ -510,7 +534,7 @@ async function main() {
   });
 
   // ── summary ──
-  const tablesToCount = ['users', 'ghotoks', 'guardians', 'profiles', 'match_suggestions', 'interests', 'marriages', 'payments', 'member_subscriptions', 'reports', 'verifications'];
+  const tablesToCount = ['users', 'ghotoks', 'guardians', 'profiles', 'match_suggestions', 'interests', 'management_requests', 'marriages', 'payments', 'member_subscriptions', 'reports', 'verifications'];
   const counts = {};
   for (const t of tablesToCount) {
     const [rows] = await pool.execute(`SELECT COUNT(*) AS n FROM \`${t}\``);

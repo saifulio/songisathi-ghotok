@@ -40,6 +40,11 @@ CREATE TABLE IF NOT EXISTS `ghotoks` (
     `marriagesClosed`    INTEGER      NOT NULL DEFAULT 0,
     `yearsActive`        INTEGER      NOT NULL DEFAULT 0,
     `activeProfileLimit` INTEGER      NOT NULL DEFAULT 20,
+    -- What this matchmaker asks a family to pay for taking their profile on,
+    -- in taka. Published in the directory a family searches, and copied onto a
+    -- management request as the amount that was agreed when it was sent. 0
+    -- means they have not published a figure — "ask them", not "free".
+    `serviceFee`         INTEGER      NOT NULL DEFAULT 0,
     `referralCode`       VARCHAR(191) NULL,
     `memberSince`        INTEGER      NOT NULL,
     `createdAt`          DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -249,6 +254,39 @@ CREATE TABLE IF NOT EXISTS `interests` (
     CONSTRAINT `interests_fromGuardianId_fkey` FOREIGN KEY (`fromGuardianId`) REFERENCES `guardians`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT `interests_theirProfileId_fkey` FOREIGN KEY (`theirProfileId`) REFERENCES `profiles`(`id`)  ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT `interests_yourProfileId_fkey`  FOREIGN KEY (`yourProfileId`)  REFERENCES `profiles`(`id`)  ON DELETE RESTRICT ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- ─────────────────────────── hiring a matchmaker ───────────────────────────
+-- A family asking a ghotok to take their profile on, for the fee that ghotok
+-- publishes. The other direction from `interests`: this is about who manages a
+-- profile, not about a match, so it is its own table rather than a fourth
+-- interests.kind — the two rows share no columns beyond a status.
+--
+-- `feeAmount` is copied from ghotoks.serviceFee when the request is sent, so a
+-- later change to the published price does not silently rewrite what both
+-- sides agreed to. Accepting is what moves the profile into the ghotok's book;
+-- the request row is the record of how it got there.
+CREATE TABLE IF NOT EXISTS `management_requests` (
+    `id`                INTEGER      NOT NULL AUTO_INCREMENT,
+    `profileId`         INTEGER      NOT NULL,
+    `ghotokId`          INTEGER      NOT NULL,
+    -- Who sent it: the guardian or candidate account, not the profile — a
+    -- profile's manager can change, and this is the record of who asked.
+    `requestedByUserId` INTEGER      NOT NULL,
+    `feeAmount`         INTEGER      NOT NULL DEFAULT 0,
+    `status`            ENUM('PENDING', 'ACCEPTED', 'DECLINED', 'WITHDRAWN') NOT NULL DEFAULT 'PENDING',
+    `message`           TEXT         NULL,
+    `declineReason`     VARCHAR(191) NULL,
+    `decidedAt`         DATETIME(3)  NULL,
+    `createdAt`         DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `management_requests_profileId_idx`(`profileId`),
+    INDEX `management_requests_ghotokId_idx`(`ghotokId`),
+    INDEX `management_requests_status_idx`(`status`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `management_requests_profileId_fkey`         FOREIGN KEY (`profileId`)         REFERENCES `profiles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `management_requests_ghotokId_fkey`          FOREIGN KEY (`ghotokId`)          REFERENCES `ghotoks`(`id`)  ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `management_requests_requestedByUserId_fkey` FOREIGN KEY (`requestedByUserId`) REFERENCES `users`(`id`)    ON DELETE CASCADE ON UPDATE CASCADE
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- ─────────────────────────── commission & closing ───────────────────────────

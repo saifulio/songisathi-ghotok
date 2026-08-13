@@ -20,7 +20,7 @@ const TABLES = [
   'messages', 'conversations',
   'activity_log', 'testimonials', 'report_evidence', 'reports',
   'verification_checks', 'verifications', 'pricing_tiers', 'payments',
-  'marriages', 'interests', 'match_factors', 'match_suggestions',
+  'marriages', 'management_requests', 'interests', 'match_factors', 'match_suggestions',
   'screening_responses', 'screening_options', 'screening_questions',
   'profile_preferences', 'profiles', 'password_reset_tokens',
   'email_verification_tokens', 'guardians', 'ghotoks', 'users',

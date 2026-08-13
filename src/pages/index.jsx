@@ -18,6 +18,8 @@ import MySearch from './MySearch/MySearch.jsx';
 import MyBiodataStudio from './MyBiodataStudio/MyBiodataStudio.jsx';
 import MyMatches from './MyMatches/MyMatches.jsx';
 import Membership from './Membership/Membership.jsx';
+import FindGhotok from './FindGhotok/FindGhotok.jsx';
+import ManagementRequests from './ManagementRequests/ManagementRequests.jsx';
 import { NAV_GROUPS } from '../nav.js';
 
 const ELEMENTS = {
@@ -36,6 +38,8 @@ const ELEMENTS = {
   '/my-biodata': <MyBiodataStudio />,
   '/my-matches': <MyMatches />,
   '/membership': <Membership />,
+  '/find-ghotok': <FindGhotok />,
+  '/management-requests': <ManagementRequests />,
   '/admin': <AdminModeration />,
 };
 

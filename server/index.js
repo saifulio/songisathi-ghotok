@@ -20,6 +20,7 @@ import adminRoutes from './routes/admin.js';
 import conversationRoutes from './routes/conversations.js';
 import meRoutes from './routes/me.js';
 import billingRoutes from './routes/billing.js';
+import ghotokRoutes from './routes/ghotoks.js';
 
 const app = express();
 app.use(cors());
@@ -40,6 +41,7 @@ app.use('/api', adminRoutes);
 app.use('/api', conversationRoutes);
 app.use('/api', meRoutes);
 app.use('/api', billingRoutes);
+app.use('/api', ghotokRoutes);
 
 // ── fallbacks ──
 // Any route not matched above.

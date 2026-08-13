@@ -15,6 +15,9 @@ export const NAV_GROUPS = [
     items: [
       { path: '/dashboard', label: 'Dashboard', roles: ['GHOTOK'] },
       { path: '/interest-inbox', label: 'Interest inbox', roles: ['GHOTOK'] },
+      // Families asking to join this book, kept apart from the interest inbox:
+      // one is about a match, the other about who runs a profile.
+      { path: '/management-requests', label: 'Management requests', roles: ['GHOTOK'] },
       { path: '/messages', label: 'Messages', roles: ['GHOTOK'] },
       { path: '/search', label: 'Search & profiles', roles: ['GHOTOK'] },
       { path: '/add-profile', label: 'Add profile · vault', roles: ['GHOTOK'] },
@@ -39,6 +42,11 @@ export const NAV_GROUPS = [
       // server decides, via canSendInterest / canEdit; the pages render to
       // match, so nothing is offered that the server would refuse).
       { path: '/my-search', label: 'Search & profiles', roles: ['GUARDIAN', 'CANDIDATE'] },
+      // The matchmaker directory: a family that would rather not run its own
+      // search can find a ghotok nearby and ask them to take it on for a fee.
+      // Readable by every member account; sending needs standing, which the
+      // page reads from the server like the others.
+      { path: '/find-ghotok', label: 'Find a matchmaker', roles: ['GUARDIAN', 'CANDIDATE'] },
       { path: '/my-biodata', label: 'Biodata studio', roles: ['GUARDIAN', 'CANDIDATE'] },
       { path: '/my-matches', label: 'AI matching', roles: ['GUARDIAN', 'CANDIDATE'] },
       // The plan is on the account, so every member account has one to read —
