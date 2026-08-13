@@ -31,6 +31,7 @@ export default function AiMatching() {
   const [w, setW] = useState({});
   const [open, setOpen] = useState(null);
   const [decision, setDecision] = useState({});
+  const [running, setRunning] = useState(false);
   const [toast, setToast] = useState(null);
   const timer = useRef(null);
 
@@ -41,23 +42,52 @@ export default function AiMatching() {
   }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
 
+  // Suggestions from a load or from a fresh run. Weights are merged rather
+  // than replaced: a factor the ghotok has already moved keeps its position,
+  // and anything this run scored for the first time starts neutral.
+  const applySuggestions = useCallback((list) => {
+    setSuggestions(list);
+    setOpen((cur) => cur ?? list[0]?.id ?? null);
+    setW((cur) => {
+      const keys = [...new Set(list.flatMap((s) => s.factors.map((f) => slug(f.label))))];
+      return { ...Object.fromEntries(keys.map((k) => [k, 7])), ...cur };
+    });
+  }, []);
+
   // Load this week's suggestions, with their factor breakdown, from the API.
   useEffect(() => {
     if (!token) return undefined;
     let live = true;
     api.matchSuggestions(token)
-      .then((data) => {
-        if (!live) return;
-        setSuggestions(data.suggestions);
-        setOpen((cur) => cur ?? data.suggestions[0]?.id ?? null);
-        // Neutral starting weight for every factor this run actually scored.
-        const keys = [...new Set(data.suggestions.flatMap((s) => s.factors.map((f) => slug(f.label))))];
-        setW(Object.fromEntries(keys.map((k) => [k, 7])));
-      })
+      .then((data) => { if (live) applySuggestions(data.suggestions); })
       .catch((e) => say(e.message || 'Could not load this week’s matching run.'))
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [token, say]);
+  }, [token, say, applySuggestions]);
+
+  // "Run again now": score every pair not yet put to this ghotok and keep the
+  // best. Pressing it again works further through the pool rather than
+  // repeating itself, so the honest report is what this run added.
+  const runNow = async () => {
+    if (running) return;
+    setRunning(true);
+    try {
+      const data = await api.runMatchSuggestions(token);
+      applySuggestions(data.suggestions);
+      const { created, considered } = data;
+      say(
+        created
+          ? `Run finished. ${created} new pair${created === 1 ? '' : 's'} above your threshold, out of ${considered} scored.`
+          : considered
+            ? `Run finished. ${considered} new pair${considered === 1 ? '' : 's'} scored, none above your threshold.`
+            : 'Run finished. Every pair in your book and the pool has already been put to you.'
+      );
+    } catch (e) {
+      say(e.message || 'Could not run the matcher.');
+    } finally {
+      setRunning(false);
+    }
+  };
 
   // FACTORS: the union of factor labels this run scored, in the order the
   // first pair returned them.
@@ -87,7 +117,6 @@ export default function AiMatching() {
   const wTotal = FACTORS.reduce((n, f) => n + (w[f.k] || 0), 0) || 1;
   const ranked = PAIRS.slice().sort((a, b) => weighted(b, w) - weighted(a, w));
   const top = ranked[0];
-  const heaviest = FACTORS.slice().sort((a, b) => (w[b.k] || 0) - (w[a.k] || 0))[0];
 
   // Optimistic status change, reverted on error.
   const actSuggestion = async (pairId, apiStatus, localState, successMsg) => {
@@ -186,7 +215,7 @@ export default function AiMatching() {
                   <div className="am-h-bn" style={{ fontSize: 20 }}>সোমবারের ফলাফল</div>
                   <div className="am-runs-sub">{ranked.length} pairs surfaced from 1,482 possible combinations</div>
                 </div>
-                <Button variant="outline" size="md" onClick={() => say(heaviest ? `Re-run finished in 4 seconds. ${ranked.length} pairs, same gate — ${heaviest.label.toLowerCase()} is currently your heaviest factor.` : 'No suggestions to re-run yet.')}>Run again now</Button>
+                <Button variant="outline" size="md" disabled={running} onClick={runNow}>{running ? 'Running…' : 'Run again now'}</Button>
               </div>
 
               <div className="am-funnel">

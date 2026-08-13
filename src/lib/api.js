@@ -51,6 +51,7 @@ export const api = {
   // Dashboard
   dashboardStats: (token) => request('/dashboard/stats', { token }),
   matchSuggestions: (token) => request('/match-suggestions', { token }),
+  runMatchSuggestions: (token) => request('/match-suggestions/run', { method: 'POST', token }),
   updateSuggestion: (token, id, patch) => request(`/match-suggestions/${id}`, { method: 'PATCH', body: patch, token }),
 
   // Interest inbox
