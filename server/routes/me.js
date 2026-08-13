@@ -31,6 +31,15 @@ const router = express.Router();
 // Whether this account may act (not just look) on its profile.
 const hasStanding = (req, me) => req.auth.role !== 'CANDIDATE' || me.selfManaged;
 
+const oppositeGender = (g) => (g === 'MALE' ? 'FEMALE' : 'MALE');
+
+// The genders this account has any reason to browse: the opposite of each
+// profile it holds. A guardian matchmaking for two daughters is only ever
+// looking for grooms; one with a daughter and a nephew needs both, so the
+// filter opens rather than guessing at one of them. A candidate holds a single
+// profile, so this is the one gender opposite their own, as it always was.
+const gendersToBrowse = (profiles) => [...new Set(profiles.map((p) => oppositeGender(p.gender)))];
+
 // The profile context for a route that acts. Returns null once it has already
 // replied, so callers just `if (!me) return;`. `refusal` completes the
 // sentence "Your matchmaker …" / "Your guardian …".
@@ -282,7 +291,10 @@ router.get('/my-search', memberOnly, async (req, res) => {
   const prefsByProfile = await preferencesFor(rows.map((r) => r.id));
   return res.json({
     profiles: rows.map((r) => searchProfile(r, null, prefsByProfile[r.id] || [])),
-    myGender: me.profile.gender,
+    // Derived from every profile the account holds, not just the selected one:
+    // the gender filter is about who this family is looking for, and a guardian
+    // switching between two daughters is looking for the same thing either way.
+    searchGenders: gendersToBrowse(req.myProfiles),
     canSendInterest: hasStanding(req, me),
   });
 });
@@ -401,8 +413,10 @@ router.get('/my-matches', memberOnly, async (req, res) => {
   const me = req.me;
   if (!me) return res.json({ matches: [], canSendInterest: false });
 
+  // Scoring is per profile, so this one reads the selected profile's gender
+  // rather than the household's set — a match is suggested for one person.
   const mine = me.profile;
-  const opposite = mine.gender === 'MALE' ? 'FEMALE' : 'MALE';
+  const opposite = oppositeGender(mine.gender);
   const mineIds = req.myProfiles.map((p) => p.id);
   const rows = await query(
     `SELECT * FROM profiles

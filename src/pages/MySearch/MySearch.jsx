@@ -30,6 +30,10 @@ export default function MySearch() {
   const [toast, setToast] = useState(null);
   const timer = useRef(null);
   const cardsRef = useRef(null);
+  // The gender filter is seeded from the profiles the account holds, but only
+  // once: switching between two daughters derives the same default, and
+  // re-applying it would throw away a filter the reader had set by hand.
+  const genderSeeded = useRef(false);
   const say = useCallback((msg) => { clearTimeout(timer.current); setToast(msg); timer.current = setTimeout(() => setToast(null), 4400); }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
   const setFF = (k, v) => setFf((s) => ({ ...s, [k]: v }));
@@ -41,10 +45,19 @@ export default function MySearch() {
     api.mySearch(token, activeId)
       .then((data) => {
         if (!live) return;
+        // Who this family is looking for: one gender when every profile they
+        // hold is of the other, both when they hold a bride and a groom — the
+        // server derives it (see searchGenders), 'Any' is the honest answer
+        // when there is nothing to derive it from.
+        const wanted = data.searchGenders || [];
+        const defaultGender = wanted.length === 1 ? wanted[0] : 'Any';
         setResults(data.profiles);
         setCanSendInterest(data.canSendInterest !== false);
-        if (data.myGender) setFf((s) => ({ ...s, gender: data.myGender === 'MALE' ? 'FEMALE' : 'MALE' }));
-        setSelected((cur) => cur ?? data.profiles.find((r) => !data.myGender || r.gender !== data.myGender)?.id ?? data.profiles[0]?.id ?? null);
+        if (!genderSeeded.current && wanted.length) {
+          genderSeeded.current = true;
+          setFf((s) => ({ ...s, gender: defaultGender }));
+        }
+        setSelected((cur) => cur ?? data.profiles.find((r) => defaultGender === 'Any' || r.gender === defaultGender)?.id ?? data.profiles[0]?.id ?? null);
       })
       .catch((e) => { if (live) setBlocked(e.message || 'Search is not available for this account.'); })
       .finally(() => { if (live) setLoading(false); });
