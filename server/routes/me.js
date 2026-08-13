@@ -275,26 +275,38 @@ router.post('/interests', memberOnly, async (req, res) => {
 // "your own book" concept. Every profile the account holds is left out, not
 // just the selected one — a guardian browsing for their daughter should not be
 // shown their nephew.
+//
+// Gender is part of that visibility rule, not a filter: a bride's account is
+// served grooms and nothing else. It used to be enforced only by the client
+// pre-selecting the filter, which meant switching it to "Any" read the biodata
+// of other brides — people this account has no business browsing. A ghotok's
+// search is unchanged, since their book legitimately holds both.
 router.get('/my-search', memberOnly, async (req, res) => {
   const me = req.me;
   if (!me) return res.json({ profiles: [], canSendInterest: false });
 
   const mineIds = req.myProfiles.map((p) => p.id);
+  // Non-empty by the guard above: an account with no profiles never gets here,
+  // and every profile it does hold contributes the gender opposite its own.
+  const genders = gendersToBrowse(req.myProfiles);
   const rows = await query(
     `${POOL_PROFILE_SELECT}
       WHERE p.id NOT IN (${mineIds.map(() => '?').join(',')})
+        AND p.gender IN (${genders.map(() => '?').join(',')})
         AND p.inNetworkPool = 1 AND p.status = 'ACTIVE'
       ORDER BY p.lastUpdatedAt DESC`,
-    mineIds
+    [...mineIds, ...genders]
   );
 
   const prefsByProfile = await preferencesFor(rows.map((r) => r.id));
   return res.json({
     profiles: rows.map((r) => searchProfile(r, null, prefsByProfile[r.id] || [])),
-    // Derived from every profile the account holds, not just the selected one:
-    // the gender filter is about who this family is looking for, and a guardian
-    // switching between two daughters is looking for the same thing either way.
-    searchGenders: gendersToBrowse(req.myProfiles),
+    // What the results above are limited to, so the UI can say so plainly
+    // rather than offer a gender filter that would return nothing. Derived
+    // from every profile the account holds, not just the selected one: a
+    // guardian switching between two daughters is looking for grooms either
+    // way, and one with a daughter and a nephew needs both.
+    searchGenders: genders,
     canSendInterest: hasStanding(req, me),
   });
 });

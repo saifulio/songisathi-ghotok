@@ -18,6 +18,13 @@
 .ms-filters { border-right: 1px solid var(--border-subtle); background: var(--surface-card); padding: 18px 16px 22px; display: flex; flex-direction: column; gap: 16px; }
 .ms-h-bn { font-family: 'Tiro Bangla', serif; font-size: 17px; color: var(--text-primary); }
 .ms-h-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+/* Stands in for the "Looking for" select when the account is served one
+   gender: a fact about the results, not a control. */
+.ms-fixed-gender { display: flex; flex-direction: column; gap: 3px; }
+.ms-fixed-gender-k { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.ms-fixed-gender-v { font-size: 15px; color: var(--text-primary); }
+.ms-fixed-gender-note { font-size: 11px; line-height: 1.5; color: var(--text-tertiary); }
+
 .ms-age-label { font-size: 13px; font-weight: 600; color: var(--text-primary); }
 .ms-age-row { display: flex; align-items: center; gap: 9px; margin-top: 9px; font-size: 11.5px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .ms-switches { display: flex; flex-direction: column; gap: 11px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }

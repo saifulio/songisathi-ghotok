@@ -25,6 +25,10 @@ export default function MySearch() {
   const [q, setQ] = useState('');
   const [selected, setSelected] = useState(null);
   const [ff, setFf] = useState(DEFAULT_FF);
+  // The genders the server will serve this account — one for a household
+  // matchmaking for brides only, both for a guardian holding a bride and a
+  // groom. The filter is offered only where there is a choice to make.
+  const [searchGenders, setSearchGenders] = useState([]);
   const [sent, setSent] = useState({});
   const [page, setPage] = useState(1);
   const [toast, setToast] = useState(null);
@@ -46,12 +50,13 @@ export default function MySearch() {
       .then((data) => {
         if (!live) return;
         // Who this family is looking for: one gender when every profile they
-        // hold is of the other, both when they hold a bride and a groom — the
-        // server derives it (see searchGenders), 'Any' is the honest answer
-        // when there is nothing to derive it from.
+        // hold is of the other, both when they hold a bride and a groom. The
+        // server derives it and has already limited the results to it, so this
+        // filter narrows what came back rather than reaching past it.
         const wanted = data.searchGenders || [];
         const defaultGender = wanted.length === 1 ? wanted[0] : 'Any';
         setResults(data.profiles);
+        setSearchGenders(wanted);
         setCanSendInterest(data.canSendInterest !== false);
         if (!genderSeeded.current && wanted.length) {
           genderSeeded.current = true;
@@ -139,7 +144,18 @@ export default function MySearch() {
               <div className="ms-h-bn">অনুসন্ধান</div>
               <div className="ms-h-sub">Search profiles in the trusted network</div>
             </div>
-            <Select label="Looking for" value={ff.gender} onChange={(e) => setFF('gender', e.target.value)} options={opts(['Any', 'FEMALE', 'MALE']).map((o) => ({ value: o.value, label: o.value === 'FEMALE' ? 'Bride' : o.value === 'MALE' ? 'Groom' : 'Any' }))} />
+            {/* With one gender served there is no choice to offer — a select
+                whose other options return nothing would only mislead. */}
+            {searchGenders.length > 1 && (
+              <Select label="Looking for" value={ff.gender} onChange={(e) => setFF('gender', e.target.value)} options={opts(['Any', 'FEMALE', 'MALE']).map((o) => ({ value: o.value, label: o.value === 'FEMALE' ? 'Bride' : o.value === 'MALE' ? 'Groom' : 'Any' }))} />
+            )}
+            {searchGenders.length === 1 && (
+              <div className="ms-fixed-gender">
+                <span className="ms-fixed-gender-k">Looking for</span>
+                <span className="ms-fixed-gender-v">{searchGenders[0] === 'FEMALE' ? 'Brides' : 'Grooms'}</span>
+                <span className="ms-fixed-gender-note">Matched to the profiles you manage. The pool you can read holds no others.</span>
+              </div>
+            )}
             <div>
               <div className="ms-age-label">Age range</div>
               <div className="ms-age-row">
@@ -162,7 +178,9 @@ export default function MySearch() {
               <Switch label="Verified profiles only" checked={ff.verified} onChange={() => setFF('verified', !ff.verified)} />
               <Switch label="Screening completed" checked={ff.screened} onChange={() => setFF('screened', !ff.screened)} />
             </div>
-            <Button variant="ghost" size="sm" onClick={() => { setFf(DEFAULT_FF); setQ(''); }}>Reset filters</Button>
+            {/* Reset returns to the derived gender, not to "Any" — the latter
+                is not a state this account's results can be in. */}
+            <Button variant="ghost" size="sm" onClick={() => { setFf({ ...DEFAULT_FF, gender: searchGenders.length === 1 ? searchGenders[0] : 'Any' }); setQ(''); }}>Reset filters</Button>
           </div>
 
           <div className="ms-results">
