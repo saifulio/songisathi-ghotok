@@ -4,7 +4,7 @@
 import express from 'express';
 import { query, queryOne, withTransaction } from '../../db/pool.js';
 import { bad } from '../lib/http.js';
-import { suggestionPerson, markPairInDiscussion } from '../lib/profiles.js';
+import { suggestionPerson, markPairInDiscussion, countActiveProfiles } from '../lib/profiles.js';
 import { runMatchingFor } from '../lib/suggestions.js';
 import { ghotokOnly } from '../middleware.js';
 
@@ -42,11 +42,9 @@ async function openSuggestionsFor(ghotokId) {
 router.get('/dashboard/stats', ghotokOnly, async (req, res) => {
   const { ghotok } = req;
   const countOne = async (sql, params) => (await queryOne(sql, params))?.n ?? 0;
-  // "Active" = counts against the plan limit (anything not a draft, married, or archived).
-  const activeProfiles = await countOne(
-    "SELECT COUNT(*) AS n FROM profiles WHERE managedByGhotokId = ? AND status NOT IN ('DRAFT','MARRIED','AUTO_ARCHIVED')",
-    [ghotok.id]
-  );
+  // "Active" = fills a place on the plan. The same count the limit is enforced
+  // on, so the meter never says there is room where publishing would refuse.
+  const activeProfiles = await countActiveProfiles(ghotok.id);
   const matchesSuggested = await countOne(
     "SELECT COUNT(*) AS n FROM match_suggestions WHERE ghotokId = ? AND status = 'OPEN'",
     [ghotok.id]

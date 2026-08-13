@@ -1,8 +1,29 @@
 // Profile view mappers, plus the shared SQL the two search endpoints
 // (ghotok and guardian/candidate) both read from.
 
-import { query } from '../../db/pool.js';
+import { query, queryOne } from '../../db/pool.js';
 import { STATUS_LABEL, initialsOf, yearsSince, daysSince, capWord, eduLevelOf } from './format.js';
+
+// What fills a place on a ghotok's plan: every profile they manage except a
+// draft, a closed marriage, and one the 90-day clock archived. The dashboard
+// meter and the limit check read this same definition, so the number a ghotok
+// is shown is the number they are held to.
+export async function countActiveProfiles(ghotokId) {
+  const row = await queryOne(
+    "SELECT COUNT(*) AS n FROM profiles WHERE managedByGhotokId = ? AND status NOT IN ('DRAFT','MARRIED','AUTO_ARCHIVED')",
+    [ghotokId]
+  );
+  return row?.n ?? 0;
+}
+
+// The refusal a ghotok gets when their plan is full, or null when it is not.
+// Checked wherever a profile becomes active — publishing a new one, and
+// attesting an archived one back to life.
+export async function planFullRefusal(ghotok) {
+  const used = await countActiveProfiles(ghotok.id);
+  if (used < ghotok.activeProfileLimit) return null;
+  return `Your ${capWord(ghotok.tier)} plan covers ${ghotok.activeProfileLimit} active profiles and all ${ghotok.activeProfileLimit} are in use. Free a place first — a draft costs you nothing in the meantime.`;
+}
 
 // A DB profile row → the shape the ghotok's book / dashboard table expects.
 export function profileCard(p) {

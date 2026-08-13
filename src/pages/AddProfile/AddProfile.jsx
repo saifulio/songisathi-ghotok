@@ -30,6 +30,9 @@ export default function AddProfile() {
   const [sealed, setSealed] = useState(false);
   const [poolOn, setPoolOn] = useState(true);
   const [busy, setBusy] = useState(false);
+  // The plan meter from the dashboard, so a full plan is visible before the
+  // wizard is filled in rather than only when POST /profiles refuses it.
+  const [plan, setPlan] = useState(null);
   const [publishedPrn, setPublishedPrn] = useState(null);
   const [dialog, setDialog] = useState(null);
   const [toast, setToast] = useState(null);
@@ -53,6 +56,20 @@ export default function AddProfile() {
       .catch(() => { /* keep the built-in QS fallback */ });
     return () => { live = false; };
   }, [token]);
+
+  // How much room the plan has left. A failure here leaves plan null, which
+  // reads as "not known yet" and blocks nothing — the server still decides.
+  useEffect(() => {
+    let live = true;
+    api.dashboardStats(token)
+      .then((data) => { if (live) setPlan(data.stats); })
+      .catch(() => { /* the publish attempt will report it */ });
+    return () => { live = false; };
+  }, [token]);
+
+  const planFull = plan ? plan.activeProfiles >= plan.profileLimit : false;
+  const slotsLeft = plan ? Math.max(0, plan.profileLimit - plan.activeProfiles) : null;
+  const tierLabel = plan?.tier ? plan.tier[0] + plan.tier.slice(1).toLowerCase() : '';
 
   const setField = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }));
 
@@ -132,14 +149,28 @@ export default function AddProfile() {
     { k: 'Managed by', v: 'Rahima Akter (ghotok) · GHT-0042, Sylhet' },
   ];
   const checks = [
+    {
+      label: plan
+        ? planFull
+          ? `Your ${tierLabel} plan is full — ${plan.activeProfiles} of ${plan.profileLimit} active profiles. Save this as a draft, or free a place first.`
+          : `${slotsLeft} of ${plan.profileLimit} places left on your ${tierLabel} plan`
+        : 'Checking how much room your plan has left',
+      mark: planFull ? '!' : '✓',
+      bg: planFull ? 'var(--gold-200)' : 'var(--green-100)',
+      fg: planFull ? 'var(--gold-700)' : 'var(--brand-primary)',
+    },
     { label: 'Basic details and education complete', mark: '✓', bg: 'var(--green-100)', fg: 'var(--brand-primary)' },
     { label: sealed ? 'Private screening sealed' : 'Private screening not sealed — profile will publish without matching', mark: sealed ? '✓' : '!', bg: sealed ? 'var(--green-100)' : 'var(--gold-200)', fg: sealed ? 'var(--brand-primary)' : 'var(--gold-700)' },
     { label: 'Photo locked until released per request', mark: '✓', bg: 'var(--green-100)', fg: 'var(--brand-primary)' },
     { label: 'Guardian consent recorded for contact routing', mark: '✓', bg: 'var(--green-100)', fg: 'var(--brand-primary)' },
   ];
   const sealDisabled = !(consent && answered >= total - 1);
-  const nextLabel = step === 4 ? 'Publish profile' : 'Save and continue';
-  const footerNote = step === 3 ? (sealed ? 'Sealed — step 4 is unlocked.' : 'Step 4 unlocks once this section is sealed.') : 'Everything here is editable until you publish.';
+  const nextLabel = step === 4 ? (planFull ? 'Plan full' : 'Publish profile') : 'Save and continue';
+  const footerNote = step === 3
+    ? (sealed ? 'Sealed — step 4 is unlocked.' : 'Step 4 unlocks once this section is sealed.')
+    : step === 4 && planFull
+      ? 'Your plan has no free place. Save this as a draft and publish it once one opens.'
+      : 'Everything here is editable until you publish.';
 
   return (
     <div className="ap">
@@ -367,7 +398,7 @@ export default function AddProfile() {
                     <div className="ap-card ap-publish">
                       <Switch label="Include in trusted network pool" checked={poolOn} onChange={() => setPoolOn((v) => !v)} />
                       <div className="ap-publish-note">Other verified ghotoks can be suggested this profile. Contact always routes back through you.</div>
-                      <Button variant="primary" style={{ width: '100%' }} disabled={busy || !!publishedPrn} onClick={() => submit(true)}>{publishedPrn ? `Published · ${publishedPrn}` : busy ? 'Publishing…' : 'Publish profile'}</Button>
+                      <Button variant="primary" style={{ width: '100%' }} disabled={busy || !!publishedPrn || planFull} onClick={() => submit(true)}>{publishedPrn ? `Published · ${publishedPrn}` : planFull ? 'Plan full — save as a draft' : busy ? 'Publishing…' : 'Publish profile'}</Button>
                     </div>
                   </div>
                 </div>
@@ -379,7 +410,7 @@ export default function AddProfile() {
               <span className="ap-footer-note">{footerNote}</span>
               <div className="ap-footer-actions">
                 <Button variant="outline" disabled={busy} onClick={() => submit(false)}>Save and exit</Button>
-                <Button variant="primary" disabled={busy || (step === 4 && !!publishedPrn)} onClick={() => (step === 4 ? submit(true) : setStep((s) => Math.min(4, s + 1)))}>{step === 4 && busy ? 'Publishing…' : nextLabel}</Button>
+                <Button variant="primary" disabled={busy || (step === 4 && (!!publishedPrn || planFull))} onClick={() => (step === 4 ? submit(true) : setStep((s) => Math.min(4, s + 1)))}>{step === 4 && busy ? 'Publishing…' : nextLabel}</Button>
               </div>
             </div>
           </div>

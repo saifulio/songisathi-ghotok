@@ -5,7 +5,9 @@ import express from 'express';
 import { query, queryOne, withTransaction, insert } from '../../db/pool.js';
 import { bad } from '../lib/http.js';
 import { yearsSince } from '../lib/format.js';
-import { profileCard, searchProfile, POOL_PROFILE_SELECT, preferencesFor } from '../lib/profiles.js';
+import {
+  profileCard, searchProfile, POOL_PROFILE_SELECT, preferencesFor, planFullRefusal,
+} from '../lib/profiles.js';
 import { nextPrn } from '../lib/refs.js';
 import { requireAuth, ghotokOnly } from '../middleware.js';
 
@@ -59,7 +61,14 @@ router.post('/profiles', ghotokOnly, async (req, res) => {
     ? String(b.familyType).toUpperCase()
     : null;
 
+  // A draft is invisible and costs nothing; it is publishing that fills a
+  // place on the plan, so that is where the limit is enforced. Checked before
+  // any of the work below, so a refusal writes nothing.
   const publish = Boolean(b.publish);
+  if (publish) {
+    const refusal = await planFullRefusal(req.ghotok);
+    if (refusal) return bad(res, refusal, 409);
+  }
   const sealed = Boolean(b.sealed);
   const inNetworkPool = Boolean(b.inNetworkPool);
   const owner = { guardian: 'GUARDIAN', candidate: 'CANDIDATE', ghotok: 'GHOTOK' }[b.owner] || 'GHOTOK';
@@ -199,7 +208,13 @@ router.patch('/profiles/:id', ghotokOnly, async (req, res) => {
   if (typeof b.inNetworkPool === 'boolean') { sets.push('inNetworkPool = ?'); params.push(b.inNetworkPool ? 1 : 0); }
   if (b.attest === true) {
     sets.push('lastUpdatedAt = ?'); params.push(new Date());
-    if (profile.status === 'AUTO_ARCHIVED') { sets.push("status = 'ACTIVE'"); }
+    // Reviving a lapsed profile takes a place on the plan just as publishing a
+    // new one does — the 90-day clock is what freed that place to begin with.
+    if (profile.status === 'AUTO_ARCHIVED') {
+      const refusal = await planFullRefusal(req.ghotok);
+      if (refusal) return bad(res, refusal, 409);
+      sets.push("status = 'ACTIVE'");
+    }
   }
   if (!sets.length) return bad(res, 'Nothing to update.');
   await query(`UPDATE profiles SET ${sets.join(', ')} WHERE id = ?`, [...params, profile.id]);
