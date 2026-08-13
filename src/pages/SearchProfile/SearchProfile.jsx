@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Dialog, Pagination } from '../../components/ui/index.jsx';
+import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Dialog, Pagination, RangeSlider } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
 import './SearchProfile.css';
@@ -157,7 +157,15 @@ export default function SearchProfile() {
               <div className="sp-age-label">Age range</div>
               <div className="sp-age-row">
                 <span>{ff.ageMin}</span>
-                <input type="range" min="20" max="45" value={ff.ageMax} onChange={(e) => setFF('ageMax', Number(e.target.value))} className="sp-range" />
+                <RangeSlider
+                  min={18}
+                  max={60}
+                  valueMin={ff.ageMin}
+                  valueMax={ff.ageMax}
+                  labelMin="Minimum age"
+                  labelMax="Maximum age"
+                  onChange={(ageMin, ageMax) => setFf((s) => ({ ...s, ageMin, ageMax }))}
+                />
                 <span>{ff.ageMax}</span>
               </div>
             </div>

@@ -505,6 +505,50 @@ export function Tabs({ items, active, onChange, style }) {
   );
 }
 
+/* --- RangeSlider (dual thumb) --- */
+// Two thumbs over one track, for a from–to filter. The thumbs push against
+// each other instead of swapping: dragging the low thumb past the high one
+// stops it at the high value, which is what a reader expects from a range.
+// Styling lives in styles/global.css (.ss-dual-range) — thumbs are pseudo
+// elements, so they can't be reached from inline styles.
+export function RangeSlider({ min, max, valueMin, valueMax, step = 1, onChange, labelMin, labelMax }) {
+  const span = Math.max(1, max - min);
+  const lo = ((valueMin - min) / span) * 100;
+  const hi = ((valueMax - min) / span) * 100;
+
+  // The high input is later in the DOM, so it wins the hit test where the two
+  // overlap. Once both sit in the upper half that would trap the low thumb, so
+  // lift it above instead.
+  const lowOnTop = lo > 50;
+
+  return (
+    <div className="ss-dual-range">
+      <div className="ss-dual-range-track" />
+      <div className="ss-dual-range-fill" style={{ left: `${lo}%`, width: `${Math.max(0, hi - lo)}%` }} />
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={valueMin}
+        aria-label={labelMin || 'Minimum'}
+        style={{ zIndex: lowOnTop ? 4 : 2 }}
+        onChange={(e) => onChange(Math.min(Number(e.target.value), valueMax), valueMax)}
+      />
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={valueMax}
+        aria-label={labelMax || 'Maximum'}
+        style={{ zIndex: 3 }}
+        onChange={(e) => onChange(valueMin, Math.max(Number(e.target.value), valueMin))}
+      />
+    </div>
+  );
+}
+
 /* --- Pagination --- */
 // Page numbers with the first and last always reachable and a window of one
 // either side of the current page; anything skipped collapses to an ellipsis.
