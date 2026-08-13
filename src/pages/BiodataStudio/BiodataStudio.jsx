@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button, Avatar, Checkbox, Switch, Radio, Select, Dialog } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import { downloadBiodataPdf, pageCountFor } from '../../lib/biodataPdf.js';
 import './BiodataStudio.css';
 
 const TEMPLATES = [
@@ -30,7 +31,12 @@ export default function BiodataStudio() {
   const [sections, setSections] = useState({ education: true, family: true, preferences: true, religion: true, career: true, health: false });
   const [opt, setOpt] = useState({ photo: true, photoMode: 'locked', address: 'District only', income: false, siblings: true });
   const [dialog, setDialog] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+  const [sheetPages, setSheetPages] = useState(1);
   const [toast, setToast] = useState(null);
+  // The live preview is what gets rasterised — the file and the screen cannot
+  // disagree, because they are the same thing.
+  const sheetRef = useRef(null);
   const timer = useRef(null);
   const say = useCallback((msg) => { clearTimeout(timer.current); setToast(msg); timer.current = setTimeout(() => setToast(null), 4400); }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -106,12 +112,50 @@ export default function BiodataStudio() {
   const langNote = { bn: 'বাংলা only', en: 'English only', both: 'Bangla with English beneath' }[lang];
   const addressNote = opt.address === 'Area and district' ? 'Enough for a family to judge distance, not enough to find the house.' : 'The safest default. Most families accept it without asking.';
 
+  // Measure the sheet so the page count above it is the one the PDF will
+  // actually come to. Synchronously after layout, keyed on everything that
+  // changes the sheet's height — a ResizeObserver would be the obvious tool,
+  // but its callbacks are delivered per frame, and this pane is often not
+  // drawing frames. The measurement is the border box, padding and all,
+  // because that is what gets rasterised.
+  useLayoutEffect(() => {
+    const measure = () => {
+      if (!sheetRef.current) return;
+      const { width, height } = sheetRef.current.getBoundingClientRect();
+      setSheetPages(pageCountFor(width, height));
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [profile, sections, opt, template, lang]);
+
+  // What the sheet is stamped with, on every page: who released it and when.
+  const watermark = `${manager?.code || 'SongiSathi'} · ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+  const downloadPdf = async () => {
+    if (downloading || !sheetRef.current) return;
+    setDialog(null);
+    setDownloading(true);
+    say('Building the PDF…');
+    try {
+      const { pages } = await downloadBiodataPdf(sheetRef.current, {
+        name: profile.name, prn: profile.prn, watermark,
+      });
+      say(`PDF downloaded · ${pages} page${pages === 1 ? '' : 's'}, watermarked with ${watermark}.`);
+    } catch (err) {
+      console.error(err);
+      say('Could not build the PDF. The sheet is still on screen — try again, or send a link instead.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const dlg = dialog === 'share'
     ? { title: 'Share this biodata?', body: 'A 7-day link is created — not a file. You can revoke it at any time from Manage active links, and whoever opens it sees exactly the sheet on screen now.',
         actions: (<><Button variant="ghost" onClick={() => setDialog(null)}>Cancel</Button><Button variant="primary" onClick={() => { setDialog(null); say(`Link created for ${profile?.prn || 'this profile'}, expires in 7 days. Opened in WhatsApp.`); }}>Create link</Button></>) }
     : dialog === 'download'
-      ? { title: 'Download a PDF?', body: 'A downloaded file cannot be revoked or expired. Once it is forwarded, it is out of your hands and out of the family’s. Prefer a link unless someone specifically needs to print it.',
-          actions: (<><Button variant="ghost" onClick={() => setDialog('share')}>Send a link instead</Button><Button variant="primary" onClick={() => { setDialog(null); say(`PDF downloaded. It is watermarked with ${manager?.code || 'your GHT number'} and the date.`); }}>Download anyway</Button></>) }
+      ? { title: 'Download a PDF?', body: `A downloaded file cannot be revoked or expired. Once it is forwarded, it is out of your hands and out of the family’s — every page is stamped “${watermark}”, which traces it back to you but does not stop it. Prefer a link unless someone specifically needs to print it.`,
+          actions: (<><Button variant="ghost" onClick={() => setDialog('share')}>Send a link instead</Button><Button variant="primary" disabled={downloading} onClick={downloadPdf}>{downloading ? 'Building…' : 'Download anyway'}</Button></>) }
       : null;
 
   if (loading) return <div className="bs"><div className="bs-frame" style={{ padding: 40 }}>Loading…</div></div>;
@@ -165,10 +209,10 @@ export default function BiodataStudio() {
           {/* center: sheet */}
           <div className="bs-center">
             <div className="bs-sheet-bar">
-              <span>Live preview · A4 · {sheetSections.length > 4 ? '2 pages' : '1 page'}</span>
+              <span>Live preview · A4 · {sheetPages} page{sheetPages === 1 ? '' : 's'}</span>
               <span>{langNote}</span>
             </div>
-            <div className="bs-sheet">
+            <div className="bs-sheet" ref={sheetRef}>
               <div className="bs-sheet-head" style={{ borderBottom: tpl.headBorder }}>
                 {opt.photo && (
                   <div className="bs-sheet-photo" style={{ borderRadius: tpl.photoRadius }}>
@@ -250,7 +294,7 @@ export default function BiodataStudio() {
 
             <div className="bs-actions">
               <Button variant="primary" style={{ width: '100%' }} onClick={() => setDialog('share')}>হোয়াটসঅ্যাপে পাঠান · Share link</Button>
-              <Button variant="outline" style={{ width: '100%' }} onClick={() => setDialog('download')}>Download PDF</Button>
+              <Button variant="outline" style={{ width: '100%' }} disabled={downloading} onClick={() => setDialog('download')}>{downloading ? 'Building PDF…' : 'Download PDF'}</Button>
               <Button variant="ghost" style={{ width: '100%' }} onClick={() => say('Link management is coming soon — for now, links can only be created, not revoked.')}>Manage active links</Button>
             </div>
           </div>
