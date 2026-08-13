@@ -17,6 +17,7 @@ import dashboardRoutes from './routes/dashboard.js';
 import interestRoutes from './routes/interests.js';
 import marriageRoutes from './routes/marriages.js';
 import adminRoutes from './routes/admin.js';
+import conversationRoutes from './routes/conversations.js';
 import meRoutes from './routes/me.js';
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api', dashboardRoutes);
 app.use('/api', interestRoutes);
 app.use('/api', marriageRoutes);
 app.use('/api', adminRoutes);
+app.use('/api', conversationRoutes);
 app.use('/api', meRoutes);
 
 // ── fallbacks ──

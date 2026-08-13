@@ -89,6 +89,11 @@ export const api = {
   // of their book with fromProfileId.
   sendInterest: (token, payload) => request('/interests', { method: 'POST', body: payload, token }),
 
+  // Manager-to-manager messages
+  conversations: (token) => request('/conversations', { token }),
+  conversation: (token, id) => request(`/conversations/${id}`, { token }),
+  sendMessage: (token, id, body) => request(`/conversations/${id}/messages`, { method: 'POST', body: { body }, token }),
+
   // Email verification
   verifyEmail: (token) => request('/auth/verify-email', { method: 'POST', body: { token } }),
   resendVerification: (email) => request('/auth/resend-verification', { method: 'POST', body: { email } }),

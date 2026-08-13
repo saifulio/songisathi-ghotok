@@ -12,6 +12,7 @@ import Onboarding from './Onboarding/Onboarding.jsx';
 import GuardianCandidate from './GuardianCandidate/GuardianCandidate.jsx';
 import Commission from './Commission/Commission.jsx';
 import AdminModeration from './AdminModeration/AdminModeration.jsx';
+import Messages from './Messages/Messages.jsx';
 import MyAddProfile from './MyAddProfile/MyAddProfile.jsx';
 import MySearch from './MySearch/MySearch.jsx';
 import MyBiodataStudio from './MyBiodataStudio/MyBiodataStudio.jsx';
@@ -28,6 +29,7 @@ const ELEMENTS = {
   '/commission': <Commission />,
   '/onboarding': <Onboarding />,
   '/guardian': <GuardianCandidate />,
+  '/messages': <Messages />,
   '/my-add-profile': <MyAddProfile />,
   '/my-search': <MySearch />,
   '/my-biodata': <MyBiodataStudio />,
@@ -35,4 +37,16 @@ const ELEMENTS = {
   '/admin': <AdminModeration />,
 };
 
-export const ROUTES = NAV_GROUPS.flatMap((g) => g.items).map((item) => ({ ...item, element: ELEMENTS[item.path] }));
+// A page may be listed in more than one nav group when it serves more than one
+// audience — messages are the same page for a ghotok and for a family. The nav
+// wants both entries; the router wants one route per path, allowed to whoever
+// either entry allows, so the duplicates are merged here by union of roles.
+const routeByPath = new Map();
+for (const item of NAV_GROUPS.flatMap((g) => g.items)) {
+  const seen = routeByPath.get(item.path);
+  routeByPath.set(item.path, seen
+    ? { ...seen, roles: seen.roles && item.roles ? [...new Set([...seen.roles, ...item.roles])] : undefined }
+    : item);
+}
+
+export const ROUTES = [...routeByPath.values()].map((item) => ({ ...item, element: ELEMENTS[item.path] }));

@@ -381,4 +381,42 @@ CREATE TABLE IF NOT EXISTS `activity_log` (
     CONSTRAINT `activity_log_profileId_fkey` FOREIGN KEY (`profileId`) REFERENCES `profiles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- ─────────────────────────── manager-to-manager messages ───────────────────────────
+-- One conversation per matched pair, not per request: the two managers are
+-- talking about the match, however many interests, photo requests, or release
+-- requests passed between them. The pair is stored lowest id first, so the
+-- unique index is what stops a second thread being opened the other way round.
+--
+-- There is no conversation between candidates, and none between a manager and
+-- the other side's candidate. That is the product, not an omission — the
+-- landing page sells it in as many words.
+
+CREATE TABLE IF NOT EXISTS `conversations` (
+    `id`          INTEGER     NOT NULL AUTO_INCREMENT,
+    `profileAId`  INTEGER     NOT NULL,
+    `profileBId`  INTEGER     NOT NULL,
+    `createdAt`   DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `conversations_pair_key`(`profileAId`, `profileBId`),
+    INDEX `conversations_profileBId_idx`(`profileBId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `conversations_profileAId_fkey` FOREIGN KEY (`profileAId`) REFERENCES `profiles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `conversations_profileBId_fkey` FOREIGN KEY (`profileBId`) REFERENCES `profiles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `messages` (
+    `id`             INTEGER     NOT NULL AUTO_INCREMENT,
+    `conversationId` INTEGER     NOT NULL,
+    -- The user who wrote it. A profile's manager can change; who typed cannot.
+    `senderUserId`   INTEGER     NOT NULL,
+    `body`           TEXT        NOT NULL,
+    `readAt`         DATETIME(3) NULL,
+    `createdAt`      DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `messages_conversationId_idx`(`conversationId`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `messages_conversationId_fkey` FOREIGN KEY (`conversationId`) REFERENCES `conversations`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `messages_senderUserId_fkey`   FOREIGN KEY (`senderUserId`)   REFERENCES `users`(`id`)         ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

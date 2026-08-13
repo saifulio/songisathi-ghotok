@@ -15,6 +15,7 @@ export const NAV_GROUPS = [
     items: [
       { path: '/dashboard', label: 'Dashboard', roles: ['GHOTOK'] },
       { path: '/interest-inbox', label: 'Interest inbox', roles: ['GHOTOK'] },
+      { path: '/messages', label: 'Messages', roles: ['GHOTOK'] },
       { path: '/search', label: 'Search & profiles', roles: ['GHOTOK'] },
       { path: '/add-profile', label: 'Add profile · vault', roles: ['GHOTOK'] },
       { path: '/biodata-studio', label: 'Biodata studio', roles: ['GHOTOK'] },
@@ -40,6 +41,11 @@ export const NAV_GROUPS = [
       { path: '/my-search', label: 'Search & profiles', roles: ['GUARDIAN', 'CANDIDATE'] },
       { path: '/my-biodata', label: 'Biodata studio', roles: ['GUARDIAN', 'CANDIDATE'] },
       { path: '/my-matches', label: 'AI matching', roles: ['GUARDIAN', 'CANDIDATE'] },
+      // The same page as the ghotok's Messages above: both sides of a match
+      // are managers, and they are talking to each other. Listed in both
+      // groups so each audience finds it where they already look; the router
+      // merges the two entries into one route (see pages/index.jsx).
+      { path: '/messages', label: 'Messages', roles: ['GUARDIAN', 'CANDIDATE'] },
     ],
   },
   {

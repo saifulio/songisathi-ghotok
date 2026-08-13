@@ -17,6 +17,7 @@ const schemaPath = path.join(here, 'schema.sql');
 
 // Every table, children-first, so DROP order never trips a foreign key.
 const TABLES = [
+  'messages', 'conversations',
   'activity_log', 'testimonials', 'report_evidence', 'reports',
   'verification_checks', 'verifications', 'pricing_tiers', 'payments',
   'marriages', 'interests', 'match_factors', 'match_suggestions',
