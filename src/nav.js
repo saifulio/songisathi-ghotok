@@ -7,6 +7,8 @@
 //   public: true  → anyone, signed in or not (marketing pages).
 //   roles: [...]  → must be signed in AND hold one of these roles.
 //   (neither)     → must be signed in, any role.
+// hideWhenSelfManaged: true → additionally hidden from a self-managed
+// candidate's nav. It only hides the link; the route stays reachable.
 // The router enforces this via ProtectedRoute; the nav hides what a user
 // can't reach (see Layout).
 export const NAV_GROUPS = [
@@ -19,7 +21,7 @@ export const NAV_GROUPS = [
       // one is about a match, the other about who runs a profile.
       { path: '/management-requests', label: 'Management requests', roles: ['GHOTOK'] },
       { path: '/messages', label: 'Messages', roles: ['GHOTOK'] },
-      { path: '/search', label: 'Search & profiles', roles: ['GHOTOK'] },
+      { path: '/search', label: 'Search', roles: ['GHOTOK'] },
       { path: '/add-profile', label: 'Add profile · vault', roles: ['GHOTOK'] },
       { path: '/biodata-studio', label: 'Biodata studio', roles: ['GHOTOK'] },
       { path: '/ai-matching', label: 'AI matching', roles: ['GHOTOK'] },
@@ -30,7 +32,11 @@ export const NAV_GROUPS = [
     label: 'Onboarding & family',
     items: [
       { path: '/onboarding', label: 'Onboarding & pricing', public: true },
-      { path: '/guardian', label: 'Guardian & candidate', roles: ['GUARDIAN', 'CANDIDATE'] },
+      // A self-managed candidate has no guardian standing between them and a
+      // proposal, so the page is still their landing spot (and stays routable —
+      // hiding is a nav-only rule) but the entry reads as someone else's view.
+      // Keep it out of their menu; managed candidates and guardians keep it.
+      { path: '/guardian', label: 'Guardian & candidate', roles: ['GUARDIAN', 'CANDIDATE'], hideWhenSelfManaged: true },
       // A guardian matchmakes for their own family — up to five profiles, one
       // per person. A candidate's single profile is created at signup, so the
       // page has nothing to offer them.
@@ -41,7 +47,7 @@ export const NAV_GROUPS = [
       // with the manager — a managed candidate gets all three read-only (the
       // server decides, via canSendInterest / canEdit; the pages render to
       // match, so nothing is offered that the server would refuse).
-      { path: '/my-search', label: 'Search & profiles', roles: ['GUARDIAN', 'CANDIDATE'] },
+      { path: '/my-search', label: 'Search', roles: ['GUARDIAN', 'CANDIDATE'] },
       // The matchmaker directory: a family that would rather not run its own
       // search can find a ghotok nearby and ask them to take it on for a fee.
       // Readable by every member account; sending needs standing, which the

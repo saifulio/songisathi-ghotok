@@ -1,5 +1,7 @@
 .ms { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
-.ms-frame { max-width: 1360px; margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
+/* 1544px = the app bar's 1600px inner width minus its 28px gutters, so the
+   frame (and the ms-topbar inside it) lines up with the brand and Log out. */
+.ms-frame { max-width: 1544px; margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
 
 .ms-blocked { max-width: 520px; margin: 60px auto; background: var(--surface-page); border: 1px solid var(--gold-300); border-radius: 14px; padding: 28px; text-align: center; }
 .ms-blocked-t { font-family: var(--font-serif-display); font-size: 18px; font-weight: 600; color: var(--text-primary); }
