@@ -21,10 +21,15 @@ import conversationRoutes from './routes/conversations.js';
 import meRoutes from './routes/me.js';
 import billingRoutes from './routes/billing.js';
 import ghotokRoutes from './routes/ghotoks.js';
+import photoRoutes from './routes/photos.js';
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+// Gallery photographs arrive as base64 data URLs on ordinary JSON bodies
+// (they are stored that way — see db/schema.sql), which is well past
+// Express's 100kb default. The per-photo ceiling is enforced properly in
+// lib/photos.js; this only has to be above it.
+app.use(express.json({ limit: '4mb' }));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
@@ -42,6 +47,7 @@ app.use('/api', conversationRoutes);
 app.use('/api', meRoutes);
 app.use('/api', billingRoutes);
 app.use('/api', ghotokRoutes);
+app.use('/api', photoRoutes);
 
 // ── fallbacks ──
 // Any route not matched above.

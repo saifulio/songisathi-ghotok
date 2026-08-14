@@ -22,7 +22,7 @@ const TABLES = [
   'verification_checks', 'verifications', 'pricing_tiers', 'payments',
   'marriages', 'management_requests', 'interests', 'match_factors', 'match_suggestions',
   'screening_responses', 'screening_options', 'screening_questions',
-  'profile_preferences', 'profiles', 'password_reset_tokens',
+  'profile_photos', 'profile_preferences', 'profiles', 'password_reset_tokens',
   'email_verification_tokens', 'guardians', 'ghotoks', 'users',
 ];
 

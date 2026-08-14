@@ -31,6 +31,7 @@
 .mb-pref-remove:hover { color: var(--status-error); }
 .mb-pref-add { display: flex; gap: 8px; margin-top: 10px; align-items: flex-end; }
 .mb-pref-add > div { flex: 1; }
+.mb-gallery { padding-top: 14px; border-top: 1px solid var(--border-subtle); }
 .mb-switches { display: flex; flex-direction: column; gap: 12px; padding-top: 14px; border-top: 1px solid var(--border-subtle); }
 
 .mb-right { padding: 22px 20px; display: flex; flex-direction: column; gap: 16px; }

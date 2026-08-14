@@ -1,0 +1,55 @@
+/* The two faces of the gallery: the manager's grid (GalleryManager) and the
+   viewer's slideshow (PhotoSlideshow). Shared prefix pg-, used from both
+   biodata studios and both search panels. */
+
+.pg { display: flex; flex-direction: column; gap: 12px; }
+.pg-head { display: flex; align-items: baseline; gap: 10px; }
+.pg-label { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.pg-count { font-size: 11px; color: var(--text-tertiary); margin-left: auto; font-variant-numeric: tabular-nums; }
+.pg-note { font-size: 11px; line-height: 1.55; color: var(--text-secondary); }
+
+.pg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+
+.pg-tile { position: relative; aspect-ratio: 3 / 4; border-radius: 12px; overflow: hidden; background: var(--surface-card-alt); border: 1px solid var(--border-subtle); }
+.pg-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* A photograph the queue has turned down is dimmed rather than hidden: the
+   manager has to be able to see which one it was to replace it. */
+.pg-tile.is-rejected img { filter: grayscale(1) opacity(0.45); }
+.pg-tile.is-pending img { filter: saturate(0.55); }
+
+.pg-tile-status { position: absolute; left: 6px; bottom: 6px; right: 6px; display: flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 8px; font-size: 9.5px; font-weight: 600; line-height: 1.3; background: var(--photo-lock-scrim); color: #ebdcc3; }
+.pg-tile-status.ok { background: rgba(47, 92, 62, 0.86); color: #eef5ee; }
+.pg-tile-status.no { background: rgba(140, 58, 47, 0.86); color: #f8ece9; }
+
+.pg-tile-remove { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border: none; border-radius: 50%; background: var(--photo-lock-scrim); color: #ebdcc3; font-size: 13px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.pg-tile-remove:hover { background: rgba(140, 58, 47, 0.9); color: #fff; }
+
+/* The upload tile sits in the grid as the last cell, the same size as a
+   photograph, so adding one happens where they already are. */
+.pg-add { aspect-ratio: 3 / 4; border-radius: 12px; border: 1px dashed var(--border-default); background: var(--surface-card-alt); color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font-size: 11px; text-align: center; padding: 8px; }
+.pg-add:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
+.pg-add:disabled { cursor: not-allowed; opacity: 0.55; }
+.pg-add-mark { font-size: 20px; line-height: 1; }
+.pg-empty { font-size: 11.5px; line-height: 1.55; color: var(--text-secondary); }
+.pg-review { font-size: 10.5px; line-height: 1.5; color: var(--gold-700); }
+
+.pg-lock-row { display: flex; align-items: flex-start; gap: 10px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+.pg-lock-copy { font-size: 10.5px; line-height: 1.55; color: var(--text-tertiary); }
+
+/* ── viewer slideshow ── */
+.pg-show { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 12px; overflow: hidden; background: var(--surface-card-alt); }
+.pg-show img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pg-show-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border: none; border-radius: 50%; background: var(--photo-lock-scrim); color: #ebdcc3; cursor: pointer; display: grid; place-items: center; font-size: 15px; line-height: 1; }
+.pg-show-nav:hover { background: rgba(56, 42, 31, 0.85); color: #fff; }
+.pg-show-nav.prev { left: 8px; }
+.pg-show-nav.next { right: 8px; }
+.pg-show-dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 5px; }
+.pg-show-dot { width: 6px; height: 6px; border-radius: 50%; border: none; padding: 0; background: rgba(253, 251, 246, 0.5); cursor: pointer; }
+.pg-show-dot.is-on { background: var(--gold-400); }
+
+/* The locked state reuses the blurred panel the search pages already showed
+   for a held-back photograph, so nothing about the pool's look changes. */
+.pg-locked { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 12px; overflow: hidden; }
+.pg-locked-bg { position: absolute; inset: 0; background: linear-gradient(135deg, var(--terracotta-200), var(--green-300)); filter: blur(5px); }
+.pg-locked-veil { position: absolute; inset: 0; background: var(--photo-lock-scrim); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; padding: 0 12px; text-align: center; }
+.pg-locked-veil span { font-size: 9.5px; line-height: 1.45; color: #ebdcc3; }

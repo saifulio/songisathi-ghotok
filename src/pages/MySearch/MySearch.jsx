@@ -3,6 +3,7 @@ import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Paginat
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
+import { PhotoSlideshow } from '../../components/PhotoGallery.jsx';
 import './MySearch.css';
 
 const opts = (a) => a.map((v) => ({ value: v, label: v }));
@@ -86,6 +87,19 @@ export default function MySearch() {
   };
   const list = results.filter(matches);
   const sel = list.find((r) => r.id === selected) || null;
+
+  // The selected profile's photographs, loaded on selection rather than with
+  // the results: a page of ten galleries is ten images the reader may never
+  // open, and the images travel inside the JSON (see server/lib/photos.js).
+  const [gallery, setGallery] = useState(null);
+  useEffect(() => {
+    if (!token || !sel) { setGallery(null); return undefined; }
+    let live = true;
+    api.profileGallery(token, sel.id)
+      .then((d) => { if (live) setGallery(d); })
+      .catch(() => { if (live) setGallery(null); });
+    return () => { live = false; };
+  }, [token, sel?.id]);
 
   // Ten to a page. Changing a filter shrinks the list under you, so the page
   // is clamped on render (page 9 of a 3-page result would otherwise go blank)
@@ -228,11 +242,7 @@ export default function MySearch() {
               <div className="ms-panel-body">
                 <div className="ms-panel-hero">
                   <div className="ms-panel-photo">
-                    <div className="ms-panel-photo-bg" />
-                    <div className="ms-panel-photo-lock">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EBDCC3" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4" /><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7" /></svg>
-                      <span>Photo hidden until accepted</span>
-                    </div>
+                    <PhotoSlideshow gallery={gallery} />
                   </div>
                   <div className="ms-panel-hero-info">
                     <div className="ms-panel-name-row">

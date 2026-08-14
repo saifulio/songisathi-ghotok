@@ -6,6 +6,7 @@ import './AdminModeration.css';
 
 const V_RES = { approved: { label: 'Approved — gold seal issued, ghotok notified', bg: 'var(--green-100)', fg: 'var(--brand-primary)' }, more: { label: 'Asked for a clearer photograph — awaiting reply', bg: 'var(--gold-100)', fg: 'var(--gold-700)' }, rejected: { label: 'Rejected — reason recorded, account closed', bg: 'var(--red-100)', fg: 'var(--red-700)' } };
 const R_RES = { suspended: { label: 'Suspended · both families notified, profiles paused', bg: 'var(--red-100)', fg: 'var(--red-700)' }, warned: { label: 'Warning sent to the manager', bg: 'var(--gold-100)', fg: 'var(--gold-700)' }, dismissed: { label: 'Closed with no action', bg: 'var(--surface-card-alt)', fg: 'var(--text-secondary)' } };
+const PH_RES = { approved: { label: 'Approved — visible wherever the family allows', bg: 'var(--green-100)', fg: 'var(--brand-primary)' }, rejected: { label: 'Not approved — the manager can read the reason and replace it', bg: 'var(--red-100)', fg: 'var(--red-700)' } };
 const P_RES = { confirmed: { label: 'Confirmed', bg: 'var(--green-100)', fg: 'var(--brand-primary)' }, flagged: { label: 'Not found', bg: 'var(--red-100)', fg: 'var(--red-700)' } };
 
 const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -16,6 +17,7 @@ export default function AdminModeration() {
   const [VERIFY, setVERIFY] = useState([]);
   const [REPORTS, setREPORTS] = useState([]);
   const [PAYMENTS, setPAYMENTS] = useState([]);
+  const [PHOTOS, setPHOTOS] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialog, setDialog] = useState(null);
   const [toast, setToast] = useState(null);
@@ -28,12 +30,13 @@ export default function AdminModeration() {
   useEffect(() => {
     if (!token) return undefined;
     let live = true;
-    Promise.all([api.adminVerifications(token), api.adminReports(token), api.adminPayments(token)])
-      .then(([v, r, p]) => {
+    Promise.all([api.adminVerifications(token), api.adminReports(token), api.adminPayments(token), api.adminPhotos(token)])
+      .then(([v, r, p, ph]) => {
         if (!live) return;
         setVERIFY(v.verifications);
         setREPORTS(r.reports);
         setPAYMENTS(p.payments);
+        setPHOTOS(ph.photos);
       })
       .catch((e) => say(e.message || 'Could not load the moderation queues.'))
       .finally(() => { if (live) setLoading(false); });
@@ -48,6 +51,7 @@ export default function AdminModeration() {
   const pendingP = openPayments.length;
   const owed = openPayments.reduce((n, p) => n + Number(p.amount.replace(/[^0-9]/g, '')), 0);
   const flagged = PAYMENTS.filter((p) => p.status === 'flagged').length;
+  const pendingPh = PHOTOS.filter((p) => !p.status).length;
 
   // Optimistic decision, reverted on error.
   const decide = async (list, setList, id, apiCall, decision, localStatus, successMsg) => {
@@ -67,10 +71,10 @@ export default function AdminModeration() {
     { label: 'Awaiting verification', value: String(pendingV), note: 'ghotoks', fg: 'var(--text-primary)' },
     { label: 'Open reports', value: String(pendingR), note: pendingR === 0 ? 'queue clear' : seriousOpen ? `${seriousOpen} serious` : 'none serious', fg: seriousOpen ? 'var(--terracotta-600)' : 'var(--text-primary)' },
     { label: 'Payments to match', value: String(pendingP), note: pendingP === 0 ? (flagged ? `${flagged} to chase` : 'all matched') : `৳${owed.toLocaleString('en-US')} total`, fg: 'var(--text-primary)' },
-    { label: 'Median decision time', value: '6h', note: 'target is 24h', fg: 'var(--brand-primary)' },
+    { label: 'Photos to review', value: String(pendingPh), note: pendingPh === 0 ? 'queue clear' : 'unseen outside the family', fg: 'var(--text-primary)' },
   ];
-  const tabs = [{ value: 'verify', label: 'Verification', count: pendingV }, { value: 'reports', label: 'Reports', count: pendingR }, { value: 'payments', label: 'Payments', count: pendingP }];
-  const queueNote = { verify: 'Oldest first · a ghotok waiting on a seal cannot appear in the trusted pool', reports: 'Serious first · nothing here requires opening a sealed section', payments: 'Matched against the merchant statement by hand' }[tab];
+  const tabs = [{ value: 'verify', label: 'Verification', count: pendingV }, { value: 'reports', label: 'Reports', count: pendingR }, { value: 'payments', label: 'Payments', count: pendingP }, { value: 'photos', label: 'Photos', count: pendingPh }];
+  const queueNote = { verify: 'Oldest first · a ghotok waiting on a seal cannot appear in the trusted pool', reports: 'Serious first · nothing here requires opening a sealed section', payments: 'Matched against the merchant statement by hand', photos: 'Oldest first · nobody outside the family sees a photograph until it clears this queue' }[tab];
 
   const dlg = dialog ? {
     title: 'Suspend this ghotok?',
@@ -257,6 +261,52 @@ export default function AdminModeration() {
                     );
                   })}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {tab === 'photos' && (
+            <div className="ad-photos">
+              <div className="ad-pay-note">
+                <div>
+                  <div className="ad-pay-note-t">A photograph is nobody's but the family's until you pass it</div>
+                  <div className="ad-pay-note-b">
+                    An upload is held from the moment it arrives: the manager who sent it can see it, you can see it,
+                    and no one else. Approving it does not publish it — a family that keeps its gallery on request
+                    still decides who gets to look, one proposal at a time.
+                  </div>
+                </div>
+              </div>
+              <div className="ad-photo-grid">
+                {loading && <div className="ad-card">Loading…</div>}
+                {!loading && PHOTOS.length === 0 && <div className="ad-card">No photographs waiting.</div>}
+                {PHOTOS.map((ph) => {
+                  const res = PH_RES[ph.status];
+                  return (
+                    <div key={ph.id} className="ad-card ad-photo-card">
+                      <div className="ad-photo-frame"><img src={ph.src} alt="" /></div>
+                      <div className="ad-photo-id">
+                        <span className="ad-v-name">{ph.name}</span>
+                        <span className="ad-v-id">{ph.prn}</span>
+                      </div>
+                      <div className="ad-v-meta">{ph.meta}</div>
+                      <div className="ad-photo-flags">
+                        <Badge tone={ph.photoLocked ? 'neutral' : 'warning'}>
+                          {ph.photoLocked ? 'Gallery held on request' : 'Gallery open to the pool'}
+                        </Badge>
+                        <span className="ad-photo-size">{ph.sizeLabel}</span>
+                      </div>
+                      {ph.status ? (
+                        <div className="ad-res" style={{ background: res.bg, color: res.fg }}>{res.label}</div>
+                      ) : (
+                        <div className="ad-actions">
+                          <Button variant="primary" size="sm" onClick={() => decide(PHOTOS, setPHOTOS, ph.id, api.decidePhoto, 'APPROVE', 'approved', `Approved. It joins ${ph.name.split(' ')[0]}'s gallery${ph.photoLocked ? ', still held back until their family releases it' : ''}.`)}>Approve</Button>
+                          <Button variant="ghost" size="sm" onClick={() => decide(PHOTOS, setPHOTOS, ph.id, api.decidePhoto, 'REJECT', 'rejected', 'Not approved. The manager sees the decision on their own gallery and can replace it.')}>Reject</Button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

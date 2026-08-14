@@ -116,6 +116,18 @@ export const api = {
   conversation: (token, id) => request(`/conversations/${id}`, { token }),
   sendMessage: (token, id, body) => request(`/conversations/${id}/messages`, { method: 'POST', body: { body }, token }),
 
+  // The photo gallery. A manager's own gallery is /my-gallery — a ghotok
+  // names the profile in the query string, a family's comes from the
+  // switcher, the same way every other member read works. Another family's
+  // gallery is read by profile id and may come back locked.
+  myGallery: (token, profileId) => request(forProfile('/my-gallery', profileId), { token }),
+  uploadPhoto: (token, image, profileId) => request('/my-gallery', { method: 'POST', body: { image, profileId }, token }),
+  setGalleryLock: (token, photoLocked, profileId) => request('/my-gallery', { method: 'PATCH', body: { photoLocked, profileId }, token }),
+  deletePhoto: (token, photoId, profileId) => request(`/my-gallery/${photoId}`, { method: 'DELETE', body: { profileId }, token }),
+  profileGallery: (token, profileId) => request(`/profiles/${profileId}/gallery`, { token }),
+  adminPhotos: (token) => request('/admin/photos', { token }),
+  decidePhoto: (token, id, patch) => request(`/admin/photos/${id}`, { method: 'PATCH', body: patch, token }),
+
   // Email verification
   verifyEmail: (token) => request('/auth/verify-email', { method: 'POST', body: { token } }),
   resendVerification: (email) => request('/auth/resend-verification', { method: 'POST', body: { email } }),

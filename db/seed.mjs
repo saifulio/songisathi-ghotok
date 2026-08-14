@@ -9,13 +9,23 @@ import pool, { withTransaction, insert } from './pool.js';
 const hash = (pw) => bcrypt.hashSync(pw, 10);
 const dobFromAge = (age) => new Date(Date.UTC(2026 - age, 0, 1));
 
+// A stand-in portrait: a 3:4 SVG panel, tinted from the PRN so a profile's
+// photographs look like a set and two profiles never look alike.
+const PHOTO_TINTS = [['#C9A227', '#7A8450'], ['#B4654A', '#8C6A56'], ['#5C7A6B', '#A88B5A'], ['#8A6BA8', '#5A7FA8']];
+function placeholderPhoto(prn, index) {
+  const seed = [...prn].reduce((n, c) => n + c.charCodeAt(0), 0);
+  const [from, to] = PHOTO_TINTS[(seed + index) % PHOTO_TINTS.length];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${from}"/><stop offset="1" stop-color="${to}"/></linearGradient></defs><rect width="300" height="400" fill="url(#g)"/><circle cx="150" cy="158" r="56" fill="rgba(253,251,246,0.35)"/><path d="M60 400c0-52 40-94 90-94s90 42 90 94z" fill="rgba(253,251,246,0.35)"/><text x="150" y="376" text-anchor="middle" font-family="Georgia, serif" font-size="19" fill="rgba(253,251,246,0.85)">${prn} · ${index + 1}</text></svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg, 'utf8').toString('base64')}`;
+}
+
 // Delete every table's rows, children first (FK-safe).
 async function clearAll(tx) {
   const order = [
     'activity_log', 'testimonials', 'report_evidence', 'reports',
     'verification_checks', 'verifications', 'member_subscriptions', 'payments', 'marriages',
     'management_requests', 'match_factors', 'match_suggestions', 'interests', 'screening_responses',
-    'screening_options', 'screening_questions', 'profile_preferences',
+    'screening_options', 'screening_questions', 'profile_preferences', 'profile_photos',
     'profiles', 'guardians', 'ghotoks', 'pricing_tiers',
     'password_reset_tokens', 'email_verification_tokens', 'users',
   ];
@@ -332,6 +342,38 @@ async function main() {
         [profileIdByPrn['PRN-31206'], label, enabled]);
     }
 
+    // ── gallery photographs ──
+    // Placeholder portraits, not photographs of anyone: an SVG panel in the
+    // profile's own colours, so the slideshow, the lock, and the moderation
+    // queue all have something real to render without shipping face images
+    // in the repository. A real upload is a JPEG or PNG data URL of the same
+    // shape (see server/lib/photos.js).
+    const photoDefs = [
+      // Nusrat is the worked example throughout the app: an approved gallery
+      // behind a locked switch, which is what a photo request unlocks.
+      { prn: 'PRN-10245', count: 3, status: 'APPROVED' },
+      { prn: 'PRN-24410', count: 2, status: 'APPROVED' },
+      // Tasnim runs her own profile — one approved, one still in the queue,
+      // so the studio shows both states to the person who uploaded them.
+      { prn: 'PRN-31206', count: 1, status: 'APPROVED' },
+      { prn: 'PRN-31206', count: 1, status: 'PENDING' },
+      // Farhana's guardian uploaded these; they give the admin queue work.
+      { prn: 'PRN-31204', count: 2, status: 'PENDING' },
+    ];
+    for (const def of photoDefs) {
+      const profileId = profileIdByPrn[def.prn];
+      if (!profileId) continue;
+      for (let i = 0; i < def.count; i++) {
+        const data = placeholderPhoto(def.prn, i);
+        await insert(
+          tx,
+          `INSERT INTO profile_photos (profileId, uploadedByUserId, data, mimeType, byteSize, status, reviewedAt)
+           VALUES (?, NULL, ?, 'image/svg+xml', ?, ?, ?)`,
+          [profileId, data, Buffer.byteLength(data, 'utf8'), def.status, def.status === 'APPROVED' ? new Date() : null]
+        );
+      }
+    }
+
     // ── profile preferences + sealed screening (bulk population) ──
     // Without these two the "Family is looking for" line reads "—" on every
     // generated profile and the "Screening completed" filter matches nothing.
@@ -534,7 +576,7 @@ async function main() {
   });
 
   // ── summary ──
-  const tablesToCount = ['users', 'ghotoks', 'guardians', 'profiles', 'match_suggestions', 'interests', 'management_requests', 'marriages', 'payments', 'member_subscriptions', 'reports', 'verifications'];
+  const tablesToCount = ['users', 'ghotoks', 'guardians', 'profiles', 'profile_photos', 'match_suggestions', 'interests', 'management_requests', 'marriages', 'payments', 'member_subscriptions', 'reports', 'verifications'];
   const counts = {};
   for (const t of tablesToCount) {
     const [rows] = await pool.execute(`SELECT COUNT(*) AS n FROM \`${t}\``);

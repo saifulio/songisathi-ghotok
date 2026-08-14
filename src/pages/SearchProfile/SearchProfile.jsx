@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Dialog, Pagination, RangeSlider } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import { PhotoSlideshow } from '../../components/PhotoGallery.jsx';
 import './SearchProfile.css';
 
 const opts = (a) => a.map((v) => ({ value: v, label: v }));
@@ -93,6 +94,19 @@ export default function SearchProfile() {
 
   const iState = sel ? interest[sel.id] : null;
   const pState = sel ? photoReq[sel.id] : null;
+
+  // The selected profile's photographs. Loaded per selection, not with the
+  // page of results — the images ride inside the JSON (server/lib/photos.js),
+  // so a list of ten would carry ten galleries nobody asked to see.
+  const [gallery, setGallery] = useState(null);
+  useEffect(() => {
+    if (!token || !sel) { setGallery(null); return undefined; }
+    let live = true;
+    api.profileGallery(token, sel.id)
+      .then((d) => { if (live) setGallery(d); })
+      .catch(() => { if (live) setGallery(null); });
+    return () => { live = false; };
+  }, [token, sel?.id, pState]);
   const isReleased = sel ? !!released[sel.id] : false;
 
   const chips = [];
@@ -257,13 +271,10 @@ export default function SearchProfile() {
               <div className="sp-panel-body">
                 <div className="sp-panel-hero">
                   <div className="sp-panel-photo">
-                    <div className="sp-panel-photo-bg" style={{ filter: pState === 'granted' ? 'none' : 'blur(5px)' }} />
-                    {pState !== 'granted' && (
-                      <div className="sp-panel-photo-lock">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EBDCC3" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4" /><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7" /></svg>
-                        <span>{pState === 'pending' ? 'Request pending' : 'Request photo access'}</span>
-                      </div>
-                    )}
+                    {/* pState is this session's record of asking; the gallery
+                        is the server's answer. A photo released while the tab
+                        was open shows without the local flag being touched. */}
+                    <PhotoSlideshow gallery={gallery} locked={gallery ? gallery.locked && pState !== 'granted' : true} />
                   </div>
                   <div className="sp-panel-hero-info">
                     <div className="sp-panel-name-row">

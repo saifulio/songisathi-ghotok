@@ -119,7 +119,14 @@ CANDIDATE (self-managed — signed up as a bride)
                                   + 1 ACCEPTED contact-release.
   · Commission (/commission):     5 marriages in Rahima's ledger
                                   (PAID / PART_PAID / UNPAID mix; ৳ outstanding).
-  · Admin Moderation (/admin):    3 verifications, 3 reports, 5 pending payments.
+  · Admin Moderation (/admin):    3 verifications, 3 reports, 5 pending payments,
+                                  3 photographs waiting for review.
+  · Photo galleries:              Nusrat PRN-10245 — 3 approved, gallery open;
+                                  Rifat PRN-24410 — 2 approved, held on request;
+                                  Tasnim PRN-31206 — 1 approved + 1 in the queue;
+                                  Farhana PRN-31204 — 2 in the queue.
+                                  Seeded images are placeholder SVG panels, not
+                                  photographs of anyone.
   · Sealed vault (/add-profile):  Nusrat (PRN-10245) has 6 sealed screening
                                   answers (answered by the guardian).
   · Pricing (/onboarding):        3 tiers — Solo / Bureau / Agency.

@@ -3,6 +3,7 @@ import { Button, Avatar, Switch, Input, Select, Badge } from '../../components/u
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
+import { GalleryManager } from '../../components/PhotoGallery.jsx';
 import './MyBiodataStudio.css';
 
 const FIELDS = [
@@ -58,7 +59,6 @@ export default function MyBiodataStudio() {
         setForm({
           ...Object.fromEntries(FIELDS.map((f) => [f.k, data.profile[f.k] || ''])),
           familyType: data.profile.familyType || '',
-          photoLocked: data.profile.photoLocked,
           inNetworkPool: data.profile.inNetworkPool,
         });
         setPrefs(data.profile.preferences || []);
@@ -87,11 +87,7 @@ export default function MyBiodataStudio() {
       reload().catch(() => { /* the switcher keeps its previous copy */ });
       // Publishing turns pool sharing on server-side; mirror the saved flags
       // back into the form so the next "Save changes" doesn't undo it.
-      setForm((s) => ({
-        ...s,
-        photoLocked: Boolean(data.profile.photoLocked),
-        inNetworkPool: Boolean(data.profile.inNetworkPool),
-      }));
+      setForm((s) => ({ ...s, inNetworkPool: Boolean(data.profile.inNetworkPool) }));
       say(extra.publish ? 'Published — your profile is now searchable in the network.' : 'Biodata saved.');
     } catch (e) {
       say(e.message || 'Could not save your biodata.');
@@ -165,8 +161,14 @@ export default function MyBiodataStudio() {
               )}
             </div>
 
+            {/* The gallery keeps its own switch (it holds the whole gallery
+                back), so the biodata save no longer sends photoLocked — one
+                column, one place that writes it. */}
+            <div className="mb-gallery">
+              <GalleryManager profileId={activeId} canEdit={canEdit} onError={say} />
+            </div>
+
             <div className="mb-switches">
-              <Switch label="Keep photo locked (released only on request)" checked={form.photoLocked !== false} disabled={!canEdit} onChange={() => canEdit && setF('photoLocked', !(form.photoLocked !== false))} />
               <Switch label="Share in the trusted network pool" checked={!!form.inNetworkPool} disabled={!canEdit} onChange={() => canEdit && setF('inNetworkPool', !form.inNetworkPool)} />
             </div>
           </div>

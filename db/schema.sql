@@ -157,6 +157,44 @@ CREATE TABLE IF NOT EXISTS `profile_preferences` (
 
 -- ─────────────────────────── sealed screening layer ───────────────────────────
 
+-- ─────────────────────────── the photo gallery ───────────────────────────
+-- Several photographs per profile, uploaded by whoever manages it — the
+-- candidate themselves, a guardian, or the ghotok whose book it sits in.
+--
+-- The image itself lives here, as a data URL in `data`: the deployment has no
+-- object store and no writable upload directory, so the database is the one
+-- place a row and its bytes stay together. That makes `data` expensive to
+-- read, so nothing SELECTs it by accident — the list queries name their
+-- columns and leave it out, and only the endpoints that actually hand an
+-- image over ask for it.
+--
+-- Every upload waits: `status` starts PENDING and only its own manager (and
+-- an admin) can see it until the moderation queue passes it. Whether an
+-- approved photo is then public or held back is not decided here — that is
+-- profiles.photoLocked, one switch over the whole gallery, unlocked for a
+-- particular family by an accepted PHOTO_REQUEST in `interests`.
+CREATE TABLE IF NOT EXISTS `profile_photos` (
+    `id`               INTEGER      NOT NULL AUTO_INCREMENT,
+    `profileId`        INTEGER      NOT NULL,
+    -- Who put it there. A profile's manager can change; who uploaded cannot.
+    `uploadedByUserId` INTEGER      NULL,
+    `data`             LONGTEXT     NOT NULL,
+    `mimeType`         VARCHAR(64)  NOT NULL,
+    `byteSize`         INTEGER      NOT NULL DEFAULT 0,
+    `status`           ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING',
+    -- What the moderator said, shown back to the manager on a rejection so a
+    -- re-upload can fix the actual problem.
+    `reviewNote`       VARCHAR(191) NULL,
+    `reviewedAt`       DATETIME(3)  NULL,
+    `createdAt`        DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `profile_photos_profileId_idx`(`profileId`),
+    INDEX `profile_photos_status_idx`(`status`),
+    PRIMARY KEY (`id`),
+    CONSTRAINT `profile_photos_profileId_fkey`        FOREIGN KEY (`profileId`)        REFERENCES `profiles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `profile_photos_uploadedByUserId_fkey` FOREIGN KEY (`uploadedByUserId`) REFERENCES `users`(`id`)    ON DELETE SET NULL ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `screening_questions` (
     `id`         INTEGER      NOT NULL AUTO_INCREMENT,
     `code`       VARCHAR(191) NOT NULL,

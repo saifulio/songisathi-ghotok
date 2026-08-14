@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Button, Avatar, Checkbox, Switch, Radio, Select, Dialog } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import { GalleryManager } from '../../components/PhotoGallery.jsx';
 import { downloadBiodataPdf, pageCountFor } from '../../lib/biodataPdf.js';
 import './BiodataStudio.css';
 
@@ -256,6 +257,13 @@ export default function BiodataStudio() {
 
           {/* right: disclosure */}
           <div className="bs-right">
+            {/* The profile's own gallery, which is not the same thing as the
+                sheet's photograph below: these are the photographs families
+                see in the pool, once a moderator has passed them. */}
+            <div className="bs-gallery">
+              <GalleryManager profileId={profile.id} onError={say} />
+            </div>
+
             <div>
               <div className="bs-label">What this sheet reveals</div>
               <div className="bs-right-sub">Once forwarded, a biodata travels on its own. These defaults assume it will.</div>

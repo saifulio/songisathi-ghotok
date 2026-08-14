@@ -60,6 +60,7 @@
 .bs-qr-cap { font-size: 9.5px; color: var(--text-secondary); margin-top: 5px; }
 
 .bs-right-sub { font-size: 11px; line-height: 1.6; color: var(--text-secondary); margin-top: 6px; }
+.bs-gallery { padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle); }
 .bs-controls { display: flex; flex-direction: column; gap: 13px; }
 .bs-photo-modes { padding-left: 4px; display: flex; flex-direction: column; gap: 9px; }
 .bs-photo-mode { padding: 10px 12px; border-radius: 11px; border: 1px solid var(--border-subtle); cursor: pointer; }
