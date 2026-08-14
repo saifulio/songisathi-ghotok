@@ -6,10 +6,10 @@ import { query, queryOne, withTransaction, insert } from '../../db/pool.js';
 import { bad } from '../lib/http.js';
 import { yearsSince } from '../lib/format.js';
 import {
-  profileCard, searchProfile, POOL_PROFILE_SELECT, preferencesFor, planFullRefusal,
+  profileCard, searchProfile, profileDetail, POOL_PROFILE_SELECT, preferencesFor, planFullRefusal,
 } from '../lib/profiles.js';
 import { nextPrn } from '../lib/refs.js';
-import { requireAuth, ghotokOnly } from '../middleware.js';
+import { requireAuth, ghotokOnly, managerOnly } from '../middleware.js';
 
 const router = express.Router();
 
@@ -153,6 +153,35 @@ router.get('/profiles/search', ghotokOnly, async (req, res) => {
   return res.json({
     profiles: rows.map((r) => searchProfile(r, req.ghotok.id, prefsByProfile[r.id] || [])),
   });
+});
+
+// ── one profile, in full, for whoever may read it ──
+// The profile detail page, from either chair: a ghotok reading their own book
+// or the pool, a family reading the pool or one of their own. Visibility is
+// the same rule each side's search already applies — a ghotok sees their book
+// plus anything pooled, a family sees their own plus anything pooled and
+// active — so this route opens nothing that was not already findable.
+//
+// Declared above /profiles/:id only for company; Express matches the two
+// paths distinctly either way.
+router.get('/profiles/:id/detail', managerOnly, async (req, res) => {
+  const rows = await query(`${POOL_PROFILE_SELECT} WHERE p.id = ? LIMIT 1`, [Number(req.params.id)]);
+  const r = rows[0];
+  if (!r) return bad(res, 'Profile not found.', 404);
+
+  const isGhotok = req.auth.role === 'GHOTOK';
+  const mine = isGhotok
+    ? r.managedByGhotokId === req.ghotok.id
+    : (req.myProfiles || []).some((p) => p.id === r.id);
+  // A pooled profile is readable by anyone in the network; a ghotok also
+  // reads their own book's drafts and archived profiles, which is where they
+  // do the work of getting one ready.
+  const pooled = Boolean(r.inNetworkPool)
+    && (isGhotok ? !['DRAFT', 'AUTO_ARCHIVED'].includes(r.status) : r.status === 'ACTIVE');
+  if (!mine && !pooled) return bad(res, 'That profile is not one you can see.', 403);
+
+  const prefsByProfile = await preferencesFor([r.id]);
+  return res.json({ profile: profileDetail(r, mine, prefsByProfile[r.id] || []) });
 });
 
 // ── full detail for one profile (biodata studio) ──

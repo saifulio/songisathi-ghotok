@@ -46,6 +46,9 @@ export const api = {
   profiles: (token) => request('/profiles', { token }),
   searchProfiles: (token) => request('/profiles/search', { token }),
   profileDetail: (token, id) => request(`/profiles/${id}`, { token }),
+  // Everything one profile holds, for the detail page — readable from either
+  // chair, unlike profileDetail above, which is a ghotok reading their book.
+  profileFull: (token, id) => request(`/profiles/${id}/detail`, { token }),
   updateProfile: (token, id, patch) => request(`/profiles/${id}`, { method: 'PATCH', body: patch, token }),
 
   // Dashboard

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Dialog, Pagination, RangeSlider } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
@@ -274,7 +275,7 @@ export default function SearchProfile() {
                     {/* pState is this session's record of asking; the gallery
                         is the server's answer. A photo released while the tab
                         was open shows without the local flag being touched. */}
-                    <PhotoSlideshow gallery={gallery} locked={gallery ? gallery.locked && pState !== 'granted' : true} />
+                    <PhotoSlideshow gallery={gallery} locked={gallery ? gallery.locked && pState !== 'granted' : true} expandable />
                   </div>
                   <div className="sp-panel-hero-info">
                     <div className="sp-panel-name-row">
@@ -340,6 +341,9 @@ export default function SearchProfile() {
                 {iState === 'pending' && <div className="sp-interest-sent">Interest sent — awaiting {sel.managedBy.split(' ')[0]}’s reply</div>}
                 {iState === 'declined' && <div className="sp-interest-none">Declined — {sel.managedBy.split(' ')[0]} was not able to take it further.</div>}
                 {iState === 'accepted' && !isReleased && <Button variant="primary" style={{ width: '100%' }} onClick={() => setDialog('release')}>Release contact details</Button>}
+                {/* The panel carries what a decision to read further is made
+                    on; the full biodata is a page of its own. */}
+                <Link className="sp-full-link" to={`/profile/${sel.id}`}>View the full profile →</Link>
                 <div className="sp-panel-actions-row">
                   <Button variant="outline" style={{ flex: 1 }} onClick={() => { if (pState !== 'granted') setDialog('photo'); else say('Photo already released for this request.'); }}>{photoBtnLabel}</Button>
                   <Button variant="ghost" style={{ flex: 1 }} onClick={() => say(`${sel.name} added to your shortlist for this candidate.`)}>Shortlist</Button>

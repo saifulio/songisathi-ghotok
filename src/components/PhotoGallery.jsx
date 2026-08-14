@@ -163,16 +163,81 @@ export function GalleryManager({ profileId, canEdit = true, onError }) {
   );
 }
 
+// The full-screen slideshow, opened by clicking a photograph. Every approved
+// photograph at the size it was uploaded, with the keyboard doing what the
+// arrows do — a family looking properly at a face should not have to squint
+// at a thumbnail in a side panel.
+export function PhotoLightbox({ photos, startAt = 0, onClose }) {
+  const [at, setAt] = useState(startAt);
+  const count = photos.length;
+  const step = useCallback((delta) => setAt((i) => (i + delta + count) % count), [count]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+      else if (e.key === 'ArrowLeft') step(-1);
+      else if (e.key === 'ArrowRight') step(1);
+    };
+    window.addEventListener('keydown', onKey);
+    // The page behind must not scroll under the overlay.
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose, step]);
+
+  if (!count) return null;
+
+  return (
+    <div className="pg-lb" role="dialog" aria-modal="true" aria-label="Photographs" onClick={onClose}>
+      {/* Clicks inside the frame belong to the slideshow; the backdrop closes. */}
+      <div className="pg-lb-frame" onClick={(e) => e.stopPropagation()}>
+        <div className="pg-lb-bar">
+          <span className="pg-lb-count">{at + 1} of {count}</span>
+          <button className="pg-lb-close" onClick={onClose} aria-label="Close">×</button>
+        </div>
+        <div className="pg-lb-stage">
+          <img src={photos[at].src} alt={`Photograph ${at + 1}`} />
+          {count > 1 && (
+            <>
+              <button className="pg-lb-nav prev" onClick={() => step(-1)} aria-label="Previous photograph">‹</button>
+              <button className="pg-lb-nav next" onClick={() => step(1)} aria-label="Next photograph">›</button>
+            </>
+          )}
+        </div>
+        {count > 1 && (
+          <div className="pg-lb-strip">
+            {photos.map((p, i) => (
+              <button
+                key={p.id}
+                className={`pg-lb-thumb ${i === at ? 'is-on' : ''}`}
+                onClick={() => setAt(i)}
+                aria-label={`Photograph ${i + 1}`}
+              >
+                <img src={p.src} alt="" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // The viewer's side. `gallery` is what GET /profiles/:id/gallery returned —
 // the caller loads it, because the pages that show this already fetch the
-// profile it belongs to.
-export function PhotoSlideshow({ gallery, locked: lockedProp, onRequest }) {
+// profile it belongs to. With `expandable` set, clicking the photograph opens
+// the whole gallery full-screen (PhotoLightbox above).
+export function PhotoSlideshow({ gallery, locked: lockedProp, onRequest, expandable = false }) {
   const [at, setAt] = useState(0);
+  const [open, setOpen] = useState(false);
   const photos = gallery?.photos || [];
   const count = gallery?.count ?? photos.length;
   const locked = lockedProp ?? gallery?.locked;
 
-  useEffect(() => { setAt(0); }, [gallery]);
+  useEffect(() => { setAt(0); setOpen(false); }, [gallery]);
 
   if (locked || !photos.length) {
     return (
@@ -194,8 +259,16 @@ export function PhotoSlideshow({ gallery, locked: lockedProp, onRequest }) {
   const step = (delta) => setAt((i) => (i + delta + photos.length) % photos.length);
 
   return (
-    <div className="pg-show">
-      <img src={photos[at].src} alt="" />
+    <div className={`pg-show ${expandable ? 'is-expandable' : ''}`}>
+      {expandable ? (
+        <button className="pg-show-open" onClick={() => setOpen(true)} aria-label="View photographs full screen">
+          <img src={photos[at].src} alt="" />
+          <span className="pg-show-hint">View all {photos.length}</span>
+        </button>
+      ) : (
+        <img src={photos[at].src} alt="" />
+      )}
+      {open && <PhotoLightbox photos={photos} startAt={at} onClose={() => setOpen(false)} />}
       {photos.length > 1 && (
         <>
           <button className="pg-show-nav prev" onClick={() => step(-1)} aria-label="Previous photograph">‹</button>

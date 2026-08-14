@@ -5,6 +5,7 @@ import { ProtectedRoute, PublicOnlyRoute } from './components/RouteGuards.jsx';
 import SignIn from './pages/Auth/SignIn.jsx';
 import SignUp from './pages/Auth/SignUp.jsx';
 import LandingPage from './pages/LandingPage/LandingPage.jsx';
+import ProfileDetails from './pages/ProfileDetails/ProfileDetails.jsx';
 
 function LayoutRoute() {
   return (
@@ -35,6 +36,15 @@ export default function App() {
             element={r.public ? r.element : <ProtectedRoute roles={r.roles}>{r.element}</ProtectedRoute>}
           />
         ))}
+        {/* One profile in full. Reached from a search result rather than from
+            the nav — it is about a particular profile, so it takes an id and
+            has no menu entry of its own (hence not in nav.js). Open to every
+            manager; which profiles each may actually read is the server's
+            call (GET /profiles/:id/detail). */}
+        <Route
+          path="/profile/:id"
+          element={<ProtectedRoute roles={['GHOTOK', 'GUARDIAN', 'CANDIDATE']}><ProfileDetails /></ProtectedRoute>}
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

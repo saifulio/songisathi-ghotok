@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Pagination, RangeSlider } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
@@ -242,7 +243,7 @@ export default function MySearch() {
               <div className="ms-panel-body">
                 <div className="ms-panel-hero">
                   <div className="ms-panel-photo">
-                    <PhotoSlideshow gallery={gallery} />
+                    <PhotoSlideshow gallery={gallery} expandable />
                   </div>
                   <div className="ms-panel-hero-info">
                     <div className="ms-panel-name-row">
@@ -272,6 +273,9 @@ export default function MySearch() {
               </div>
 
               <div className="ms-panel-actions">
+                {/* The panel is the summary a family reads first; the whole
+                    biodata has a page of its own. */}
+                <Link className="ms-full-link" to={`/profile/${sel.id}`}>View the full profile →</Link>
                 {!canSendInterest
                   ? <div className="ms-interest-sent">Your manager sends interest on your behalf — show them this profile.</div>
                   : !sent[sel.id]

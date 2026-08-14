@@ -47,6 +47,34 @@
 .pg-show-dot { width: 6px; height: 6px; border-radius: 50%; border: none; padding: 0; background: rgba(253, 251, 246, 0.5); cursor: pointer; }
 .pg-show-dot.is-on { background: var(--gold-400); }
 
+/* The photograph doubles as the button that opens the lightbox, so it fills
+   its frame exactly as the plain <img> above it does. */
+.pg-show-open { position: absolute; inset: 0; padding: 0; border: none; background: none; cursor: zoom-in; display: block; width: 100%; height: 100%; }
+.pg-show-open img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pg-show-hint { position: absolute; top: 8px; left: 8px; padding: 4px 8px; border-radius: 8px; font-size: 9.5px; font-weight: 600; background: var(--photo-lock-scrim); color: #ebdcc3; opacity: 0; transition: opacity var(--motion-fast, 140ms) ease; }
+.pg-show.is-expandable:hover .pg-show-hint, .pg-show-open:focus-visible .pg-show-hint { opacity: 1; }
+
+/* ── full-screen slideshow ── */
+.pg-lb { position: fixed; inset: 0; z-index: 90; background: rgba(36, 26, 18, 0.92); display: flex; align-items: center; justify-content: center; padding: clamp(12px, 3vw, 32px); }
+.pg-lb-frame { display: flex; flex-direction: column; gap: 12px; max-width: min(880px, 100%); max-height: 100%; width: 100%; }
+.pg-lb-bar { display: flex; align-items: center; gap: 12px; color: var(--ivory-300); font-size: 12px; font-variant-numeric: tabular-nums; }
+.pg-lb-count { margin-right: auto; }
+.pg-lb-close { width: 32px; height: 32px; border: none; border-radius: 50%; background: rgba(253, 251, 246, 0.12); color: var(--ivory-100); font-size: 20px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.pg-lb-close:hover { background: rgba(253, 251, 246, 0.24); }
+
+.pg-lb-stage { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; }
+.pg-lb-stage img { max-width: 100%; max-height: min(70vh, 640px); object-fit: contain; border-radius: 12px; display: block; }
+.pg-lb-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border: none; border-radius: 50%; background: rgba(253, 251, 246, 0.14); color: var(--ivory-100); font-size: 22px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.pg-lb-nav:hover { background: rgba(253, 251, 246, 0.28); }
+.pg-lb-nav.prev { left: 0; }
+.pg-lb-nav.next { right: 0; }
+
+.pg-lb-strip { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.pg-lb-thumb { width: 52px; height: 68px; padding: 0; border: 2px solid transparent; border-radius: 8px; overflow: hidden; background: none; cursor: pointer; }
+.pg-lb-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0.6; }
+.pg-lb-thumb.is-on { border-color: var(--gold-400); }
+.pg-lb-thumb.is-on img, .pg-lb-thumb:hover img { opacity: 1; }
+
 /* The locked state reuses the blurred panel the search pages already showed
    for a held-back photograph, so nothing about the pool's look changes. */
 .pg-locked { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 12px; overflow: hidden; }

@@ -84,23 +84,32 @@ export async function preferencesFor(ids) {
   return byProfile;
 }
 
+// Who runs a profile, as the two lines every view of it shows: the manager's
+// name and the meta beneath. `mine` is whether the reader is that manager —
+// their own book says how many marriages it has closed, someone else's book
+// is just a pool member.
+export function managerOf(r, mine) {
+  if (r.managerType === 'GHOTOK') {
+    return {
+      managedBy: `${r.ghotokName || 'Ghotok'} (ghotok)`,
+      mgrMeta: [r.ghotokCode, r.ghotokDistrict].filter(Boolean).join(' · ')
+        + (mine ? ` · ${r.ghotokMarriages} marriages` : ' · pool member'),
+    };
+  }
+  if (r.managerType === 'GUARDIAN') {
+    return {
+      managedBy: `Guardian — ${r.guardianName || ''}`.trim(),
+      mgrMeta: [r.guardianRelation, 'self-managed family'].filter(Boolean).join(' · '),
+    };
+  }
+  return { managedBy: `${r.candidateName || r.fullName} (self)`, mgrMeta: 'Self-managed' };
+}
+
 // A POOL_PROFILE_SELECT row → the shape the search UI expects. myGhotokId is
 // null for a guardian / candidate, who has no book of their own.
 export function searchProfile(r, myGhotokId, prefLabels) {
   const mine = r.managedByGhotokId === myGhotokId;
-  let managedBy;
-  let mgrMeta;
-  if (r.managerType === 'GHOTOK') {
-    managedBy = `${r.ghotokName || 'Ghotok'} (ghotok)`;
-    mgrMeta = [r.ghotokCode, r.ghotokDistrict].filter(Boolean).join(' · ')
-      + (mine ? ` · ${r.ghotokMarriages} marriages` : ' · pool member');
-  } else if (r.managerType === 'GUARDIAN') {
-    managedBy = `Guardian — ${r.guardianName || ''}`.trim();
-    mgrMeta = [r.guardianRelation, 'self-managed family'].filter(Boolean).join(' · ');
-  } else {
-    managedBy = `${r.candidateName || r.fullName} (self)`;
-    mgrMeta = 'Self-managed';
-  }
+  const { managedBy, mgrMeta } = managerOf(r, mine);
   return {
     id: r.id,
     prn: r.prn,
@@ -126,6 +135,57 @@ export function searchProfile(r, myGhotokId, prefLabels) {
     siblings: r.siblings || '—',
     religion: [r.religion, r.religiousPractice].filter(Boolean).join(' · ') || '—',
     looking: prefLabels.length ? prefLabels.join(', ') : '—',
+  };
+}
+
+// A POOL_PROFILE_SELECT row → the whole profile, for the detail page.
+//
+// The search mapper above folds fields together for a card ("family" is family
+// type and father's info joined); this one keeps them apart, because the detail
+// page has room to name each one. What it still does not carry: the sealed
+// screening answers (only that there are some), the date of birth (age is what
+// a family is told), and contact details, which no read of a profile has ever
+// returned — they are released by hand, from the interest, or not at all.
+export function profileDetail(r, mine, prefLabels) {
+  const { managedBy, mgrMeta } = managerOf(r, mine);
+  const sealedCount = Number(r.sealedCount) || 0;
+  return {
+    id: r.id,
+    prn: r.prn,
+    name: r.fullName,
+    gender: r.gender,
+    genderLabel: r.gender === 'FEMALE' ? 'Bride' : 'Groom',
+    age: yearsSince(r.dob),
+    height: r.heightLabel,
+    maritalStatus: r.maritalStatus,
+    district: r.district,
+    area: r.area,
+    location: [r.area, r.district].filter(Boolean).join(', '),
+    degree: r.degree,
+    institution: r.institution,
+    undergraduate: r.undergraduate,
+    eduLevel: eduLevelOf(r.degree),
+    profession: r.profession,
+    organisation: r.organisation,
+    familyType: r.familyType ? capWord(r.familyType) : null,
+    fatherInfo: r.fatherInfo,
+    motherInfo: r.motherInfo,
+    siblings: r.siblings,
+    familyIncome: r.familyIncome,
+    religion: r.religion,
+    religiousPractice: r.religiousPractice,
+    verified: Boolean(r.verified),
+    screened: sealedCount > 0,
+    sealedCount,
+    photoLocked: Boolean(r.photoLocked),
+    inNetworkPool: Boolean(r.inNetworkPool),
+    status: r.status,
+    statusLabel: STATUS_LABEL[r.status] || r.status,
+    completeness: r.completeness,
+    updatedDays: daysSince(r.lastUpdatedAt),
+    looking: prefLabels,
+    mine,
+    manager: { name: managedBy, meta: mgrMeta, type: r.managerType },
   };
 }
 
