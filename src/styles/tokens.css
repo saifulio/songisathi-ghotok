@@ -141,6 +141,9 @@
   --radius-full: 999px;
 
   --container-max: 1160px;
+  /* An app page's framed card: the top bar's 1600px inner width less its 28px
+     gutters, so a frame's edges land on the brand and the Log out button. */
+  --page-frame-max: 1544px;
 
   /* --- elevation / motion --- */
   --shadow-1: 0 1px 2px rgba(56, 42, 31, 0.08);

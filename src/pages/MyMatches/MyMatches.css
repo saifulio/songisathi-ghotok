@@ -1,5 +1,5 @@
 .mm { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
-.mm-frame { max-width: 900px; margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
+.mm-frame { max-width: var(--page-frame-max); margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
 
 .mm-blocked { max-width: 520px; margin: 60px auto; background: var(--surface-page); border: 1px solid var(--gold-300); border-radius: 14px; padding: 28px; text-align: center; }
 .mm-blocked-t { font-family: var(--font-serif-display); font-size: 18px; font-weight: 600; color: var(--text-primary); }

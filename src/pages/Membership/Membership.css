@@ -2,9 +2,7 @@
    mb-, and these stylesheets are plain global CSS. The two shared .mb-grid
    and .mb-actions, so whichever loaded second decided this page's layout. */
 .mp { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
-/* 1544px = the app bar's 1600px inner width minus its 28px gutters, the same
-   width the search page frames to, so both line up with the brand and Log out. */
-.mp-frame { max-width: 1544px; margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
+.mp-frame { max-width: var(--page-frame-max); margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
 
 .mp-topbar { background: var(--green-900); padding: 0 20px; display: flex; align-items: center; gap: 16px; height: 54px; }
 .mp-topbar-brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif-display); font-size: 13.5px; font-weight: 600; color: var(--surface-card); }
