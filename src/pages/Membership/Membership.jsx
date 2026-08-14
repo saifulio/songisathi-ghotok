@@ -11,6 +11,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Input, Select, Badge, Avatar } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './Membership.css';
 
 const METHODS = [
@@ -80,13 +81,7 @@ export default function Membership() {
   };
 
   return (
-    <div className="mp">
-      <div className="mp-frame">
-        <div className="mp-topbar">
-          <div className="mp-topbar-brand"><div className="mp-logo">স</div><span>SongiSathi</span></div>
-          <span className="mp-topbar-note">Membership</span>
-          <div className="mp-topbar-right"><Avatar initials={initialsOf(user?.fullName)} size={28} /></div>
-        </div>
+    <PageFrame note="Membership" right={<Avatar initials={initialsOf(user?.fullName)} size={28} />}>
 
         <div className="mp-body">
           <div className="mp-head">
@@ -223,9 +218,8 @@ export default function Membership() {
             </div>
           )}
         </div>
-      </div>
 
       {toast && (<div className="mp-toast"><span className="mp-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

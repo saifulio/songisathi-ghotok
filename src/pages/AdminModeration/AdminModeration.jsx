@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Badge, Tabs, Dialog } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './AdminModeration.css';
 
 const V_RES = { approved: { label: 'Approved — gold seal issued, ghotok notified', bg: 'var(--green-100)', fg: 'var(--brand-primary)' }, more: { label: 'Asked for a clearer photograph — awaiting reply', bg: 'var(--gold-100)', fg: 'var(--gold-700)' }, rejected: { label: 'Rejected — reason recorded, account closed', bg: 'var(--red-100)', fg: 'var(--red-700)' } };
@@ -96,17 +97,10 @@ export default function AdminModeration() {
   } : null;
 
   return (
-    <div className="ad">
-      <div className="ad-frame">
-        <div className="ad-topbar">
-          <div className="ad-topbar-brand">
-            <div className="ad-logo">স</div>
-            <span>SongiSathi</span>
-            <span className="ad-badge">ADMIN</span>
-          </div>
-          <span className="ad-topbar-note">Internal · every action is logged against your account</span>
-          <div className="ad-topbar-right"><span>{user?.fullName || ''} · moderator</span><Avatar initials={initialsOf(user?.fullName)} size={28} /></div>
-        </div>
+    <PageFrame
+      note={<><span className="ad-badge">ADMIN</span> Internal · every action is logged against your account</>}
+      right={<><span>{user?.fullName || ''} · moderator</span><Avatar initials={initialsOf(user?.fullName)} size={28} /></>}
+    >
 
         <div className="ad-strip">
           {strip.map((k) => (
@@ -311,11 +305,10 @@ export default function AdminModeration() {
             </div>
           )}
         </div>
-      </div>
 
       <Dialog open={!!dlg} title={dlg ? dlg.title : ''} actions={dlg ? dlg.actions : null}>{dlg ? dlg.body : ''}</Dialog>
 
       {toast && (<div className="ad-toast"><span className="ad-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

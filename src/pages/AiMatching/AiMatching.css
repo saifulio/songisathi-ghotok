@@ -1,15 +1,10 @@
-.am {
-  padding: clamp(12px, 3vw, 28px);
-  background: var(--surface-sunken);
-  min-height: 100%;
-  font-family: var(--font-sans-body);
-}
+/* Two columns inside the shared frame: the console, and the digest beside
+   it. The frame supplies the page's width and padding (see PageFrame). */
 .am-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 380px;
-  gap: 24px;
-  max-width: 1500px;
-  margin: 0 auto;
+  gap: 20px;
+  padding: 20px;
   align-items: start;
 }
 
@@ -17,17 +12,8 @@
   background: var(--surface-page);
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
-  box-shadow: var(--shadow-2);
   overflow: hidden;
 }
-.am-topbar { background: var(--green-900); padding: 0 20px; display: flex; align-items: center; gap: 16px; height: 54px; }
-.am-topbar-brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif-display); font-size: 13.5px; font-weight: 600; color: var(--surface-card); }
-.am-logo { width: 24px; height: 24px; border-radius: 7px; background: var(--surface-card); display: grid; place-items: center; font-family: var(--font-serif-display); font-size: 12px; font-weight: 600; color: var(--green-900); }
-.am-topbar-tabs { display: flex; gap: 2px; font-size: 11.5px; font-weight: 500; font-family: 'Hind Siliguri', sans-serif; }
-.am-topbar-tabs span { padding: 7px 11px; border-radius: 8px; color: rgba(253, 251, 246, 0.6); cursor: pointer; }
-.am-topbar-tabs span:hover { color: #fdfbf6; }
-.am-topbar-tabs span.on { background: rgba(253, 251, 246, 0.13); color: #fdfbf6; }
-.am-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 .am-lastrun { font-size: 11px; color: rgba(253, 251, 246, 0.6); }
 
 .am-body { display: grid; grid-template-columns: 320px 1fr; align-items: stretch; }
@@ -131,7 +117,6 @@
   .am-factors { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 560px) {
-  .am-topbar-tabs, .am-lastrun { display: none; }
   .am-pair-people { flex-direction: column; align-items: flex-start; }
   .am-factors { grid-template-columns: 1fr; }
 }

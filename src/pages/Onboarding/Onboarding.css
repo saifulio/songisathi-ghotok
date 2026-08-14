@@ -1,5 +1,5 @@
-.ob { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
-.ob-grid { display: grid; grid-template-columns: 390px 1fr; gap: 24px; max-width: 1440px; margin: 0 auto; align-items: start; }
+/* The wizard and the price list, inside the shared frame (see PageFrame). */
+.ob-grid { display: grid; grid-template-columns: 390px 1fr; gap: 20px; padding: 20px; align-items: start; }
 .ob-logo { width: 26px; height: 26px; flex: none; border-radius: 8px; background: var(--surface-card); display: grid; place-items: center; font-family: var(--font-serif-display); font-size: 13px; font-weight: 600; color: var(--green-900); }
 
 /* wizard phone */
@@ -68,9 +68,6 @@
 
 /* pricing */
 .ob-pricing { background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
-.ob-pricing-topbar { background: var(--green-900); padding: 0 20px; display: flex; align-items: center; gap: 16px; height: 54px; }
-.ob-pricing-brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif-display); font-size: 13.5px; font-weight: 600; color: var(--surface-card); }
-.ob-pricing-note { font-size: 11.5px; color: rgba(253, 251, 246, 0.55); }
 .ob-pricing-body { padding: 28px; display: flex; flex-direction: column; gap: 20px; }
 .ob-pricing-head { display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
 .ob-pricing-head-copy { flex: 1; min-width: 280px; }

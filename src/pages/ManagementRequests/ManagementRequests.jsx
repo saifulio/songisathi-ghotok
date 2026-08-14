@@ -10,6 +10,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Badge, Tabs, Dialog, Radio, Input } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './ManagementRequests.css';
 
 const taka = (n) => `৳${Number(n || 0).toLocaleString('en-US')}`;
@@ -28,8 +29,10 @@ const STATE = {
   withdrawn: { label: 'Withdrawn by the family', tone: 'neutral' },
 };
 
+const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+
 export default function ManagementRequests() {
-  const { token } = useAuth();
+  const { user, token } = useAuth();
   const [items, setItems] = useState([]);
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -91,8 +94,8 @@ export default function ManagementRequests() {
   const chosenReason = reason === 'Other' ? other.trim() : reason;
 
   return (
-    <div className="mr">
-      <div className="mr-frame">
+    <PageFrame note="Management requests" right={<Avatar initials={initialsOf(user?.fullName)} size={28} />}>
+      <div className="mr-body">
         <div className="mr-head">
           <div>
             <div className="mr-h-bn">দায়িত্বের অনুরোধ</div>
@@ -224,6 +227,6 @@ export default function ManagementRequests() {
       </Dialog>
 
       {toast && (<div className="mr-toast"><span className="mr-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

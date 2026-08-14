@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input, Select, Badge } from '../../components/ui/index.jsx';
+import PageFrame from '../../components/PageFrame.jsx';
 import './Onboarding.css';
 
 // value must match the ghotoks.tier enum (SOLO/BUREAU/AGENCY) so "Choose"
@@ -61,7 +62,7 @@ export default function Onboarding() {
   const otpBoxes = (otp || '    ').split('').slice(0, 4).map((v) => v.trim());
 
   return (
-    <div className="ob">
+    <PageFrame note="অনবোর্ডিং · Onboarding & pricing">
       <div className="ob-grid">
         {/* --- wizard --- */}
         <div className="ob-phone">
@@ -191,10 +192,6 @@ export default function Onboarding() {
 
         {/* --- pricing --- */}
         <div className="ob-pricing">
-          <div className="ob-pricing-topbar">
-            <div className="ob-pricing-brand"><div className="ob-logo">স</div><span>SongiSathi</span></div>
-            <span className="ob-pricing-note">মূল্য · Pricing for ghotoks</span>
-          </div>
           <div className="ob-pricing-body">
             <div className="ob-pricing-head">
               <div className="ob-pricing-head-copy">
@@ -255,6 +252,6 @@ export default function Onboarding() {
       </div>
 
       {toast && (<div className="ob-toast"><span className="ob-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

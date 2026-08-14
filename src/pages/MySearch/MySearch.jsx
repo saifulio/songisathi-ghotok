@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
 import { PhotoSlideshow } from '../../components/PhotoGallery.jsx';
+import PageFrame from '../../components/PageFrame.jsx';
 import './MySearch.css';
 
 const opts = (a) => a.map((v) => ({ value: v, label: v }));
@@ -140,7 +141,7 @@ export default function MySearch() {
 
   if (blocked) {
     return (
-      <div className="ms"><div className="ms-blocked">
+      <div className="pf"><div className="ms-blocked">
         <div className="ms-blocked-t">Search isn't open on this account</div>
         <div className="ms-blocked-b">{blocked}</div>
         <a className="ms-blocked-link" href="/guardian">Go to your proposals</a>
@@ -149,14 +150,7 @@ export default function MySearch() {
   }
 
   return (
-    <div className="ms">
-      <div className="ms-frame">
-        <div className="ms-topbar">
-          <div className="ms-topbar-brand"><div className="ms-logo">স</div><span>SongiSathi</span></div>
-          <span className="ms-topbar-note">Search & profiles</span>
-          <div className="ms-topbar-right"><Avatar initials={initialsOf(user?.fullName)} size={28} /></div>
-        </div>
-
+    <PageFrame note="Search & profiles" right={<Avatar initials={initialsOf(user?.fullName)} size={28} />}>
         <div className={`ms-grid ${sel ? 'has-panel' : ''}`}>
           <div className="ms-filters">
             <div>
@@ -293,9 +287,8 @@ export default function MySearch() {
             </div>
           )}
         </div>
-      </div>
 
       {toast && (<div className="ms-toast"><span className="ms-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

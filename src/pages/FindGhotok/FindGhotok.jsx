@@ -12,6 +12,7 @@ import { Button, Avatar, Badge, Input, Select, Dialog } from '../../components/u
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './FindGhotok.css';
 
 const taka = (n) => `৳${Number(n || 0).toLocaleString('en-US')}`;
@@ -94,13 +95,7 @@ export default function FindGhotok() {
   };
 
   return (
-    <div className="fg">
-      <div className="fg-frame">
-        <div className="fg-topbar">
-          <div className="fg-topbar-brand"><div className="fg-logo">স</div><span>SongiSathi</span></div>
-          <span className="fg-topbar-note">Find a matchmaker</span>
-          <div className="fg-topbar-right"><Avatar initials={initialsOf(user?.fullName)} size={28} /></div>
-        </div>
+    <PageFrame note="Find a matchmaker" right={<Avatar initials={initialsOf(user?.fullName)} size={28} />}>
 
         <div className="fg-body">
           <div className="fg-head">
@@ -227,7 +222,6 @@ export default function FindGhotok() {
             })}
           </div>
         </div>
-      </div>
 
       <Dialog
         open={Boolean(asking)}
@@ -258,6 +252,6 @@ export default function FindGhotok() {
       </Dialog>
 
       {toast && (<div className="fg-toast"><span className="fg-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

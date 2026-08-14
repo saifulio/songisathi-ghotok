@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
 import { GalleryManager } from '../../components/PhotoGallery.jsx';
+import PageFrame from '../../components/PageFrame.jsx';
 import './MyBiodataStudio.css';
 
 const FIELDS = [
@@ -98,24 +99,21 @@ export default function MyBiodataStudio() {
 
   if (blocked) {
     return (
-      <div className="mb"><div className="mb-blocked">
+      <div className="pf"><div className="mb-blocked">
         <div className="mb-blocked-t">Biodata editing isn't open on this account</div>
         <div className="mb-blocked-b">{blocked}</div>
         <a className="mb-blocked-link" href="/guardian">Go to your proposals</a>
       </div></div>
     );
   }
-  if (loading) return <div className="mb"><div className="mb-frame" style={{ padding: 40 }}>Loading…</div></div>;
-  if (!profile) return <div className="mb"><div className="mb-frame" style={{ padding: 40 }}>No profile is linked to this account yet.</div></div>;
+  if (loading) return <PageFrame><div className="pf-body">Loading…</div></PageFrame>;
+  if (!profile) return <PageFrame><div className="pf-body">No profile is linked to this account yet.</div></PageFrame>;
 
   return (
-    <div className="mb">
-      <div className="mb-frame">
-        <div className="mb-topbar">
-          <div className="mb-topbar-brand"><div className="mb-logo">স</div><span>SongiSathi</span></div>
-          <span className="mb-crumb">/ বায়োডাটা স্টুডিও · {profile.name}</span>
-          <div className="mb-topbar-right"><Avatar initials={initialsOf(profile.name)} size={28} /></div>
-        </div>
+    <PageFrame
+      note={`/ বায়োডাটা স্টুডিও · ${profile.name}`}
+      right={<Avatar initials={initialsOf(profile.name)} size={28} />}
+    >
 
         <div className="mb-grid">
           <div className="mb-left">
@@ -212,9 +210,8 @@ export default function MyBiodataStudio() {
             </div>
           </div>
         </div>
-      </div>
 
       {toast && (<div className="mb-toast"><span className="mb-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

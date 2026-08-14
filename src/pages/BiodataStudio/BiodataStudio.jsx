@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
 import { GalleryManager } from '../../components/PhotoGallery.jsx';
 import { downloadBiodataPdf, pageCountFor } from '../../lib/biodataPdf.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './BiodataStudio.css';
 
 const TEMPLATES = [
@@ -159,22 +160,21 @@ export default function BiodataStudio() {
           actions: (<><Button variant="ghost" onClick={() => setDialog('share')}>Send a link instead</Button><Button variant="primary" disabled={downloading} onClick={downloadPdf}>{downloading ? 'Building…' : 'Download anyway'}</Button></>) }
       : null;
 
-  if (loading) return <div className="bs"><div className="bs-frame" style={{ padding: 40 }}>Loading…</div></div>;
-  if (!profile) return <div className="bs"><div className="bs-frame" style={{ padding: 40 }}>No profile to show. Add a profile to your book first.</div></div>;
+  if (loading) return <PageFrame><div className="pf-body">Loading…</div></PageFrame>;
+  if (!profile) return <PageFrame><div className="pf-body">No profile to show. Add a profile to your book first.</div></PageFrame>;
 
   return (
-    <div className="bs">
-      <div className="bs-frame">
-        <div className="bs-topbar">
-          <div className="bs-topbar-brand"><div className="bs-logo">স</div><span>SongiSathi</span></div>
-          <span className="bs-crumb">/ প্রোফাইল / {profile.name} · {profile.prn} / বায়োডাটা</span>
-          <div className="bs-topbar-right">
-            <div className="bs-lang">
-              {['bn', 'en', 'both'].map((l) => (<span key={l} className={lang === l ? 'on' : ''} style={{ fontFamily: l === 'bn' ? "'Hind Siliguri', sans-serif" : undefined }} onClick={() => setLang(l)}>{l === 'bn' ? 'বাংলা' : l === 'en' ? 'EN' : 'Both'}</span>))}
-            </div>
-            <Avatar initials={initialsOf(manager?.name)} size={28} />
+    <PageFrame
+      note={`/ প্রোফাইল / ${profile.name} · ${profile.prn} / বায়োডাটা`}
+      right={(
+        <>
+          <div className="bs-lang">
+            {['bn', 'en', 'both'].map((l) => (<span key={l} className={lang === l ? 'on' : ''} style={{ fontFamily: l === 'bn' ? "'Hind Siliguri', sans-serif" : undefined }} onClick={() => setLang(l)}>{l === 'bn' ? 'বাংলা' : l === 'en' ? 'EN' : 'Both'}</span>))}
           </div>
-        </div>
+          <Avatar initials={initialsOf(manager?.name)} size={28} />
+        </>
+      )}
+    >
 
         <div className="bs-grid">
           {/* left: templates + sections */}
@@ -307,11 +307,10 @@ export default function BiodataStudio() {
             </div>
           </div>
         </div>
-      </div>
 
       <Dialog open={!!dlg} title={dlg ? dlg.title : ''} actions={dlg ? dlg.actions : null}>{dlg ? dlg.body : ''}</Dialog>
 
       {toast && (<div className="bs-toast"><span className="bs-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

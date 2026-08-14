@@ -19,6 +19,7 @@ import { Avatar, Badge, Button } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
 import { PhotoSlideshow } from '../../components/PhotoGallery.jsx';
+import PageFrame from '../../components/PageFrame.jsx';
 import './ProfileDetails.css';
 
 const VERIFIED_MARK = (
@@ -118,25 +119,24 @@ export default function ProfileDetails() {
     return () => { live = false; };
   }, [token, id]);
 
-  if (loading) return <div className="pd"><div className="pd-frame pd-state">Loading profile…</div></div>;
+  if (loading) return <PageFrame note="Profile"><div className="pd-state">Loading profile…</div></PageFrame>;
 
   if (error || !profile) {
     return (
-      <div className="pd">
-        <div className="pd-frame pd-state">
+      <PageFrame note="Profile">
+        <div className="pd-state">
           <div className="pd-state-t">This profile isn’t open to you</div>
           <div className="pd-state-b">{error || 'It may have been withdrawn from the network pool, or it was never shared outside its own manager’s book.'}</div>
           <Button variant="outline" size="sm" onClick={() => navigate(-1)}>Go back</Button>
         </div>
-      </div>
+      </PageFrame>
     );
   }
 
   const looking = profile.looking || [];
 
   return (
-    <div className="pd">
-      <div className="pd-frame">
+    <PageFrame note={profile.mine ? 'Your profile' : 'A profile in the trusted network'}>
         <div className="pd-crumbs">
           <button className="pd-back" onClick={() => navigate(-1)}>← Back</button>
           <span className="pd-crumb-sep">·</span>
@@ -254,7 +254,6 @@ export default function ProfileDetails() {
             </div>
           </section>
         </div>
-      </div>
-    </div>
+    </PageFrame>
   );
 }

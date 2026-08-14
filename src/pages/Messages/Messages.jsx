@@ -9,6 +9,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Badge } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './Messages.css';
 
 const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -78,11 +79,11 @@ export default function Messages() {
     }
   };
 
-  if (loading) return <div className="mg"><div className="mg-frame" style={{ padding: 40 }}>Loading…</div></div>;
+  if (loading) return <PageFrame><div className="pf-body">Loading…</div></PageFrame>;
 
   if (!canMessage) {
     return (
-      <div className="mg">
+      <div className="pf">
         <div className="mg-blocked">
           <div className="mg-blocked-t">Your manager holds these conversations</div>
           <div className="mg-blocked-b">
@@ -97,12 +98,7 @@ export default function Messages() {
   }
 
   return (
-    <div className="mg">
-      <div className="mg-frame">
-        <div className="mg-topbar">
-          <div className="mg-topbar-brand"><div className="mg-logo">স</div><span>SongiSathi</span></div>
-          <span className="mg-crumb">/ বার্তা · manager to manager</span>
-        </div>
+    <PageFrame note="/ বার্তা · manager to manager">
 
         <div className="mg-grid">
           <div className="mg-list">
@@ -196,9 +192,8 @@ export default function Messages() {
             )}
           </div>
         </div>
-      </div>
 
       {toast && (<div className="mg-toast"><span className="mg-toast-check">!</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

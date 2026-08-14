@@ -3,6 +3,7 @@ import { Button, Avatar, Badge } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './GuardianCandidate.css';
 
 // Resolved status → resolution ribbon. Guardian and candidate share the same
@@ -93,16 +94,14 @@ export default function GuardianCandidate() {
   const singlePane = { gridTemplateColumns: '1fr' };
 
   return (
-    <div className="gc">
+    <PageFrame
+      note={`Guardian view${profile ? ` · ${profile.name}` : ''}`}
+      right={<><span>{awaitingCount} awaiting your word</span><Avatar initials={profile?.init || ''} size={28} /></>}
+    >
       <div className="gc-grid" style={role !== 'GUARDIAN' && role !== 'CANDIDATE' ? undefined : singlePane}>
         {/* guardian */}
         {role === 'GUARDIAN' && (
         <div className="gc-guardian">
-          <div className="gc-topbar">
-            <div className="gc-topbar-brand"><div className="gc-logo">স</div><span>SongiSathi</span></div>
-            <span className="gc-topbar-note">Guardian view{profile ? ` · ${profile.name}` : ''}</span>
-            <div className="gc-topbar-right"><span>{awaitingCount} awaiting your word</span><Avatar initials={profile?.init || ''} size={28} /></div>
-          </div>
 
           <div className="gc-guardian-body">
             <div className="gc-guardian-main">
@@ -257,6 +256,6 @@ export default function GuardianCandidate() {
       </div>
 
       {toast && (<div className="gc-toast"><span className="gc-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Tabs, StatusPill, Badge, Dialog, Radio } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './InterestInbox.css';
 
 const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -115,18 +116,10 @@ export default function InterestInbox() {
   };
 
   return (
-    <div className="ib">
-      <div className="ib-frame">
-        <div className="ib-topbar">
-          <div className="ib-topbar-brand"><div className="ib-logo">স</div><span>SongiSathi</span></div>
-          <div className="ib-topbar-tabs">
-            <span>ড্যাশবোর্ড</span><span>প্রোফাইল</span><span>অনুসন্ধান</span><span className="on">আগ্রহ</span>
-          </div>
-          <div className="ib-topbar-right">
-            <span className="ib-pending-pill">{pendingCount} awaiting you</span>
-            <Avatar initials={initialsOf(user?.fullName)} size={28} />
-          </div>
-        </div>
+    <PageFrame
+      note="আগ্রহ · Interest inbox"
+      right={<><span className="ib-pending-pill">{pendingCount} awaiting you</span><Avatar initials={initialsOf(user?.fullName)} size={28} /></>}
+    >
 
         <div className="ib-grid">
           {/* list */}
@@ -310,7 +303,6 @@ export default function InterestInbox() {
             )}
           </div>
         </div>
-      </div>
 
       <Dialog open={!!dlg} title={dlg ? dlg.title : ''} actions={dlg ? dlg.actions : null}>
         {dlg && (
@@ -332,6 +324,6 @@ export default function InterestInbox() {
       {toast && (
         <div className="ib-toast"><span className="ib-toast-check">✓</span><span>{toast}</span></div>
       )}
-    </div>
+    </PageFrame>
   );
 }

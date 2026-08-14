@@ -3,6 +3,7 @@ import { Button, Avatar, Badge } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './MyMatches.css';
 
 const initialsOf = (name) => String(name || '').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -62,7 +63,7 @@ export default function MyMatches() {
 
   if (blocked) {
     return (
-      <div className="mm"><div className="mm-blocked">
+      <div className="pf"><div className="mm-blocked">
         <div className="mm-blocked-t">Matching isn't open on this account</div>
         <div className="mm-blocked-b">{blocked}</div>
         <a className="mm-blocked-link" href="/guardian">Go to your proposals</a>
@@ -73,13 +74,7 @@ export default function MyMatches() {
   const visible = matches.filter((m) => decision[m.profileId] !== 'dismissed');
 
   return (
-    <div className="mm">
-      <div className="mm-frame">
-        <div className="mm-topbar">
-          <div className="mm-topbar-brand"><div className="mm-logo">স</div><span>SongiSathi</span></div>
-          <span className="mm-topbar-note">AI matching</span>
-          <div className="mm-topbar-right"><Avatar initials={initialsOf(user?.fullName)} size={28} /></div>
-        </div>
+    <PageFrame note="AI matching" right={<Avatar initials={initialsOf(user?.fullName)} size={28} />}>
 
         <div className="mm-body">
           <div>
@@ -148,9 +143,8 @@ export default function MyMatches() {
             )}
           </div>
         </div>
-      </div>
 
       {toast && (<div className="mm-toast"><span className="mm-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

@@ -1,12 +1,5 @@
-.ad { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
-.ad-frame { max-width: 1360px; margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
 
-.ad-topbar { background: var(--brown-900); padding: 0 20px; display: flex; align-items: center; gap: 16px; height: 54px; }
-.ad-topbar-brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif-display); font-size: 13.5px; font-weight: 600; color: var(--surface-card); }
-.ad-logo { width: 24px; height: 24px; border-radius: 7px; background: var(--gold-400); display: grid; place-items: center; font-family: var(--font-serif-display); font-size: 12px; font-weight: 700; color: var(--brown-900); }
 .ad-badge { padding: 2px 8px; border-radius: 99px; background: rgba(253, 251, 246, 0.14); color: var(--gold-400); font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; }
-.ad-topbar-note { font-size: 11.5px; color: rgba(253, 251, 246, 0.5); }
-.ad-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 11px; color: rgba(253, 251, 246, 0.6); }
 
 .ad-strip { display: flex; background: var(--surface-card); border-bottom: 1px solid var(--border-subtle); flex-wrap: wrap; }
 .ad-strip-item { flex: 1; min-width: 160px; padding: 14px 20px; border-right: 1px solid var(--border-subtle); }
@@ -85,7 +78,6 @@
   .ad-checks { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 620px) {
-  .ad-topbar-note { display: none; }
   .ad-checks { grid-template-columns: 1fr; }
 }
 

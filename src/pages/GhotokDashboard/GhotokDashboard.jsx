@@ -4,6 +4,7 @@ import { Button, Badge, Avatar, Switch, Tabs } from '../../components/ui/index.j
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
 import { NAV_GROUPS } from '../../nav.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './GhotokDashboard.css';
 
 // Status label → Badge tone.
@@ -162,18 +163,14 @@ export default function GhotokDashboard() {
   };
 
   return (
-    <div className="gd">
-      <div className="gd-frame">
-        {/* --- app nav --- */}
+    <PageFrame
+      note="ড্যাশবোর্ড · Ghotok workspace"
+      right={<Badge tone="gold">{tier || '—'}</Badge>}
+    >
+      <div className="gd-row">
+        {/* --- workspace rail: the plan meter and the counts that go with it.
+            The brand that used to head it now sits in the frame's top bar. --- */}
         <aside className="gd-side">
-          <div className="gd-side-brand">
-            <div className="gd-logo">স</div>
-            <div>
-              <div className="gd-logo-name">SongiSathi</div>
-              <div className="gd-logo-sub">GHOTOK WORKSPACE</div>
-            </div>
-          </div>
-
           <div className="gd-tier">
             <div className="gd-tier-top">
               <Badge tone="gold">{tier || '—'}</Badge>
@@ -470,13 +467,12 @@ export default function GhotokDashboard() {
           </div>
         </div>
       </div>
-
       {toast && (
         <div className="gd-toast">
           <span className="gd-toast-check">✓</span>
           <span>{toast}</span>
         </div>
       )}
-    </div>
+    </PageFrame>
   );
 }

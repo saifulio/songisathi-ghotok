@@ -4,6 +4,7 @@ import { Button, Avatar, Badge, Input, Select, Switch, Tag, ProfileCard, Dialog,
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
 import { PhotoSlideshow } from '../../components/PhotoGallery.jsx';
+import PageFrame from '../../components/PageFrame.jsx';
 import './SearchProfile.css';
 
 const opts = (a) => a.map((v) => ({ value: v, label: v }));
@@ -168,13 +169,10 @@ export default function SearchProfile() {
   ] : [];
 
   return (
-    <div className="sp">
-      <div className="sp-frame">
-        <div className="sp-topbar">
-          <div className="sp-topbar-brand"><div className="sp-logo">স</div><span>SongiSathi</span></div>
-          <div className="sp-topbar-tabs"><span>ড্যাশবোর্ড</span><span>প্রোফাইল</span><span className="on">অনুসন্ধান</span><span>এআই ম্যাচিং</span></div>
-          <div className="sp-topbar-right"><Badge tone="gold">{user?.tier || '—'}</Badge><Avatar initials={initialsOf(user?.fullName)} size={28} /></div>
-        </div>
+    <PageFrame
+      note="অনুসন্ধান · Search"
+      right={<><Badge tone="gold">{user?.tier || '—'}</Badge><Avatar initials={initialsOf(user?.fullName)} size={28} /></>}
+    >
 
         <div className={`sp-grid ${sel ? 'has-panel' : ''}`}>
           {/* filters */}
@@ -352,11 +350,10 @@ export default function SearchProfile() {
             </div>
           )}
         </div>
-      </div>
 
       <Dialog open={!!dlg} title={dlg ? dlg.title : ''} actions={dlg ? dlg.actions : null}>{dlg ? dlg.body : ''}</Dialog>
 
       {toast && (<div className="sp-toast"><span className="sp-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

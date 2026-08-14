@@ -1,13 +1,4 @@
-.cm { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
-.cm-frame { max-width: 1360px; margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
 
-.cm-topbar { background: var(--green-900); padding: 0 20px; display: flex; align-items: center; gap: 16px; height: 54px; }
-.cm-topbar-brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif-display); font-size: 13.5px; font-weight: 600; color: var(--surface-card); }
-.cm-logo { width: 24px; height: 24px; border-radius: 7px; background: var(--surface-card); display: grid; place-items: center; font-family: var(--font-serif-display); font-size: 12px; font-weight: 600; color: var(--green-900); }
-.cm-topbar-tabs { display: flex; gap: 2px; font-size: 11.5px; font-weight: 500; font-family: 'Hind Siliguri', sans-serif; }
-.cm-topbar-tabs span { padding: 7px 11px; border-radius: 8px; color: rgba(253, 251, 246, 0.6); cursor: pointer; }
-.cm-topbar-tabs span.on { background: rgba(253, 251, 246, 0.13); color: #fdfbf6; }
-.cm-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 11px; color: rgba(253, 251, 246, 0.6); }
 
 .cm-summary { display: flex; background: var(--surface-card); border-bottom: 1px solid var(--border-subtle); flex-wrap: wrap; }
 .cm-summary-item { flex: 1; min-width: 150px; padding: 16px 22px; border-right: 1px solid var(--border-subtle); }
@@ -97,4 +88,4 @@
 .cm-toast span:last-child { font-size: 12.5px; line-height: 1.45; color: var(--surface-card); }
 
 @media (max-width: 980px) { .cm-body { grid-template-columns: 1fr; } }
-@media (max-width: 620px) { .cm-topbar-tabs, .cm-topbar-right span { display: none; } .cm-fee-grid { grid-template-columns: 1fr; } }
+@media (max-width: 620px) { .cm-fee-grid { grid-template-columns: 1fr; } }

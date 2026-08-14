@@ -1,5 +1,6 @@
-.mr { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
-.mr-frame { max-width: 940px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+/* A column of cards inside the shared frame (see PageFrame): the reading
+   width stays narrow, the frame around it matches every other page. */
+.mr-body { max-width: 940px; margin: 0 auto; padding: 22px 20px; display: flex; flex-direction: column; gap: 16px; }
 
 .mr-head { display: flex; align-items: flex-start; gap: 16px; justify-content: space-between; }
 .mr-h-bn { font-family: 'Tiro Bangla', serif; font-size: 21px; color: var(--text-primary); }

@@ -1,11 +1,4 @@
-.fg { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
-.fg-frame { max-width: var(--page-frame-max); margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
 
-.fg-topbar { background: var(--green-900); padding: 0 20px; display: flex; align-items: center; gap: 16px; height: 54px; }
-.fg-topbar-brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif-display); font-size: 13.5px; font-weight: 600; color: var(--surface-card); }
-.fg-logo { width: 24px; height: 24px; border-radius: 7px; background: var(--surface-card); display: grid; place-items: center; font-family: var(--font-serif-display); font-size: 12px; font-weight: 600; color: var(--green-900); }
-.fg-topbar-note { font-size: 11.5px; color: rgba(253, 251, 246, 0.6); }
-.fg-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 
 .fg-body { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 16px; }
 

@@ -2,8 +2,6 @@
    other family page (--page-frame-max) so moving between them doesn't shift
    the page under the reader. */
 
-.pd { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
-.pd-frame { max-width: var(--page-frame-max); margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
 
 .pd-state { padding: 56px 28px; text-align: center; font-size: 13px; color: var(--text-secondary); }
 .pd-state-t { font-family: var(--font-serif-display); font-size: 18px; font-weight: 600; color: var(--text-primary); }

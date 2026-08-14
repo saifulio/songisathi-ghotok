@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Avatar, Badge, Input, Select, Checkbox, Switch, Radio, Tabs, StatusPill, Dialog } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './AddProfile.css';
 
 const QS = [
@@ -173,13 +174,10 @@ export default function AddProfile() {
       : 'Everything here is editable until you publish.';
 
   return (
-    <div className="ap">
-      <div className="ap-frame">
-        <div className="ap-topbar">
-          <div className="ap-topbar-brand"><div className="ap-logo">স</div><span>SongiSathi</span></div>
-          <span className="ap-crumb">/ প্রোফাইল / নতুন প্রোফাইল</span>
-          <div className="ap-topbar-right"><span>Draft saved 2 minutes ago</span><Badge tone="neutral">Draft</Badge><Avatar initials="RA" size={28} /></div>
-        </div>
+    <PageFrame
+      note="/ প্রোফাইল / নতুন প্রোফাইল"
+      right={<><span>Draft saved 2 minutes ago</span><Badge tone="neutral">Draft</Badge><Avatar initials="RA" size={28} /></>}
+    >
 
         <div className="ap-grid">
           {/* rail */}
@@ -415,11 +413,10 @@ export default function AddProfile() {
             </div>
           </div>
         </div>
-      </div>
 
       <Dialog open={!!dlg} title={dlg ? dlg.title : ''} actions={dlg ? dlg.actions : null}>{dlg ? dlg.body : ''}</Dialog>
 
       {toast && (<div className="ap-toast"><span className="ap-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

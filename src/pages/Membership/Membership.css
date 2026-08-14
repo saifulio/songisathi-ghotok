@@ -1,14 +1,7 @@
 /* Prefixed mp- (membership plan), not mb-: the biodata studio already owns
    mb-, and these stylesheets are plain global CSS. The two shared .mb-grid
    and .mb-actions, so whichever loaded second decided this page's layout. */
-.mp { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
-.mp-frame { max-width: var(--page-frame-max); margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
 
-.mp-topbar { background: var(--green-900); padding: 0 20px; display: flex; align-items: center; gap: 16px; height: 54px; }
-.mp-topbar-brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif-display); font-size: 13.5px; font-weight: 600; color: var(--surface-card); }
-.mp-logo { width: 24px; height: 24px; border-radius: 7px; background: var(--surface-card); display: grid; place-items: center; font-family: var(--font-serif-display); font-size: 12px; font-weight: 600; color: var(--green-900); }
-.mp-topbar-note { font-size: 11.5px; color: rgba(253, 251, 246, 0.6); }
-.mp-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 
 .mp-body { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 16px; }
 

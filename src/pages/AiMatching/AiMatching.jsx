@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Button, Avatar, Badge } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './AiMatching.css';
 
 // The factor set is whatever the matching run scored this week (see
@@ -153,25 +154,18 @@ export default function AiMatching() {
   ] : [];
 
   return (
-    <div className="am">
+    <PageFrame
+      note="এআই ম্যাচিং · AI matching"
+      right={(
+        <>
+          <span className="am-lastrun">{lastRun ? `Last run ${weekLabel(lastRun)} · next in ${nextIn} day${nextIn === 1 ? '' : 's'}` : 'No run yet'}</span>
+          <Avatar initials={initialsOf(user?.fullName)} size={28} />
+        </>
+      )}
+    >
       <div className="am-grid">
         {/* --- console --- */}
         <div className="am-console">
-          <div className="am-topbar">
-            <div className="am-topbar-brand">
-              <div className="am-logo">স</div>
-              <span>SongiSathi</span>
-            </div>
-            <div className="am-topbar-tabs">
-              <span>ড্যাশবোর্ড</span>
-              <span>প্রোফাইল</span>
-              <span className="on">এআই ম্যাচিং</span>
-            </div>
-            <div className="am-topbar-right">
-              <span className="am-lastrun">{lastRun ? `Last run ${weekLabel(lastRun)} · next in ${nextIn} day${nextIn === 1 ? '' : 's'}` : 'No run yet'}</span>
-              <Avatar initials={initialsOf(user?.fullName)} size={28} />
-            </div>
-          </div>
 
           <div className="am-body">
             {/* weights */}
@@ -353,6 +347,6 @@ export default function AiMatching() {
           <span>{toast}</span>
         </div>
       )}
-    </div>
+    </PageFrame>
   );
 }

@@ -11,6 +11,7 @@ import { Button, Input, Select, Checkbox, Badge } from '../../components/ui/inde
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useMyProfiles } from '../../context/MyProfilesContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './MyAddProfile.css';
 
 const opts = (a) => a.map((v) => ({ value: v, label: v }));
@@ -61,8 +62,8 @@ export default function MyAddProfile() {
 
   if (!loading && !canAdd) {
     return (
-      <div className="map">
-        <div className="map-frame map-full">
+      <PageFrame note="Add a profile">
+        <div className="map-body map-full">
           <div className="map-h-bn">প্রোফাইল যোগ করা যাবে না</div>
           <div className="map-h-sub">
             A guardian account holds up to {limit} profiles, and yours is full ({profiles.length} of {limit}).
@@ -70,13 +71,13 @@ export default function MyAddProfile() {
           </div>
           <Button variant="outline" onClick={() => navigate('/guardian')}>Go to your proposals</Button>
         </div>
-      </div>
+      </PageFrame>
     );
   }
 
   return (
-    <div className="map">
-      <div className="map-frame">
+    <PageFrame note="Add a profile">
+      <div className="map-body">
         <div className="map-head">
           <div>
             <div className="map-h-bn">নতুন প্রোফাইল</div>
@@ -135,6 +136,6 @@ export default function MyAddProfile() {
       </div>
 
       {toast && (<div className="map-toast"><span className="map-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }

@@ -1,0 +1,26 @@
+/* The shared page frame and top bar (see PageFrame.jsx). Prefix pf-.
+   Copied from the family search page, which is the look the rest were
+   converging on anyway. */
+
+.pf { padding: clamp(12px, 3vw, 28px); background: var(--surface-sunken); min-height: 100%; font-family: var(--font-sans-body); }
+.pf-frame { max-width: var(--page-frame-max); margin: 0 auto; background: var(--surface-page); border: 1px solid var(--border-subtle); border-radius: 14px; box-shadow: var(--shadow-2); overflow: hidden; }
+
+.pf-topbar { background: var(--green-900); padding: 0 20px; display: flex; align-items: center; gap: 16px; height: 54px; }
+.pf-brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif-display); font-size: 13.5px; font-weight: 600; color: var(--surface-card); flex: none; }
+.pf-logo { width: 24px; height: 24px; border-radius: 7px; background: var(--surface-card); display: grid; place-items: center; font-family: var(--font-serif-display); font-size: 12px; font-weight: 600; color: var(--green-900); }
+/* The page's own name, and anything it wants said beside it. Truncates
+   rather than pushing the avatar off the bar on a narrow screen. */
+.pf-note { font-size: 11.5px; color: rgba(253, 251, 246, 0.6); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-right { margin-left: auto; display: flex; align-items: center; gap: 12px; flex: none; font-size: 11px; color: rgba(253, 251, 246, 0.72); }
+
+/* A page whose body is a column of cards rather than a full-bleed grid: the
+   frame gives it the same padding every other page's body has. */
+.pf-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+/* Narrow: the bar keeps its one line. The note truncates, and the running
+   commentary on the right ("Draft saved 2 minutes ago", "3 awaiting you")
+   gives way to the avatar and any badge, which are what identify the page. */
+@media (max-width: 620px) {
+  .pf-topbar { padding: 0 14px; gap: 10px; }
+  .pf-right > span:not([class]) { display: none; }
+}

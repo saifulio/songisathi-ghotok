@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Avatar, Badge, Tabs, Input, Checkbox } from '../../components/ui/index.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { api } from '../../lib/api.js';
+import PageFrame from '../../components/PageFrame.jsx';
 import './Commission.css';
 
 const taka = (n) => '৳' + Number(n || 0).toLocaleString('en-US');
@@ -111,13 +112,10 @@ export default function Commission() {
   const flowBack = () => { if (flowStep === 1) setCloseOpen(false); else setFlowStep(flowStep - 1); };
 
   return (
-    <div className="cm">
-      <div className="cm-frame">
-        <div className="cm-topbar">
-          <div className="cm-topbar-brand"><div className="cm-logo">স</div><span>SongiSathi</span></div>
-          <div className="cm-topbar-tabs"><span>ড্যাশবোর্ড</span><span>প্রোফাইল</span><span className="on">কমিশন</span></div>
-          <div className="cm-topbar-right"><span>SongiSathi takes 0% of your commission</span><Avatar initials={initialsOf(user?.fullName)} size={28} /></div>
-        </div>
+    <PageFrame
+      note="কমিশন · Commission & closing"
+      right={<><span>SongiSathi takes 0% of your commission</span><Avatar initials={initialsOf(user?.fullName)} size={28} /></>}
+    >
 
         <div className="cm-summary">
           {summary.map((sm) => (
@@ -189,7 +187,6 @@ export default function Commission() {
             </div>
           </div>
         </div>
-      </div>
 
       {closeOpen && (
         <div className="cm-overlay">
@@ -264,6 +261,6 @@ export default function Commission() {
       )}
 
       {toast && (<div className="cm-toast"><span className="cm-toast-check">✓</span><span>{toast}</span></div>)}
-    </div>
+    </PageFrame>
   );
 }
