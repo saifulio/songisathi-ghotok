@@ -3,6 +3,9 @@ dist/
 .env
 *.local
 
+# Deployment settings — holds the database password (see deploy/README.md)
+deploy/deploy.conf
+
 # Vite / build
 .vite/
 
