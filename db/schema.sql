@@ -371,8 +371,16 @@ CREATE TABLE IF NOT EXISTS `payments` (
     INDEX `payments_userId_idx`(`userId`),
     INDEX `payments_status_idx`(`status`),
     PRIMARY KEY (`id`),
-    CONSTRAINT `payments_ghotokId_fkey` FOREIGN KEY (`ghotokId`) REFERENCES `ghotoks`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `payments_userId_fkey`   FOREIGN KEY (`userId`)   REFERENCES `users`(`id`)   ON DELETE CASCADE ON UPDATE CASCADE,
+    -- No ON DELETE/ON UPDATE actions here, deliberately. MySQL 8.0.16+ refuses
+    -- to create a CHECK over a column that also carries a referential action
+    -- (ER_CHECK_CONSTRAINT_CLAUSE_USING_FK_REFER_ACTION_COLUMN), because the
+    -- cascade could rewrite the column out from under the check. Both keys
+    -- point at AUTO_INCREMENT ids that never change, so ON UPDATE CASCADE was
+    -- inert; dropping ON DELETE CASCADE means a ghotok or user with payments
+    -- cannot be deleted until those rows are dealt with, which is the right
+    -- default for financial records anyway.
+    CONSTRAINT `payments_ghotokId_fkey` FOREIGN KEY (`ghotokId`) REFERENCES `ghotoks`(`id`),
+    CONSTRAINT `payments_userId_fkey`   FOREIGN KEY (`userId`)   REFERENCES `users`(`id`),
     CONSTRAINT `CHK_payments_payer` CHECK ((`ghotokId` IS NULL) <> (`userId` IS NULL))
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
