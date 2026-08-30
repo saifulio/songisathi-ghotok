@@ -7,6 +7,8 @@
 //
 // Data access is plain MySQL via mysql2 (see db/pool.js) — no ORM.
 
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import { PORT } from './config.js';
@@ -48,6 +50,22 @@ app.use('/api', meRoutes);
 app.use('/api', billingRoutes);
 app.use('/api', ghotokRoutes);
 app.use('/api', photoRoutes);
+
+// ── frontend ──
+// With no reverse proxy in front, Express serves the Vite build itself: the
+// browser fetches '/api/...' as a relative path (src/lib/api.js), so the app
+// and the API have to answer on one origin. Static assets first, then the SPA
+// shell for any other GET so React Router owns the path. Express 5 rejects
+// app.get('*') — path-to-regexp v8 dropped the bare wildcard — hence the
+// middleware form. Skipped entirely when dist/ has not been built.
+const distDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
+app.use(express.static(distDir));
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || req.path.startsWith('/api')) return next();
+  res.sendFile(path.join(distDir, 'index.html'), (err) => {
+    if (err) next();
+  });
+});
 
 // ── fallbacks ──
 // Any route not matched above.

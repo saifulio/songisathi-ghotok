@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { NAV_GROUPS } from '../nav.js';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useAuth, homeForRole } from '../context/AuthContext.jsx';
 import ProfileSwitcher from './ProfileSwitcher.jsx';
 import './Layout.css';
 
@@ -36,7 +36,10 @@ export default function Layout({ children }) {
     <div className="ss-shell">
       <header className="ss-topbar">
         <div className="ss-topbar-inner">
-          <NavLink to="/" className="ss-brand" onClick={() => setOpen(false)}>
+          {/* Home means the workspace once signed in, the landing page when not.
+              "/" would redirect there anyway (see HomeRoute in App.jsx); pointing
+              straight at it skips the extra history entry. */}
+          <NavLink to={homeForRole(user)} className="ss-brand" onClick={() => setOpen(false)}>
             <span className="ss-brand-mark">স</span>
             <span className="ss-brand-name">SongiSathi</span>
           </NavLink>

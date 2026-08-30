@@ -2,10 +2,20 @@ import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import { ROUTES } from './pages/index.jsx';
 import { ProtectedRoute, PublicOnlyRoute } from './components/RouteGuards.jsx';
+import { useAuth, homeForRole } from './context/AuthContext.jsx';
 import SignIn from './pages/Auth/SignIn.jsx';
 import SignUp from './pages/Auth/SignUp.jsx';
 import LandingPage from './pages/LandingPage/LandingPage.jsx';
 import ProfileDetails from './pages/ProfileDetails/ProfileDetails.jsx';
+
+// "/" is the marketing page when logged out and a redirect to the user's own
+// workspace when logged in — the mirror image of PublicOnlyRoute, which keeps
+// signed-in users off /signin and /signup for the same reason.
+function HomeRoute() {
+  const { user } = useAuth();
+  if (user) return <Navigate to={homeForRole(user)} replace />;
+  return <LandingPage />;
+}
 
 function LayoutRoute() {
   return (
@@ -23,8 +33,11 @@ export default function App() {
       <Route path="/signin" element={<PublicOnlyRoute><SignIn /></PublicOnlyRoute>} />
       <Route path="/signup" element={<PublicOnlyRoute><SignUp /></PublicOnlyRoute>} />
 
-      {/* Landing page has its own marketing header, so it also skips the app shell. */}
-      <Route path="/" element={<LandingPage />} />
+      {/* Landing page has its own marketing header, so it also skips the app shell.
+          It is the logged-out home; a signed-in user asking for "/" — the brand
+          link, a bookmark, the catch-all below — is sent to their own home
+          instead, so home always means the workspace once there is one. */}
+      <Route path="/" element={<HomeRoute />} />
 
       {/* Everything else inside the app shell. Public pages render as-is;
           the rest are gated on auth and (where set) the user's role. */}

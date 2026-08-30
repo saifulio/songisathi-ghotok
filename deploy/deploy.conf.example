@@ -1,0 +1,55 @@
+# SongiSathi Ghotok — VPS deployment settings.
+#
+# Copy to deploy.conf, edit, then run:  sudo bash deploy/setup.sh
+# deploy.conf holds a database password, so it is git-ignored and should be
+# chmod 600 on the server.
+
+# ── who and where ──
+# The Linux user the API runs as, and the directory holding the checkout.
+# The user must already exist; the directory is the repository root.
+APP_USER="saif"
+APP_DIR="/home/saif/songisathi-ghotok"
+
+# Left empty, the script deploys whatever is already in APP_DIR. Set a git URL
+# to have it clone into APP_DIR when the directory does not yet exist.
+REPO_URL=""
+
+# ── the site ──
+# The domain Nginx answers on. Leave as "_" to answer on the server's bare IP
+# (fine for testing; TLS then has nothing to certify and is skipped).
+DOMAIN="_"
+
+# Where email links point. Must match how people actually reach the site,
+# including the scheme — this is what lands in verification and reset emails.
+# Leave empty and the script derives it from DOMAIN and ENABLE_TLS.
+APP_URL=""
+
+# ── database ──
+# Created if absent. The password is written into .env; the migration itself
+# creates the database, so this user needs rights over it.
+DB_NAME="songisathi-ghotok"
+DB_USER="songisathi"
+DB_PASS="change-this-to-a-strong-password"
+DB_HOST="127.0.0.1"
+DB_PORT="3306"
+
+# ── runtime ──
+API_PORT="4000"
+NODE_MAJOR="24"
+
+# Left empty, a random 48-byte secret is generated on first run. An existing
+# .env is never overwritten, so sessions survive re-runs.
+JWT_SECRET=""
+
+# ── optional steps ──
+# TLS needs a real DOMAIN whose DNS already points at this server; certbot is
+# run interactively unless LETSENCRYPT_EMAIL is set.
+ENABLE_TLS="no"
+LETSENCRYPT_EMAIL=""
+
+# Opens the firewall to SSH and Nginx. Leave "no" if you manage rules yourself
+# or your provider does it outside the box.
+ENABLE_UFW="yes"
+
+# Loads the demo households from seed.md. Never do this on a live site.
+SEED_DEMO_DATA="no"
